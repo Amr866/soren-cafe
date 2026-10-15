@@ -1,0 +1,598 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Soren Engine — Observability & Telemetry HUD</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&family=Vazirmatn:wght@400;600;700&display=swap" rel="stylesheet">
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            obsidian: '#07090E',
+            surface: {
+              DEFAULT: '#0D1117',
+              raised: '#131822',
+              border: '#1E2638',
+              muted: '#28334A'
+            },
+            brand: {
+              espresso: '#8C5E3C',
+              amber: '#C99752',
+              gold: '#E5A955'
+            },
+            telemetry: {
+              emerald: '#10B981',
+              cyan: '#06B6D4',
+              rose: '#F43F5E',
+              amber: '#F59E0B'
+            }
+          },
+          fontFamily: {
+            sans: ['"Plus Jakarta Sans"', 'Vazirmatn', 'sans-serif'],
+            mono: ['"JetBrains Mono"', 'monospace'],
+            persian: ['Vazirmatn', 'sans-serif']
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    body {
+      background-color: #07090E;
+      color: #E2E8F0;
+      font-feature-settings: "cv02", "cv03", "cv04", "cv11";
+    }
+    .tabular-nums {
+      font-variant-numeric: tabular-nums;
+    }
+    .grid-bg {
+      background-size: 32px 32px;
+      background-image: 
+        linear-gradient(to right, rgba(255, 255, 255, 0.02) 1px, transparent 1px),
+        linear-gradient(to bottom, rgba(255, 255, 255, 0.02) 1px, transparent 1px);
+    }
+    /* Subtle glow tokens */
+    .glow-border-emerald {
+      box-shadow: inset 0 0 0 1px rgba(16, 185, 129, 0.25), 0 0 20px -5px rgba(16, 185, 129, 0.15);
+    }
+    .glow-border-rose {
+      box-shadow: inset 0 0 0 1px rgba(244, 63, 94, 0.4), 0 0 25px -5px rgba(244, 63, 94, 0.25);
+    }
+    /* Custom sleek scrollbars */
+    ::-webkit-scrollbar { width: 4px; height: 4px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: #1E2638; border-radius: 9999px; }
+    ::-webkit-scrollbar-thumb:hover { background: #28334A; }
+  </style>
+</head>
+<body class="min-h-screen grid-bg antialiased selection:bg-brand-amber/20 selection:text-brand-gold">
+
+  <!-- Top Enterprise Status Navigation -->
+  <header class="border-b border-surface-border bg-obsidian/80 backdrop-blur-xl sticky top-0 z-50">
+    <div class="max-w-[1600px] mx-auto px-4 lg:px-8 h-16 flex items-center justify-between gap-4">
+      
+      <!-- Brand & Engine Specs -->
+      <div class="flex items-center gap-3.5">
+        <div class="w-8 h-8 rounded-lg bg-surface-raised border border-surface-border flex items-center justify-center font-bold text-brand-amber text-sm shadow-inner">
+          <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M18 8h1a4 4 0 0 1 0 8h-1"></path>
+            <path d="M2 8h16v9a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4V8z"></path>
+            <line x1="6" y1="1" x2="6" y2="4"></line>
+            <line x1="10" y1="1" x2="10" y2="4"></line>
+            <line x1="14" y1="1" x2="14" y2="4"></line>
+          </svg>
+        </div>
+        <div>
+          <div class="flex items-center gap-2">
+            <span class="font-bold tracking-tight text-slate-100 text-sm">SOREN OBSERVABILITY HUD</span>
+            <span class="px-1.5 py-0.5 rounded text-[10px] font-mono font-medium tracking-wide bg-telemetry-emerald/10 text-telemetry-emerald border border-telemetry-emerald/20 flex items-center gap-1">
+              <span class="w-1.5 h-1.5 rounded-full bg-telemetry-emerald animate-ping"></span>
+              CLUSTER ONLINE
+            </span>
+          </div>
+          <p class="text-[11px] text-slate-400 font-mono">Bun Native Runtime 1.4.2 • SQLite WAL Engine • Zero-Trust WAF</p>
+        </div>
+      </div>
+
+      <!-- Live Global Telemetry Metrics -->
+      <div class="hidden md:flex items-center gap-6 font-mono text-xs">
+        <div class="flex flex-col text-right">
+          <span class="text-[10px] text-slate-400 font-sans uppercase tracking-wider">WebSocket Gateway</span>
+          <span class="text-slate-200 font-semibold flex items-center gap-1.5 justify-end">
+            <span class="w-2 h-2 rounded-full bg-telemetry-emerald"></span>
+            <span id="stat-ws" class="tabular-nums">1</span> Client(s)
+          </span>
+        </div>
+
+        <div class="h-8 w-px bg-surface-border"></div>
+
+        <div class="flex flex-col text-right">
+          <span class="text-[10px] text-slate-400 font-sans uppercase tracking-wider">Process Memory (RSS)</span>
+          <span id="stat-memory" class="text-brand-gold font-semibold tabular-nums">22.6 MB</span>
+        </div>
+
+        <div class="h-8 w-px bg-surface-border"></div>
+
+        <div class="flex flex-col text-right">
+          <span class="text-[10px] text-slate-400 font-sans uppercase tracking-wider">Engine Uptime</span>
+          <span id="stat-uptime" class="text-slate-300 font-semibold tabular-nums">00:00:00</span>
+        </div>
+
+        <div class="h-8 w-px bg-surface-border"></div>
+
+        <div class="flex flex-col text-right">
+          <span class="text-[10px] text-slate-400 font-sans uppercase tracking-wider">Total Ingress</span>
+          <span id="stat-requests" class="text-telemetry-cyan font-semibold tabular-nums">0</span>
+        </div>
+      </div>
+
+      <!-- External Links -->
+      <div class="flex items-center gap-2.5">
+        <a href="/docs" target="_blank" class="px-3 py-1.5 rounded-lg bg-surface-raised hover:bg-surface-muted text-slate-300 hover:text-white border border-surface-border text-xs font-medium transition-all flex items-center gap-1.5">
+          <svg class="w-3.5 h-3.5 text-brand-amber" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path>
+            <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path>
+          </svg>
+          <span>OpenAPI Spec</span>
+        </a>
+      </div>
+
+    </div>
+  </header>
+
+  <!-- Main Multi-Tier Grid Container -->
+  <main class="max-w-[1600px] mx-auto p-4 lg:p-8 space-y-6">
+
+    <!-- Row 1: Time-Series Throughput Chart & Key Metrics -->
+    <section class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+
+      <!-- Real-time Ingress Time-Series (8 Cols) -->
+      <div class="lg:col-span-8 bg-surface rounded-2xl border border-surface-border p-5 shadow-2xl relative overflow-hidden flex flex-col justify-between">
+        
+        <!-- Header row -->
+        <div class="flex items-center justify-between mb-3">
+          <div>
+            <div class="flex items-center gap-2">
+              <h2 class="text-xs font-bold text-slate-200 tracking-wider uppercase">Ingress Traffic Rate (Time-Series)</h2>
+              <span class="px-2 py-0.5 rounded text-[10px] font-mono bg-surface-raised text-slate-400 border border-surface-border">Window: 60s</span>
+            </div>
+            <p class="text-[11px] text-slate-400 mt-0.5">Real-time HTTP and WebSocket transaction frequency per second</p>
+          </div>
+
+          <div class="text-right">
+            <div class="flex items-baseline gap-1 justify-end font-mono">
+              <span id="current-rps" class="text-3xl font-extrabold text-telemetry-emerald tabular-nums">0</span>
+              <span class="text-xs text-slate-400">RPS</span>
+            </div>
+            <div class="text-[10px] font-mono text-slate-400">Peak: <span id="peak-rps" class="text-slate-200 tabular-nums">0</span> req/s</div>
+          </div>
+        </div>
+
+        <!-- Canvas Chart Area -->
+        <div class="relative w-full h-56 bg-obsidian/60 rounded-xl border border-surface-border/60 overflow-hidden">
+          <canvas id="traffic-chart" class="w-full h-full"></canvas>
+          <div class="absolute top-2 left-3 flex items-center gap-3 text-[10px] font-mono text-slate-400 pointer-events-none">
+            <span class="flex items-center gap-1.5"><span class="w-2 h-2 rounded-full bg-telemetry-emerald"></span> Ingress Rate</span>
+            <span class="flex items-center gap-1.5"><span class="w-2 h-2 rounded-full bg-telemetry-rose"></span> Blocked/Shielded</span>
+          </div>
+        </div>
+
+        <!-- Footer status -->
+        <div class="mt-3 pt-3 border-t border-surface-border/60 flex items-center justify-between text-[11px] text-slate-400 font-mono">
+          <span>Concurrency Engine: <strong class="text-slate-200">Asynchronous epoll/kqueue (Bun)</strong></span>
+          <span>Buffer Health: <strong class="text-telemetry-emerald">0% Drop</strong></span>
+        </div>
+      </div>
+
+      <!-- Quick Telemetry Scorecards & Network Node Status (4 Cols) -->
+      <div class="lg:col-span-4 space-y-4">
+        
+        <!-- Scorecard: Latency & Event Loop -->
+        <div class="bg-surface rounded-2xl border border-surface-border p-5 shadow-xl">
+          <h3 class="text-xs font-bold text-slate-200 tracking-wider uppercase mb-3 flex items-center justify-between">
+            <span>Latency & Engine Diagnostics</span>
+            <span class="w-2 h-2 rounded-full bg-telemetry-emerald"></span>
+          </h3>
+
+          <div class="grid grid-cols-2 gap-3 font-mono">
+            <div class="p-3 rounded-xl bg-surface-raised border border-surface-border/70">
+              <span class="text-[10px] text-slate-400 block">Avg Response</span>
+              <span id="avg-latency" class="text-xl font-bold text-slate-100 tabular-nums">1.4 <span class="text-xs text-slate-400">ms</span></span>
+              <span class="text-[10px] text-telemetry-emerald block mt-1">Sub-millisecond</span>
+            </div>
+            <div class="p-3 rounded-xl bg-surface-raised border border-surface-border/70">
+              <span class="text-[10px] text-slate-400 block">Event Loop Lag</span>
+              <span id="loop-lag" class="text-xl font-bold text-slate-100 tabular-nums">0.2 <span class="text-xs text-slate-400">ms</span></span>
+              <span class="text-[10px] text-telemetry-emerald block mt-1">Non-blocking</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Scorecard: Database Engine Odometer -->
+        <div class="bg-surface rounded-2xl border border-surface-border p-5 shadow-xl">
+          <div class="flex items-center justify-between mb-3">
+            <h3 class="text-xs font-bold text-slate-200 tracking-wider uppercase">SQLite WAL State</h3>
+            <span class="px-2 py-0.5 rounded text-[10px] font-mono bg-telemetry-emerald/10 text-telemetry-emerald border border-telemetry-emerald/20 font-medium">Synchronous WAL</span>
+          </div>
+
+          <div class="grid grid-cols-3 gap-2 font-mono text-center">
+            <div class="p-2.5 rounded-xl bg-surface-raised border border-surface-border/70">
+              <span class="text-[10px] text-slate-400 block">Products</span>
+              <span id="count-products" class="text-base font-bold text-brand-amber tabular-nums">18</span>
+            </div>
+            <div class="p-2.5 rounded-xl bg-surface-raised border border-surface-border/70">
+              <span class="text-[10px] text-slate-400 block">Orders</span>
+              <span id="count-orders" class="text-base font-bold text-telemetry-emerald tabular-nums">0</span>
+            </div>
+            <div class="p-2.5 rounded-xl bg-surface-raised border border-surface-border/70">
+              <span class="text-[10px] text-slate-400 block">Items</span>
+              <span id="count-items" class="text-base font-bold text-telemetry-cyan tabular-nums">0</span>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+    </section>
+
+    <!-- Row 2: Distributed Trace Waterfall & Security Operations Center (SOC) -->
+    <section class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+
+      <!-- OpenTelemetry-Style Transaction Waterfall (7 Cols) -->
+      <div class="lg:col-span-7 bg-surface rounded-2xl border border-surface-border p-5 shadow-2xl">
+        <div class="flex items-center justify-between mb-4">
+          <div>
+            <div class="flex items-center gap-2">
+              <h2 class="text-xs font-bold text-slate-200 tracking-wider uppercase">Atomic Database Trace Waterfall</h2>
+              <span class="px-2 py-0.5 rounded text-[10px] font-mono bg-surface-raised text-telemetry-emerald border border-surface-border font-medium">Trace Spans</span>
+            </div>
+            <p class="text-[11px] text-slate-400 mt-0.5">Microsecond resolution breakdown of atomic SQLite transactions upon order ingestion</p>
+          </div>
+          <span class="text-[11px] font-mono text-slate-400" id="last-txn-id">Txn: None</span>
+        </div>
+
+        <!-- Waterfall Visual Cards Stream -->
+        <div id="trace-stream" class="space-y-3 font-mono text-xs max-h-[360px] overflow-y-auto pr-1">
+          <!-- Initial Default Trace Card -->
+          <div class="p-4 bg-obsidian rounded-xl border border-surface-border/80">
+            <div class="flex items-center justify-between text-slate-400 pb-2 mb-3 border-b border-surface-border/60">
+              <span class="font-bold text-brand-amber">ord_1001 • Table 04 (Cold Brew + Basque)</span>
+              <span class="text-telemetry-emerald font-bold">Total: 382 µs (0.38 ms)</span>
+            </div>
+
+            <!-- Spans Visual Representation -->
+            <div class="space-y-2 text-[11px]">
+              <div>
+                <div class="flex justify-between text-slate-300 mb-0.5">
+                  <span>1. BEGIN TRANSACTION (Lock Acquire)</span>
+                  <span class="text-telemetry-emerald tabular-nums">42 µs</span>
+                </div>
+                <div class="w-full bg-surface-raised rounded-full h-1.5 overflow-hidden">
+                  <div class="bg-telemetry-emerald h-full rounded-full" style="width: 15%"></div>
+                </div>
+              </div>
+
+              <div>
+                <div class="flex justify-between text-slate-300 mb-0.5">
+                  <span>2. PRICE AUDIT & SNAPSHOT (Zero-Trust Validation)</span>
+                  <span class="text-telemetry-emerald tabular-nums">85 µs</span>
+                </div>
+                <div class="w-full bg-surface-raised rounded-full h-1.5 overflow-hidden">
+                  <div class="bg-telemetry-emerald h-full rounded-full" style="width: 25%"></div>
+                </div>
+              </div>
+
+              <div>
+                <div class="flex justify-between text-slate-300 mb-0.5">
+                  <span>3. INSERT orders (Memory WAL Page Append)</span>
+                  <span class="text-telemetry-emerald tabular-nums">115 µs</span>
+                </div>
+                <div class="w-full bg-surface-raised rounded-full h-1.5 overflow-hidden">
+                  <div class="bg-telemetry-emerald h-full rounded-full" style="width: 35%"></div>
+                </div>
+              </div>
+
+              <div>
+                <div class="flex justify-between text-slate-300 mb-0.5">
+                  <span>4. COMMIT TRANSACTION (Atomic Persistence)</span>
+                  <span class="text-telemetry-emerald tabular-nums">65 µs</span>
+                </div>
+                <div class="w-full bg-surface-raised rounded-full h-1.5 overflow-hidden">
+                  <div class="bg-telemetry-emerald h-full rounded-full" style="width: 20%"></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Security Radar & Threat Mitigation Log (5 Cols) -->
+      <div class="lg:col-span-5 bg-surface rounded-2xl border border-surface-border p-5 shadow-2xl flex flex-col justify-between" id="soc-card">
+        
+        <div>
+          <!-- Header -->
+          <div class="flex items-center justify-between mb-3">
+            <div class="flex items-center gap-2">
+              <span class="w-2.5 h-2.5 rounded-full bg-telemetry-emerald" id="soc-indicator"></span>
+              <h2 class="text-xs font-bold text-slate-200 tracking-wider uppercase">WAF & Cyber Threat Radar</h2>
+            </div>
+            <span id="threat-badge" class="px-2 py-0.5 rounded text-[10px] font-mono bg-surface-raised text-slate-400 border border-surface-border">
+              0 Incidents
+            </span>
+          </div>
+
+          <p class="text-[11px] text-slate-400 mb-3 font-sans">
+            Autonomous threat interception stream. External penetration tests run via <code class="text-slate-300 font-mono">bun scripts/security-audit.ts</code> appear here in real time.
+          </p>
+
+          <!-- Threat Log Stream -->
+          <div id="threat-stream" class="space-y-2.5 font-mono text-xs max-h-[300px] overflow-y-auto pr-1">
+            <div class="p-3 bg-obsidian/70 rounded-xl border border-surface-border/60 text-slate-400 text-center py-8">
+              <svg class="w-6 h-6 mx-auto mb-2 text-slate-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
+              </svg>
+              <span>Defense layer listening • Zero active intrusions detected</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- WAF Policies Status Bar -->
+        <div class="mt-4 pt-3 border-t border-surface-border/60 grid grid-cols-3 gap-2 text-center text-[10px] font-mono text-slate-400">
+          <div class="p-1.5 rounded bg-surface-raised border border-surface-border">Zero-Trust: <strong class="text-telemetry-emerald">Active</strong></div>
+          <div class="p-1.5 rounded bg-surface-raised border border-surface-border">Rate-Limiter: <strong class="text-telemetry-emerald">12/min</strong></div>
+          <div class="p-1.5 rounded bg-surface-raised border border-surface-border">Auth Gate: <strong class="text-telemetry-emerald">PIN/Bearer</strong></div>
+        </div>
+
+      </div>
+
+    </section>
+
+  </main>
+
+  <!-- High-Performance JavaScript Telemetry Client -->
+  <script>
+    // Audio synthesizer for security alerts (Web Audio API)
+    const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    function playThreatAlert() {
+      if (audioCtx.state === 'suspended') audioCtx.resume();
+      const osc = audioCtx.createOscillator();
+      const gain = audioCtx.createGain();
+      osc.type = 'sawtooth';
+      osc.frequency.setValueAtTime(320, audioCtx.currentTime);
+      osc.frequency.exponentialRampToValueAtTime(140, audioCtx.currentTime + 0.35);
+      gain.gain.setValueAtTime(0.12, audioCtx.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.35);
+      osc.connect(gain);
+      gain.connect(audioCtx.destination);
+      osc.start();
+      osc.stop(audioCtx.currentTime + 0.35);
+    }
+
+    // WebSocket Telemetry Connection
+    let ws;
+    let totalThreats = 0;
+    let peakRps = 0;
+    const chartHistory = Array(60).fill(0);
+
+    function connectTelemetry() {
+      const proto = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+      ws = new WebSocket(`${proto}//${window.location.host}/ws`);
+
+      ws.onopen = () => {
+        ws.send(JSON.stringify({ action: "subscribe_dashboard" }));
+        console.log("[HUD] WebSocket Telemetry Stream Attached");
+      };
+
+      ws.onmessage = (event) => {
+        try {
+          const msg = JSON.parse(event.data);
+          handleEvent(msg);
+        } catch {}
+      };
+
+      ws.onclose = () => {
+        setTimeout(connectTelemetry, 2000);
+      };
+    }
+    connectTelemetry();
+
+    function handleEvent(msg) {
+      if (msg.event === "telemetry:heartbeat") {
+        updateHeartbeat(msg.data);
+      } else if (msg.event === "telemetry:db_txn") {
+        renderDbWaterfall(msg.data);
+      } else if (msg.event === "telemetry:threat_detected") {
+        renderThreatEvent(msg.data);
+      }
+    }
+
+    function updateHeartbeat(data) {
+      document.getElementById('stat-ws').innerText = data.activeWsClients;
+      document.getElementById('stat-uptime').innerText = formatUptime(data.uptimeSeconds);
+      document.getElementById('stat-memory').innerText = `${data.memoryRssMb} MB`;
+      document.getElementById('stat-requests').innerText = data.totalRequests.toLocaleString();
+
+      const rps = data.rps || 0;
+      document.getElementById('current-rps').innerText = rps.toLocaleString();
+
+      if (rps > peakRps) {
+        peakRps = rps;
+        document.getElementById('peak-rps').innerText = peakRps.toLocaleString();
+      }
+
+      chartHistory.shift();
+      chartHistory.push(rps);
+
+      if (data.rowCounts) {
+        document.getElementById('count-products').innerText = data.rowCounts.productsCount;
+        document.getElementById('count-orders').innerText = data.rowCounts.ordersCount;
+        document.getElementById('count-items').innerText = data.rowCounts.itemsCount;
+      }
+    }
+
+    function formatUptime(seconds) {
+      const h = Math.floor(seconds / 3600).toString().padStart(2, '0');
+      const m = Math.floor((seconds % 3600) / 60).toString().padStart(2, '0');
+      const s = (seconds % 60).toString().padStart(2, '0');
+      return `${h}:${m}:${s}`;
+    }
+
+    // Render Database Trace Waterfall Card
+    function renderDbWaterfall(txn) {
+      document.getElementById('last-txn-id').innerText = `${txn.txnId} (${(txn.totalUs / 1000).toFixed(2)} ms)`;
+      const container = document.getElementById('trace-stream');
+
+      const card = document.createElement('div');
+      card.className = "p-4 bg-obsidian rounded-xl border border-telemetry-emerald/40 glow-border-emerald transition-all";
+
+      let stepsHtml = '';
+      txn.steps.forEach((step, idx) => {
+        const pct = Math.min(Math.max(Math.round((step.durationUs / txn.totalUs) * 100), 8), 100);
+        stepsHtml += `
+          <div>
+            <div class="flex justify-between text-slate-300 mb-0.5">
+              <span>${idx + 1}. ${step.name} <span class="text-slate-400 font-sans">(${step.details || ''})</span></span>
+              <span class="text-telemetry-emerald tabular-nums font-bold">${step.durationUs} µs</span>
+            </div>
+            <div class="w-full bg-surface-raised rounded-full h-1.5 overflow-hidden">
+              <div class="bg-telemetry-emerald h-full rounded-full" style="width: ${pct}%"></div>
+            </div>
+          </div>
+        `;
+      });
+
+      card.innerHTML = `
+        <div class="flex items-center justify-between text-slate-400 pb-2 mb-3 border-b border-surface-border/60">
+          <span class="font-bold text-brand-amber">${txn.orderId} • ${txn.tableNumber}</span>
+          <span class="text-telemetry-emerald font-bold">${(txn.totalUs / 1000).toFixed(2)} ms</span>
+        </div>
+        <div class="space-y-2 text-[11px]">
+          ${stepsHtml}
+        </div>
+      `;
+
+      container.prepend(card);
+      if (container.children.length > 4) {
+        container.removeChild(container.lastChild);
+      }
+    }
+
+    // Render Threat Incident Card (SOC Radar)
+    function renderThreatEvent(threat) {
+      totalThreats++;
+      playThreatAlert();
+
+      const badge = document.getElementById('threat-badge');
+      badge.innerText = `${totalThreats} INCIDENTS DETECTED`;
+      badge.className = "px-2 py-0.5 rounded text-[10px] font-mono bg-telemetry-rose/20 text-telemetry-rose font-bold border border-telemetry-rose/40 animate-pulse";
+
+      const socIndicator = document.getElementById('soc-indicator');
+      socIndicator.className = "w-2.5 h-2.5 rounded-full bg-telemetry-rose animate-ping";
+      setTimeout(() => {
+        socIndicator.className = "w-2.5 h-2.5 rounded-full bg-telemetry-emerald";
+      }, 3500);
+
+      const socCard = document.getElementById('soc-card');
+      socCard.classList.add('glow-border-rose');
+      setTimeout(() => socCard.classList.remove('glow-border-rose'), 3500);
+
+      const container = document.getElementById('threat-stream');
+      const card = document.createElement('div');
+      card.className = "p-3.5 bg-telemetry-rose/10 border border-telemetry-rose/40 rounded-xl text-xs font-mono";
+
+      card.innerHTML = `
+        <div class="flex items-center justify-between text-telemetry-rose font-bold mb-1">
+          <span>⚠️ ${threat.type}</span>
+          <span class="px-1.5 py-0.5 bg-telemetry-rose/20 rounded text-[10px]">HTTP ${threat.status}</span>
+        </div>
+        <div class="text-[11px] text-slate-300 space-y-0.5">
+          <div>Attacker Origin: <span class="text-amber-300">${threat.originIp}</span> ➔ ${threat.endpoint || '/api/v1'}</div>
+          <div>Audit Reason: <span class="text-slate-200">${threat.reason}</span></div>
+          ${threat.enforcedAction ? `<div class="text-telemetry-emerald mt-1 font-sans">Shield Defense: ${threat.enforcedAction}</div>` : ''}
+          <div class="text-[10px] text-slate-400 mt-1">${new Date(threat.timestamp).toLocaleTimeString()}</div>
+        </div>
+      `;
+
+      // Clear empty placeholder if first threat
+      if (container.innerText.includes("Zero active intrusions")) {
+        container.innerHTML = '';
+      }
+
+      container.prepend(card);
+      if (container.children.length > 5) {
+        container.removeChild(container.lastChild);
+      }
+    }
+
+    // 60FPS Time-Series Canvas Chart Renderer
+    const chartCanvas = document.getElementById('traffic-chart');
+    const ctx = chartCanvas.getContext('2d');
+
+    function resizeChart() {
+      chartCanvas.width = chartCanvas.offsetWidth * window.devicePixelRatio;
+      chartCanvas.height = chartCanvas.offsetHeight * window.devicePixelRatio;
+    }
+    window.addEventListener('resize', resizeChart);
+    resizeChart();
+
+    function drawChart() {
+      const w = chartCanvas.width;
+      const h = chartCanvas.height;
+      ctx.clearRect(0, 0, w, h);
+
+      // Draw subtle grid lines
+      ctx.strokeStyle = 'rgba(255, 255, 255, 0.04)';
+      ctx.lineWidth = 1;
+      for (let y = 0; y < h; y += h / 4) {
+        ctx.beginPath();
+        ctx.moveTo(0, y);
+        ctx.lineTo(w, y);
+        ctx.stroke();
+      }
+
+      // Max scale calculation
+      const maxVal = Math.max(...chartHistory, 20);
+      const stepX = w / (chartHistory.length - 1);
+
+      // Draw Area Fill
+      ctx.beginPath();
+      ctx.moveTo(0, h);
+      chartHistory.forEach((val, idx) => {
+        const x = idx * stepX;
+        const y = h - (val / maxVal) * (h * 0.8) - 10;
+        ctx.lineTo(x, y);
+      });
+      ctx.lineTo(w, h);
+      ctx.closePath();
+
+      const grad = ctx.createLinearGradient(0, 0, 0, h);
+      grad.addColorStop(0, 'rgba(16, 185, 129, 0.25)');
+      grad.addColorStop(1, 'rgba(16, 185, 129, 0.0)');
+      ctx.fillStyle = grad;
+      ctx.fill();
+
+      // Draw Line
+      ctx.beginPath();
+      chartHistory.forEach((val, idx) => {
+        const x = idx * stepX;
+        const y = h - (val / maxVal) * (h * 0.8) - 10;
+        if (idx === 0) ctx.moveTo(x, y);
+        else ctx.lineTo(x, y);
+      });
+      ctx.strokeStyle = '#10B981';
+      ctx.lineWidth = 2.5 * window.devicePixelRatio;
+      ctx.stroke();
+
+      requestAnimationFrame(drawChart);
+    }
+    requestAnimationFrame(drawChart);
+  </script>
+</body>
+</html>

@@ -1,0 +1,14 @@
+# Dependencies
+node_modules/
+bun.lock
+bun.lockb
+
+# SQLite Database files
+*.db
+*.db-shm
+*.db-wal
+
+# Logs & temp
+*.log
+.DS_Store
+Thumbs.db
