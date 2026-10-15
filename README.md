@@ -71,11 +71,11 @@ soren-cafe/
 
 ---
 
-## 👥 راهنمای همکاری (Collaboration)
-* **رفیق فرانت‌اند:** کدهای `index.html` و `barista.html` را در پوشه `frontend/` قرار داده و با راهنمای موجود در [`frontend/FRONTEND_INTEGRATION_GUIDE.md`](frontend/FRONTEND_INTEGRATION_GUIDE.md) به API وصل می‌کند.
-* **پوش کدهای فرانت:**
+## 👥 راهنمای توسعه و همکاری (Collaboration Guide)
+* **توسعه فرانت‌اند:** کدهای `index.html` (منوی مشتری) و `barista.html` (کیوسک باریستا) در پوشه `frontend/` توسعه داده می‌شوند. راهنمای گام‌به‌گام و توابع آماده اتصال در مستند [`frontend/FRONTEND_INTEGRATION_GUIDE.md`](frontend/FRONTEND_INTEGRATION_GUIDE.md) قرار دارد.
+* **ثبت و انتشار تغییرات:**
   ```bash
   git add frontend/
-  git commit -m "feat: update customer menu and barista UI"
+  git commit -m "feat(frontend): update customer menu and barista UI"
   git push
   ```

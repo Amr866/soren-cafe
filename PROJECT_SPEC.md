@@ -9,7 +9,7 @@
 
 * **نام رسمی برند:** `SOREN` (کافه سورن)
 * **زیرعنوان برند:** `Specialty Coffee & Artisan Bakehouse` (عصاره اصیل، بیکری دست‌ساز)
-* **فایل لوگو:** [`assets/logo-soren.png`](file:///d:/projects/antigravity/course/05-animation-lab/soren-cafe/assets/logo-soren.png)
+* **فایل لوگو:** `assets/logo-soren.png`
 * **قوانین پیاده‌سازی لوگو:**
   * **در هدر (Navbar):** ساختار افقی — نماد پرنده و نیلوفر (ارتفاع `40px`) در سمت چپ + تایپوگرافی `SOREN` در کنار آن (زیرنویس در هدر حذف می‌شود تا تار نشود).
   * **در اسپلش/هیرو (Hero & Splash):** نسخه کامل عمودی همراه با زیرنویس و افکت طراحی با SVG (`stroke-dashoffset`).
@@ -69,15 +69,17 @@
 
 ---
 
-## ۴. معماری فول‌استک و وظایف دو نفر
+## ۴. تفکیک معماری و ماژول‌ها (System Architecture & Modules)
 
-* **فرانت‌اند (تو):**
-  * طراحی UI واکنش‌گرا با زبان طراحی Editorial Neo-Artisanal.
-  * انیمیشن‌های ۶۰ فریم با GPU Compositor (`transform` و `opacity`) و GSAP.
-  * انیمیشن لودینگ لوگو با SVG Path Drawing (`stroke-dashoffset`).
-  * اتصال به WebSocket برای ثبت زنده سفارش‌ها و تغییر وضعیت در UI.
-* **بک‌اند (رفیقت):**
-  * سرور Node.js/Express یا Python FastAPI با معماری Async.
-  * دیتابیس با مدل‌های `Product` و `Order`.
-  * سرویس WebSocket (Socket.io) برای پخش Real-time سفارش‌ها به صفحه باریستا (KDS).
-  * اعتبارسنجی ورودی‌ها (Validation) و سیستم مانیتورینگ تاخیر (Latency Tracker).
+* **لایه فرانت‌اند (Frontend Layer):**
+  * طراحی و پیاده‌سازی دو رابط کاربری تعاملی: منوی دیجیتال مشتریان (`index.html`) و کیوسک مانیتور باریستا (`barista.html`).
+  * زبان طراحی Editorial Neo-Artisanal متناسب با هویت برند کافی‌شاپ تخصصی.
+  * اجرای انیمیشن‌های ۶۰ فریم با شتاب‌دهنده گرافیکی GPU (`transform` و `opacity`) و المان‌های تعاملی SVG/Canvas.
+  * برقراری اتصال Native WebSocket برای دریافت و ارسال تغییرات لحظه‌ای وضعیت سفارشات.
+
+* **لایه بک‌اند و تله‌متری (Backend & Telemetry Layer):**
+  * سرویس‌دهنده پرسرعت مبتنی بر Bun 1.4+ و TypeScript با معماری رویدادمحور.
+  * پایگاه‌داده بومی SQLite در حالت WAL (Write-Ahead Logging) و تراکنش‌های اتمیک با مانیتورینگ میکروثانیه‌ای تاخیر.
+  * موتور وب‌سوکت بلادرنگ با کانال‌های اختصاصی Pub/Sub (`barista-kds`, `all-clients`, `dashboard-clients`).
+  * داشبورد مانیتورینگ تله‌متری به سبک Datadog/Grafana برای رصد آنی لود، گلوگاه‌های دیتابیس و لاگ‌های امنیتی WAF.
+  * مستندات خودکار و تعاملی API بر پایه استانداردهای OpenAPI 3.0 و رابط Scalar در روت `/docs`.
