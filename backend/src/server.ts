@@ -38,7 +38,7 @@ let activeWsClients = 0;
 
 const ipRateLimits = new Map<string, { count: number; expiresAt: number }>();
 
-function isRateLimited(ip: string): boolean {
+function isRateLimited(ip: string, isOrder = false): boolean {
   if (ip === "127.0.0.1" || ip === "::1" || ip === "localhost") return false;
   const now = Date.now();
   const limit = ipRateLimits.get(ip);
@@ -47,7 +47,8 @@ function isRateLimited(ip: string): boolean {
     return false;
   }
   limit.count++;
-  return limit.count > 200; // 200 requests per minute per external IP
+  const threshold = isOrder ? 10 : 200; // 10 orders/min or 200 general requests/min per external IP
+  return limit.count > threshold;
 }
 
 // Helper: Standard CORS headers
@@ -301,13 +302,16 @@ export const server = Bun.serve({
       }
 
       // Check B: Rate Limiter Protection
-      if (isRateLimited(clientIp)) {
+      const isOrderPost = method === "POST" && (path === "/orders" || path === "/orders/");
+      if (isRateLimited(clientIp, isOrderPost)) {
         const gatewayUs = Math.round((performance.now() - tGatewayStart) * 1000);
         traceSteps.push({
           node: "gateway",
           durationUs: gatewayUs,
           status: "rejected",
-          detail: "WAF Intercept: DDoS/Burst Rate-Limit Exceeded (40 req/min)",
+          detail: isOrderPost
+            ? "WAF Intercept: Order Burst Rate-Limit Exceeded (10 orders/min)"
+            : "WAF Intercept: DDoS/Burst Rate-Limit Exceeded (200 req/min)",
         });
 
         const totalUs = Math.round((performance.now() - t0) * 1000);

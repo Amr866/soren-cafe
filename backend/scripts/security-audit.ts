@@ -94,7 +94,10 @@ for (let i = 0; i < 15; i++) {
   try {
     const res = await fetch(`${BASE_URL}/api/v1/orders`, {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      headers: {
+        "Content-Type": "application/json",
+        "X-Forwarded-For": "198.51.100.77",
+      },
       body: JSON.stringify({
         tableNumber: "میز ۹۹",
         customerName: `اسپمر #${i + 1}`,
