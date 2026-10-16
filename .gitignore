@@ -1,3 +1,6 @@
+# ai agent assistant skills, scratch & SDD runtimes
+.agents/
+
 # Dependencies
 node_modules/
 bun.lock
