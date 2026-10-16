@@ -48,8 +48,21 @@ db.exec(`
     FOREIGN KEY(product_id) REFERENCES products(id)
   );
 
+  CREATE TABLE IF NOT EXISTS tables (
+    id TEXT PRIMARY KEY,
+    number TEXT NOT NULL UNIQUE,
+    name TEXT NOT NULL,
+    capacity INTEGER NOT NULL DEFAULT 4,
+    zone TEXT NOT NULL DEFAULT 'indoor' CHECK(zone IN ('indoor', 'courtyard', 'vip')),
+    status TEXT NOT NULL DEFAULT 'FREE' CHECK(status IN ('FREE', 'HELD', 'OCCUPIED')),
+    held_by TEXT,
+    held_until INTEGER,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+  );
+
   CREATE INDEX IF NOT EXISTS idx_orders_status ON orders(status);
   CREATE INDEX IF NOT EXISTS idx_orders_table ON orders(table_number);
+  CREATE INDEX IF NOT EXISTS idx_tables_status ON tables(status);
 `);
 
 export interface Product {
@@ -91,6 +104,40 @@ export interface OrderRecord {
   created_at: string;
   completed_at: string | null;
   items?: OrderItemRecord[];
+}
+
+export interface CafeTable {
+  id: string;
+  number: string;
+  name: string;
+  capacity: number;
+  zone: "indoor" | "courtyard" | "vip";
+  status: "FREE" | "HELD" | "OCCUPIED";
+  held_by?: string | null;
+  held_until?: number | null;
+  remainingHoldSeconds?: number;
+}
+
+// Auto-seed initial 8 tables if table is empty
+const tableCountCheck = db.prepare("SELECT COUNT(*) as count FROM tables").get() as { count: number };
+if (tableCountCheck.count === 0) {
+  const insertTableStmt = db.prepare(`
+    INSERT INTO tables (id, number, name, capacity, zone, status)
+    VALUES (?, ?, ?, ?, ?, 'FREE')
+  `);
+  const initialTables = [
+    { id: "tbl_1", number: "میز ۱", name: "رو به حیاط و آب‌نما", capacity: 2, zone: "courtyard" },
+    { id: "tbl_2", number: "میز ۲", name: "رو به حیاط و فضای سبز", capacity: 4, zone: "courtyard" },
+    { id: "tbl_3", number: "میز ۳", name: "سالن اصلی - کنار شومینه", capacity: 4, zone: "indoor" },
+    { id: "tbl_4", number: "میز ۴", name: "کنار بار و دم‌آوری دستی", capacity: 2, zone: "indoor" },
+    { id: "tbl_5", number: "میز ۵", name: "سالن اصلی - فضای خانوادگی", capacity: 6, zone: "indoor" },
+    { id: "tbl_6", number: "میز ۶", name: "میز کار اختصاصی با پریز برق", capacity: 4, zone: "indoor" },
+    { id: "tbl_7", number: "میز ۷", name: "تراس بهاره", capacity: 4, zone: "courtyard" },
+    { id: "tbl_8", number: "میز ۸", name: "اتاق تشریفات VIP", capacity: 8, zone: "vip" },
+  ];
+  for (const t of initialTables) {
+    insertTableStmt.run(t.id, t.number, t.name, t.capacity, t.zone);
+  }
 }
 
 // ---------------- Database Operations ----------------
@@ -269,7 +316,8 @@ export function getTableRowCounts() {
   const productsCount = (db.prepare("SELECT COUNT(*) as count FROM products").get() as { count: number }).count;
   const ordersCount = (db.prepare("SELECT COUNT(*) as count FROM orders").get() as { count: number }).count;
   const itemsCount = (db.prepare("SELECT COUNT(*) as count FROM order_items").get() as { count: number }).count;
-  return { productsCount, ordersCount, itemsCount };
+  const tablesCount = (db.prepare("SELECT COUNT(*) as count FROM tables").get() as { count: number }).count;
+  return { productsCount, ordersCount, itemsCount, tablesCount };
 }
 
 
@@ -364,4 +412,149 @@ export function getAnalyticsStats() {
     totalOrdersCount: (totalOrdersStmt.get() as { count: number }).count,
     topProducts: popularStmt.all() as { name: string; total_sold: number }[],
   };
+}
+
+// ---------------- Table Management Operations (Anti-Race Condition) ----------------
+
+export function getAllTables(): CafeTable[] {
+  // Clean any expired holds first
+  cleanExpiredTableHolds();
+
+  const stmt = db.prepare("SELECT * FROM tables ORDER BY id ASC");
+  const rawTables = stmt.all() as CafeTable[];
+  const now = Date.now();
+
+  return rawTables.map((t) => {
+    let remaining = 0;
+    if (t.status === "HELD" && t.held_until) {
+      remaining = Math.max(0, Math.ceil((t.held_until - now) / 1000));
+    }
+    return {
+      ...t,
+      remainingHoldSeconds: remaining,
+    };
+  });
+}
+
+export function getTableById(id: string): CafeTable | null {
+  cleanExpiredTableHolds();
+  const stmt = db.prepare("SELECT * FROM tables WHERE id = ?");
+  const table = stmt.get(id) as CafeTable | null;
+  if (!table) return null;
+
+  const now = Date.now();
+  let remaining = 0;
+  if (table.status === "HELD" && table.held_until) {
+    remaining = Math.max(0, Math.ceil((table.held_until - now) / 1000));
+  }
+  return { ...table, remainingHoldSeconds: remaining };
+}
+
+export function holdTable(
+  tableId: string,
+  clientId: string,
+  clientName?: string,
+  ttlSeconds = 120
+): { success: boolean; table: CafeTable; ttlSeconds: number; heldUntil: number } {
+  cleanExpiredTableHolds();
+
+  db.exec("BEGIN TRANSACTION;");
+  try {
+    const tableStmt = db.prepare("SELECT * FROM tables WHERE id = ?");
+    const table = tableStmt.get(tableId) as CafeTable | undefined;
+
+    if (!table) {
+      throw new Error("میز مورد نظر یافت نشد.");
+    }
+
+    if (table.status === "OCCUPIED") {
+      throw new Error("این میز در حال حاضر پر است و مهمان دارد.");
+    }
+
+    const now = Date.now();
+    // Check if table is currently held by someone else and lock is still active
+    if (table.status === "HELD" && table.held_until && table.held_until > now && table.held_by !== clientId) {
+      const waitSec = Math.ceil((table.held_until - now) / 1000);
+      throw new Error(`این میز هم‌اکنون توسط کاربر دیگری در حال انتخاب است (${waitSec} ثانیه تا آزادسازی).`);
+    }
+
+    const heldUntil = now + ttlSeconds * 1000;
+    const updateStmt = db.prepare(`
+      UPDATE tables 
+      SET status = 'HELD', held_by = ?, held_until = ?
+      WHERE id = ?
+    `);
+    updateStmt.run(clientId, heldUntil, tableId);
+    db.exec("COMMIT;");
+
+    const updatedTable = getTableById(tableId)!;
+    return {
+      success: true,
+      table: updatedTable,
+      ttlSeconds,
+      heldUntil,
+    };
+  } catch (err) {
+    db.exec("ROLLBACK;");
+    throw err;
+  }
+}
+
+export function releaseTable(tableId: string, clientId?: string): { success: boolean; tableId: string } {
+  db.exec("BEGIN TRANSACTION;");
+  try {
+    const tableStmt = db.prepare("SELECT * FROM tables WHERE id = ?");
+    const table = tableStmt.get(tableId) as CafeTable | undefined;
+    if (!table) throw new Error("میز یافت نشد.");
+
+    const updateStmt = db.prepare(`
+      UPDATE tables 
+      SET status = 'FREE', held_by = NULL, held_until = NULL
+      WHERE id = ?
+    `);
+    updateStmt.run(tableId);
+    db.exec("COMMIT;");
+    return { success: true, tableId };
+  } catch (err) {
+    db.exec("ROLLBACK;");
+    throw err;
+  }
+}
+
+export function occupyTable(tableId: string, clientId?: string): { success: boolean; table: CafeTable } {
+  db.exec("BEGIN TRANSACTION;");
+  try {
+    const tableStmt = db.prepare("SELECT * FROM tables WHERE id = ?");
+    const table = tableStmt.get(tableId) as CafeTable | undefined;
+    if (!table) throw new Error("میز یافت نشد.");
+
+    const updateStmt = db.prepare(`
+      UPDATE tables 
+      SET status = 'OCCUPIED', held_by = ?, held_until = NULL
+      WHERE id = ?
+    `);
+    updateStmt.run(clientId || null, tableId);
+    db.exec("COMMIT;");
+    return { success: true, table: getTableById(tableId)! };
+  } catch (err) {
+    db.exec("ROLLBACK;");
+    throw err;
+  }
+}
+
+export function cleanExpiredTableHolds(): string[] {
+  const now = Date.now();
+  const expiredStmt = db.prepare("SELECT id FROM tables WHERE status = 'HELD' AND held_until IS NOT NULL AND held_until <= ?");
+  const expiredRows = expiredStmt.all(now) as { id: string }[];
+
+  if (expiredRows.length > 0) {
+    const cleanStmt = db.prepare(`
+      UPDATE tables 
+      SET status = 'FREE', held_by = NULL, held_until = NULL
+      WHERE status = 'HELD' AND held_until IS NOT NULL AND held_until <= ?
+    `);
+    cleanStmt.run(now);
+  }
+
+  return expiredRows.map((r) => r.id);
 }

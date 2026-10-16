@@ -10,6 +10,13 @@ import {
   settleTableOrders,
   getAnalyticsStats,
   getTableRowCounts,
+  getAllTables,
+  getTableById,
+  holdTable,
+  releaseTable,
+  occupyTable,
+  cleanExpiredTableHolds,
+  type CafeTable,
 } from "./db.ts";
 import { openApiSpec, getScalarHtml } from "./docs.ts";
 import { telemetry, type TraceStep } from "./telemetry.ts";
@@ -32,6 +39,7 @@ let activeWsClients = 0;
 const ipRateLimits = new Map<string, { count: number; expiresAt: number }>();
 
 function isRateLimited(ip: string): boolean {
+  if (ip === "127.0.0.1" || ip === "::1" || ip === "localhost") return false;
   const now = Date.now();
   const limit = ipRateLimits.get(ip);
   if (!limit || now > limit.expiresAt) {
@@ -39,7 +47,7 @@ function isRateLimited(ip: string): boolean {
     return false;
   }
   limit.count++;
-  return limit.count > 40; // Max 40 requests per minute per IP for bursts
+  return limit.count > 200; // 200 requests per minute per external IP
 }
 
 // Helper: Standard CORS headers
@@ -433,6 +441,149 @@ export const server = Bun.serve({
         return jsonResponse(products);
       }
 
+      // ---------------- ROUTE: GET /api/v1/tables ----------------
+      if (path === "/tables" && method === "GET") {
+        const tDbStart = performance.now();
+        const tables = getAllTables();
+        const dbUs = Math.round((performance.now() - tDbStart) * 1000);
+
+        traceSteps.push({
+          node: "database",
+          durationUs: Math.max(1, dbUs),
+          status: "ok",
+          detail: `Read ${tables.length} Tables Status`,
+        });
+
+        const totalUs = Math.round((performance.now() - t0) * 1000);
+        telemetry.recordTrace({
+          id: `trc_${Math.random().toString(36).substring(2, 8)}`,
+          clientId: rawClientId,
+          clientLabel,
+          isAudience,
+          method,
+          endpoint: url.pathname,
+          status: 200,
+          outcome: "db_query",
+          totalDurationUs: totalUs,
+          steps: traceSteps,
+          workerNode,
+          timestamp: Date.now(),
+        });
+
+        return jsonResponse(tables);
+      }
+
+      // ---------------- ROUTE: POST /api/v1/tables/:id/hold (Anti-Race Lock) ----------------
+      if (path.match(/^\/tables\/([^/]+)\/hold$/) && method === "POST") {
+        const match = path.match(/^\/tables\/([^/]+)\/hold$/)!;
+        const tableId = match[1];
+        const body = await req.json().catch(() => ({}));
+        const targetClientId = body.clientId || rawClientId;
+        const ttlSeconds = Number(body.ttlSeconds) || 120;
+
+        try {
+          const tDbStart = performance.now();
+          const result = holdTable(tableId, targetClientId, body.clientName || clientLabel, ttlSeconds);
+          const dbUs = Math.round((performance.now() - tDbStart) * 1000);
+
+          traceSteps.push({
+            node: "database",
+            durationUs: Math.max(1, dbUs),
+            status: "ok",
+            detail: `Atomic Hold Lock Acquired (${ttlSeconds}s TTL)`,
+          });
+
+          const totalUs = Math.round((performance.now() - t0) * 1000);
+          telemetry.recordTrace({
+            id: `trc_${Math.random().toString(36).substring(2, 8)}`,
+            clientId: rawClientId,
+            clientLabel,
+            isAudience,
+            method,
+            endpoint: url.pathname,
+            status: 200,
+            outcome: "db_query",
+            totalDurationUs: totalUs,
+            steps: traceSteps,
+            workerNode,
+            timestamp: Date.now(),
+          });
+
+          // Broadcast real-time table status update to all connected screens
+          server.publish(
+            "all-clients",
+            JSON.stringify({
+              event: "table:held",
+              data: {
+                tableId,
+                heldBy: targetClientId,
+                heldUntil: result.heldUntil,
+                ttlSeconds: result.ttlSeconds,
+                clientName: body.clientName || clientLabel,
+              },
+            })
+          );
+
+          return jsonResponse({
+            success: true,
+            tableId,
+            status: "HELD",
+            heldUntil: result.heldUntil,
+            ttlSeconds: result.ttlSeconds,
+            message: `میز به مدت ${ttlSeconds} ثانیه برای شما قفل گردید.`,
+          });
+        } catch (err: any) {
+          const isConflict = err.message?.includes("کاربر دیگری");
+          return errorResponse(err.message || "خطا در قفل میز.", isConflict ? 409 : 400);
+        }
+      }
+
+      // ---------------- ROUTE: POST /api/v1/tables/:id/release ----------------
+      if (path.match(/^\/tables\/([^/]+)\/release$/) && method === "POST") {
+        const match = path.match(/^\/tables\/([^/]+)\/release$/)!;
+        const tableId = match[1];
+        const body = await req.json().catch(() => ({}));
+
+        try {
+          const result = releaseTable(tableId, body.clientId || rawClientId);
+
+          server.publish(
+            "all-clients",
+            JSON.stringify({
+              event: "table:released",
+              data: { tableId },
+            })
+          );
+
+          return jsonResponse({ success: true, tableId, status: "FREE" });
+        } catch (err: any) {
+          return errorResponse(err.message || "خطا در آزادسازی میز.", 400);
+        }
+      }
+
+      // ---------------- ROUTE: POST /api/v1/tables/:id/book ----------------
+      if (path.match(/^\/tables\/([^/]+)\/book$/) && method === "POST") {
+        const match = path.match(/^\/tables\/([^/]+)\/book$/)!;
+        const tableId = match[1];
+        const body = await req.json().catch(() => ({}));
+
+        try {
+          const result = occupyTable(tableId, body.clientId || rawClientId);
+
+          server.publish(
+            "all-clients",
+            JSON.stringify({
+              event: "table:taken",
+              data: { tableId, table: result.table },
+            })
+          );
+
+          return jsonResponse({ success: true, tableId, status: "OCCUPIED" });
+        } catch (err: any) {
+          return errorResponse(err.message || "خطا در ثبت نهایی میز.", 400);
+        }
+      }
+
       // ---------------- ROUTE 2: POST /api/v1/orders ----------------
       if (path === "/orders" && method === "POST") {
         let body: any;
@@ -776,6 +927,20 @@ setInterval(() => {
 
   server.publish("dashboard-clients", JSON.stringify(heartbeatPayload));
 }, 1000);
+
+// 3-Second Automatic Sweeper for Expired Table Holds (Releases abandoned holds)
+setInterval(() => {
+  const expiredIds = cleanExpiredTableHolds();
+  for (const tableId of expiredIds) {
+    server.publish(
+      "all-clients",
+      JSON.stringify({
+        event: "table:released",
+        data: { tableId, reason: "HOLD_EXPIRED" },
+      })
+    );
+  }
+}, 3000);
 
 import { networkInterfaces } from "os";
 
