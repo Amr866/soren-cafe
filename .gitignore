@@ -1,5 +1,6 @@
 # ai agent assistant skills, scratch & SDD runtimes
 .agents/
+skills-lock.json
 
 # Dependencies
 node_modules/
