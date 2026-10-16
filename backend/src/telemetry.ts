@@ -211,9 +211,12 @@ class TelemetryEngine {
     return this.cacheEnabled;
   }
 
-  public getCachedProducts(): any[] | null {
+  public getCachedProducts(category?: string): any[] | null {
     if (!this.cacheEnabled) return null;
     if (this.productCache && Date.now() - this.productCacheTime < this.CACHE_TTL_MS) {
+      if (category) {
+        return this.productCache.filter((p: any) => p.category === category);
+      }
       return this.productCache;
     }
     return null;

@@ -370,60 +370,65 @@ export const server = Bun.serve({
       // ---------------- ROUTE 1: GET /api/v1/products ----------------
       if (path === "/products" && method === "GET") {
         const category = url.searchParams.get("category") || undefined;
-        const bypassCache = url.searchParams.get("no_cache") === "1";
+        const bypassCache = url.searchParams.get("no_cache") === "1" || !telemetry.isCacheEnabled();
 
-        // Check L1 In-Memory Cache
-        const tCacheStart = performance.now();
-        const cachedProducts = (!bypassCache && !category) ? telemetry.getCachedProducts() : null;
+        // 1. If Cache is ACTIVE and NOT Bypassed, attempt L1 lookup
+        if (!bypassCache) {
+          const tCacheStart = performance.now();
+          const cachedProducts = telemetry.getCachedProducts(category);
 
-        if (cachedProducts) {
-          const cacheUs = Math.round((performance.now() - tCacheStart) * 1000);
+          if (cachedProducts) {
+            const cacheUs = Math.round((performance.now() - tCacheStart) * 1000);
+            traceSteps.push({
+              node: "cache",
+              durationUs: Math.max(1, cacheUs),
+              status: "hit",
+              detail: `L1 In-Memory Hit (${cachedProducts.length} items)`,
+            });
+
+            const totalUs = Math.round((performance.now() - t0) * 1000);
+            telemetry.recordTrace({
+              id: `trc_${Math.random().toString(36).substring(2, 8)}`,
+              clientId: rawClientId,
+              clientLabel,
+              isAudience,
+              method,
+              endpoint: url.pathname + url.search,
+              status: 200,
+              outcome: "cache_hit",
+              totalDurationUs: totalUs,
+              steps: traceSteps,
+              workerNode,
+              timestamp: Date.now(),
+            });
+
+            return jsonResponse(cachedProducts);
+          }
+
+          // Cache Miss: record miss step, then proceed to disk
           traceSteps.push({
             node: "cache",
-            durationUs: Math.max(1, cacheUs),
-            status: "hit",
-            detail: `L1 In-Memory Hit (${cachedProducts.length} items)`,
+            durationUs: 20,
+            status: "miss",
+            detail: "Cache Miss / Cold Read",
           });
-
-          const totalUs = Math.round((performance.now() - t0) * 1000);
-          telemetry.recordTrace({
-            id: `trc_${Math.random().toString(36).substring(2, 8)}`,
-            clientId: rawClientId,
-            clientLabel,
-            isAudience,
-            method,
-            endpoint: url.pathname,
-            status: 200,
-            outcome: "cache_hit",
-            totalDurationUs: totalUs,
-            steps: traceSteps,
-            workerNode,
-            timestamp: Date.now(),
-          });
-
-          return jsonResponse(cachedProducts);
         }
 
-        // Cache Miss / Cold Read -> Fetch from SQLite WAL
-        traceSteps.push({
-          node: "cache",
-          durationUs: 20,
-          status: "miss",
-          detail: bypassCache ? "Cache Bypass Flag Set" : "Cache Miss / Cold Read",
-        });
-
+        // 2. Cold DB Read / Cache Bypassed Read -> Fetch from SQLite WAL Disk
+        // Notice: When bypassCache is true, traceSteps completely skips the cache node!
         const tDbStart = performance.now();
-        const products = getAllProducts(category);
-        if (!category) {
-          telemetry.setCachedProducts(products);
+        const allProducts = getAllProducts();
+        if (!bypassCache) {
+          telemetry.setCachedProducts(allProducts);
         }
+        const products = category ? allProducts.filter((p) => p.category === category) : allProducts;
         const dbUs = Math.round((performance.now() - tDbStart) * 1000);
 
         traceSteps.push({
           node: "database",
           durationUs: Math.max(1, dbUs),
           status: "ok",
-          detail: "SQLite WAL Table Scan",
+          detail: bypassCache ? "Direct Disk Read (L1 Cache Bypassed)" : "SQLite WAL Table Scan",
         });
 
         const totalUs = Math.round((performance.now() - t0) * 1000);
@@ -433,7 +438,7 @@ export const server = Bun.serve({
           clientLabel,
           isAudience,
           method,
-          endpoint: url.pathname,
+          endpoint: url.pathname + url.search,
           status: 200,
           outcome: "db_query",
           totalDurationUs: totalUs,

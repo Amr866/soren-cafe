@@ -315,9 +315,21 @@
             >
               <div class="flex items-center gap-2">
                 <span class="text-sm">🚀</span>
-                <span>شلیک رگبار ترافیک (۵۰ پکت متوالی)</span>
+                <span>شلیک ترافیک خواندن (۵۰ کوئری مجاز)</span>
               </div>
               <span class="px-1.5 py-0.5 rounded text-[9px] font-mono bg-brand-amber/10 text-brand-amber border border-brand-amber/20">BURST</span>
+            </button>
+
+            <!-- TRIGGER 5: RATE-LIMIT DDOS SIMULATION -->
+            <button 
+              onclick="fireRateLimitFlood()"
+              class="w-full py-2.5 px-3 rounded-xl bg-surface-raised hover:bg-telemetry-rose/15 border border-surface-border hover:border-telemetry-rose/40 text-slate-200 text-xs font-bold transition-all flex items-center justify-between group active:scale-[0.98]"
+            >
+              <div class="flex items-center gap-2">
+                <span class="text-sm">🛑</span>
+                <span>شلیک اسپم سفارش (تست شیلد Rate-Limit)</span>
+              </div>
+              <span class="px-1.5 py-0.5 rounded text-[9px] font-mono bg-telemetry-rose/10 text-telemetry-rose border border-telemetry-rose/20">429 SHIELD</span>
             </button>
           </div>
 
@@ -1067,16 +1079,36 @@
       } catch (e) {}
     }
 
-    // 4. Traffic Burst (50 requests)
+    // 4. Traffic Burst (50 requests - below read rate limit)
     async function fireTrafficBurst() {
       for (let i = 0; i < 50; i++) {
-        fetch(`/api/v1/products?category=coffee&burst=${i+1}`, {
+        fetch(`/api/v1/products?burst=${i+1}`, {
           headers: {
             'X-Audience-Name': `BurstWorker #${(i % 5) + 1}`,
             'X-Burst-Index': String(i + 1)
           }
         }).catch(() => {});
-        if (i % 5 === 0) await new Promise(r => setTimeout(r, 20));
+        if (i % 6 === 0) await new Promise(r => setTimeout(r, 15));
+      }
+    }
+
+    // 5. Rate-Limit Flood Attack (15 rapid orders from external IP to trigger HTTP 429 Shield)
+    async function fireRateLimitFlood() {
+      for (let i = 0; i < 15; i++) {
+        fetch('/api/v1/orders', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'X-Forwarded-For': '198.51.100.88',
+            'X-Audience-Name': `اسپمر ربات #${i + 1}`,
+          },
+          body: JSON.stringify({
+            tableNumber: 'میز ۹۹ (اسپم)',
+            customerName: `نفوذگر #${i + 1}`,
+            items: [{ productId: 'prd_espresso', quantity: 1 }],
+          }),
+        }).catch(() => {});
+        if (i % 5 === 0) await new Promise(r => setTimeout(r, 10));
       }
     }
 
