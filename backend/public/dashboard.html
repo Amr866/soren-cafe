@@ -585,16 +585,16 @@
       }
 
       let color = '#06B6D4'; // Blue default
-      if (trace.outcome === 'cache_hit') color = '#10B981'; // Green
-      if (trace.outcome === 'waf_blocked') color = '#F43F5E'; // Red
-      if (trace.isAudience) color = '#F59E0B'; // Gold
+      if (trace.isAudience) color = '#F59E0B'; // Gold for regular audience
+      if (trace.outcome === 'cache_hit') color = '#10B981'; // Green for cache
+      if (trace.outcome === 'waf_blocked') color = '#F43F5E'; // Red ALWAYS wins for attacks!
 
       particles.push({
         trace,
         segments: pathSegments,
         segmentIndex: 0,
         t: 0,
-        speed: 0.035 + Math.random() * 0.015,
+        speed: trace.outcome === 'waf_blocked' ? 0.05 : (0.035 + Math.random() * 0.015),
         color,
         isAudience: trace.isAudience,
         label: trace.clientLabel || '',
@@ -602,7 +602,9 @@
       });
 
       // Sound FX trigger
-      if (trace.isAudience) {
+      if (trace.outcome === 'waf_blocked') {
+        AudioEngine.play('waf_blocked');
+      } else if (trace.isAudience) {
         AudioEngine.play('audience');
       } else {
         AudioEngine.play(trace.outcome);
@@ -1073,10 +1075,14 @@
     // 3. Fire Simulated Attack
     async function fireSimulatedAttack() {
       try {
-        await fetch('/api/v1/products?sqli=1&filter=\' OR 1=1--', {
-          headers: { 'X-Audience-Name': 'نفوذگر آزمایشی (Stage Demo)' }
-        });
-      } catch (e) {}
+        console.log("[HUD] Firing Simulated SQL Injection Attack...");
+        const targetUrl = `/api/v1/products?sqli=1&filter=${encodeURIComponent("' OR 1=1--")}&audience=${encodeURIComponent('نفوذگر SQLi (Stage Demo)')}`;
+        const res = await fetch(targetUrl);
+        const data = await res.json();
+        console.log("[HUD] SQLi Response:", res.status, data);
+      } catch (e) {
+        console.error("[HUD] SQLi Error:", e);
+      }
     }
 
     // 4. Traffic Burst (50 requests - below read rate limit)
@@ -1094,20 +1100,27 @@
 
     // 5. Rate-Limit Flood Attack (15 rapid orders from external IP to trigger HTTP 429 Shield)
     async function fireRateLimitFlood() {
+      console.log("[HUD] Launching rapid order flood to test 429 Shield...");
+      const simulatedIp = "198.51.100.88";
       for (let i = 0; i < 15; i++) {
-        fetch('/api/v1/orders', {
+        const orderUrl = `/api/v1/orders?simulate_ip=${simulatedIp}&audience=${encodeURIComponent('اسپمر ربات #' + (i + 1))}`;
+        fetch(orderUrl, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
-            'X-Forwarded-For': '198.51.100.88',
-            'X-Audience-Name': `اسپمر ربات #${i + 1}`,
           },
           body: JSON.stringify({
             tableNumber: 'میز ۹۹ (اسپم)',
-            customerName: `نفوذگر #${i + 1}`,
-            items: [{ productId: 'prd_espresso', quantity: 1 }],
+            customerName: `اسپمر #${i + 1}`,
+            items: [{ productId: 'prd_doppio', quantity: 1 }],
           }),
-        }).catch(() => {});
+        }).then(res => {
+          if (res.status === 429) {
+            console.log(`[HUD] Shield Active: Order #${i + 1} blocked with HTTP 429`);
+          }
+        }).catch(err => {
+          console.error("[HUD] Flood Error:", err);
+        });
         if (i % 5 === 0) await new Promise(r => setTimeout(r, 10));
       }
     }

@@ -55,7 +55,7 @@ function isRateLimited(ip: string, isOrder = false): boolean {
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Methods": "GET, POST, PATCH, OPTIONS",
-  "Access-Control-Allow-Headers": "Content-Type, Authorization, X-Barista-Pin, X-Client-Id, X-Audience-Name, X-Burst-Index",
+  "Access-Control-Allow-Headers": "Content-Type, Authorization, X-Barista-Pin, X-Client-Id, X-Audience-Name, X-Burst-Index, X-Forwarded-For, X-Simulated-Ip",
 };
 
 function jsonResponse(data: any, status = 200) {
@@ -136,7 +136,12 @@ export const server = Bun.serve({
 
     const url = new URL(req.url);
     const method = req.method;
-    const clientIp = req.headers.get("x-forwarded-for") || "127.0.0.1";
+    const clientIp =
+      req.headers.get("x-simulated-ip") ||
+      req.headers.get("x-forwarded-for") ||
+      url.searchParams.get("simulate_ip") ||
+      url.searchParams.get("ip") ||
+      "127.0.0.1";
 
     // Handle CORS preflight
     if (method === "OPTIONS") {
@@ -256,7 +261,13 @@ export const server = Bun.serve({
       const tGatewayStart = performance.now();
 
       // Check A: SQL Injection Interception
-      const isSqliAttempt = url.searchParams.has("sqli") || req.url.includes("' OR 1=1") || req.url.includes("UNION SELECT");
+      const isSqliAttempt =
+        url.searchParams.has("sqli") ||
+        url.searchParams.has("attack") ||
+        req.url.includes("' OR 1=1") ||
+        req.url.includes("UNION SELECT") ||
+        req.url.includes("%27%20OR%201=1") ||
+        req.url.includes("%27+OR+1=1");
       if (isSqliAttempt) {
         const gatewayUs = Math.round((performance.now() - tGatewayStart) * 1000);
         traceSteps.push({
