@@ -3,13 +3,13 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Soren Distributed Engine — Live Request Journey & Architecture Theatre</title>
+  <title>Soren Distributed Engine — Architecture & Runtime Observability Console</title>
   
   <!-- Tailwind CSS & Fonts -->
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&family=Vazirmatn:wght@400;500;600;700;900&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@300;400;500;600;700&family=Vazirmatn:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   
   <!-- QRCode.js Library -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
@@ -20,28 +20,24 @@
       theme: {
         extend: {
           colors: {
-            obsidian: '#07090E',
+            canvas: '#090A0D',
             surface: {
-              DEFAULT: '#0D1117',
-              raised: '#131822',
-              border: '#1E2638',
-              muted: '#28334A'
+              DEFAULT: '#0E1015',
+              subtle: '#13161D',
+              border: 'rgba(255, 255, 255, 0.08)',
+              hover: 'rgba(255, 255, 255, 0.04)'
             },
-            brand: {
-              espresso: '#8C5E3C',
-              amber: '#C99752',
-              gold: '#E5A955'
-            },
-            telemetry: {
+            signal: {
               emerald: '#10B981',
               cyan: '#06B6D4',
-              rose: '#F43F5E',
-              amber: '#F59E0B'
+              rose: '#EF4444',
+              amber: '#F59E0B',
+              silver: '#A1A1AA'
             }
           },
           fontFamily: {
             sans: ['Vazirmatn', '"Plus Jakarta Sans"', 'sans-serif'],
-            mono: ['"JetBrains Mono"', 'monospace']
+            mono: ['"JetBrains Mono"', 'ui-monospace', 'monospace']
           }
         }
       }
@@ -50,352 +46,397 @@
 
   <style>
     body {
-      background-color: #07090E;
-      color: #E2E8F0;
+      background-color: #090A0D;
+      color: #E4E4E7;
       font-feature-settings: "cv02", "cv03", "cv04", "cv11";
     }
     .tabular-nums {
       font-variant-numeric: tabular-nums;
     }
-    .grid-bg {
+    .grid-pattern {
       background-size: 32px 32px;
       background-image: 
-        linear-gradient(to right, rgba(255, 255, 255, 0.02) 1px, transparent 1px),
-        linear-gradient(to bottom, rgba(255, 255, 255, 0.02) 1px, transparent 1px);
+        linear-gradient(to right, rgba(255, 255, 255, 0.018) 1px, transparent 1px),
+        linear-gradient(to bottom, rgba(255, 255, 255, 0.018) 1px, transparent 1px);
     }
-    .glow-emerald {
-      box-shadow: 0 0 25px -4px rgba(16, 185, 129, 0.25);
+    .hairline-border {
+      border: 1px solid rgba(255, 255, 255, 0.08);
     }
-    .glow-rose {
-      box-shadow: 0 0 25px -4px rgba(244, 63, 94, 0.35);
+    .hairline-bottom {
+      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
     }
-    .glow-amber {
-      box-shadow: 0 0 25px -4px rgba(245, 158, 11, 0.25);
-    }
-    .node-shake {
-      animation: shake 0.5s cubic-bezier(.36,.07,.19,.97) both;
-    }
-    @keyframes shake {
-      10%, 90% { transform: translate3d(-1px, 0, 0); }
-      20%, 80% { transform: translate3d(2px, 0, 0); }
-      30%, 50%, 70% { transform: translate3d(-4px, 0, 0); }
-      40%, 60% { transform: translate3d(4px, 0, 0); }
-    }
-    ::-webkit-scrollbar { width: 5px; height: 5px; }
+    ::-webkit-scrollbar { width: 4px; height: 4px; }
     ::-webkit-scrollbar-track { background: transparent; }
-    ::-webkit-scrollbar-thumb { background: #1E2638; border-radius: 9999px; }
-    ::-webkit-scrollbar-thumb:hover { background: #28334A; }
+    ::-webkit-scrollbar-thumb { background: rgba(255, 255, 255, 0.12); border-radius: 9999px; }
+    ::-webkit-scrollbar-thumb:hover { background: rgba(255, 255, 255, 0.2); }
+    
+    @keyframes pulse-subtle {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50% { opacity: 0.4; transform: scale(0.96); }
+    }
+    .pulse-subtle {
+      animation: pulse-subtle 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+    }
   </style>
 </head>
-<body class="min-h-screen grid-bg antialiased selection:bg-brand-amber/30 selection:text-brand-gold flex flex-col justify-between">
+<body class="min-h-screen grid-pattern antialiased text-zinc-300 flex flex-col justify-between selection:bg-white/10 selection:text-white">
 
-  <!-- ================= TOP NAVIGATION HUD ================= -->
-  <header class="border-b border-surface-border bg-obsidian/90 backdrop-blur-xl sticky top-0 z-50">
-    <div class="max-w-[1720px] mx-auto px-4 lg:px-8 h-16 flex items-center justify-between gap-4">
+  <!-- ================= MINIMAL TOP HEADER HUD ================= -->
+  <header class="hairline-bottom bg-[#090A0D]/95 backdrop-blur-md sticky top-0 z-50">
+    <div class="max-w-[1780px] mx-auto px-4 lg:px-6 h-14 flex items-center justify-between gap-4">
       
-      <!-- Logo & Title -->
-      <div class="flex items-center gap-3.5">
-        <div class="w-9 h-9 rounded-xl bg-gradient-to-br from-brand-amber/30 to-brand-espresso/20 border border-brand-amber/40 flex items-center justify-center font-black text-brand-gold text-base shadow-inner">
-          ⚡
-        </div>
-        <div>
-          <div class="flex items-center gap-2">
-            <h1 class="font-bold tracking-tight text-slate-100 text-sm font-mono uppercase">SOREN ARCHITECTURE THEATRE</h1>
-            <span id="cluster-status-pill" class="px-2 py-0.5 rounded text-[10px] font-mono font-medium tracking-wide bg-telemetry-emerald/10 text-telemetry-emerald border border-telemetry-emerald/20 flex items-center gap-1.5">
-              <span class="w-1.5 h-1.5 rounded-full bg-telemetry-emerald animate-ping"></span>
-              <span id="cluster-status-text">KEEPALIVE ONLINE • 2 NODES</span>
-            </span>
-          </div>
-          <p class="text-[11px] text-slate-400 font-mono">Bun 1.4.2 Native • Zero-Trust WAF • SQLite WAL • 50ms Batch Trace</p>
-        </div>
-      </div>
-
-      <!-- Live Global Telemetry Metrics -->
-      <div class="hidden lg:flex items-center gap-6 font-mono text-xs">
-        
-        <div class="flex flex-col text-right">
-          <span class="text-[10px] text-slate-400 font-sans uppercase tracking-wider">Throughput Rate</span>
-          <span class="text-slate-100 font-bold flex items-center gap-1 justify-end">
-            <span id="stat-rps" class="text-telemetry-emerald text-base tabular-nums">0</span> <span class="text-[10px] text-slate-400">RPS</span>
-          </span>
+      <!-- Left: Engine Identity & Runtime Timer -->
+      <div class="flex items-center gap-4">
+        <div class="flex items-center gap-2.5">
+          <div class="w-2 h-2 rounded-full bg-signal-emerald pulse-subtle"></div>
+          <span class="font-mono text-xs font-semibold tracking-wider text-zinc-100 uppercase">SOREN ARCHITECTURE</span>
+          <span class="text-[10px] font-mono text-zinc-400">v1.4 • Bun Native</span>
         </div>
 
-        <div class="h-8 w-px bg-surface-border"></div>
+        <div class="h-4 w-px bg-white/10 hidden sm:block"></div>
 
-        <div class="flex flex-col text-right">
-          <span class="text-[10px] text-slate-400 font-sans uppercase tracking-wider">p95 Trace Latency</span>
-          <span id="stat-p95" class="text-brand-gold font-bold text-base tabular-nums">0 µs</span>
-        </div>
-
-        <div class="h-8 w-px bg-surface-border"></div>
-
-        <div class="flex flex-col text-right">
-          <span class="text-[10px] text-slate-400 font-sans uppercase tracking-wider">L1 Cache Engine</span>
-          <span id="stat-cache-badge" class="text-telemetry-emerald font-bold flex items-center gap-1.5 justify-end">
-            <span class="w-1.5 h-1.5 rounded-full bg-telemetry-emerald"></span> ACTIVE
-          </span>
-        </div>
-
-        <div class="h-8 w-px bg-surface-border"></div>
-
-        <div class="flex flex-col text-right">
-          <span class="text-[10px] text-slate-400 font-sans uppercase tracking-wider">Audience Devices</span>
-          <span id="stat-ws" class="text-telemetry-cyan font-bold text-base tabular-nums">0 Client(s)</span>
+        <!-- System Runtime Session Timer -->
+        <div class="hidden sm:flex items-center gap-2 font-mono text-xs text-zinc-400">
+          <span class="text-[10px] uppercase tracking-wider text-zinc-400">RUNTIME</span>
+          <span id="session-runtime-clock" class="text-zinc-200 tabular-nums font-semibold">00:00:00.0</span>
         </div>
       </div>
 
-      <!-- Action Nav & Audio Toggle -->
-      <div class="flex items-center gap-3">
+      <!-- Center: Key Live Telemetry -->
+      <div class="hidden md:flex items-center gap-6 font-mono text-xs">
+        <div class="flex items-center gap-2">
+          <span class="text-[10px] text-zinc-400 uppercase tracking-wider">Rate</span>
+          <span class="text-zinc-100 font-medium tabular-nums"><strong id="stat-rps" class="text-white font-bold">0</strong> <span class="text-zinc-400 text-[10px]">req/s</span></span>
+        </div>
+
+        <div class="h-3 w-px bg-white/10"></div>
+
+        <div class="flex items-center gap-2">
+          <span class="text-[10px] text-zinc-400 uppercase tracking-wider">p95 Latency</span>
+          <span id="stat-p95" class="text-zinc-100 font-semibold tabular-nums">0 µs</span>
+        </div>
+
+        <div class="h-3 w-px bg-white/10"></div>
+
+        <div class="flex items-center gap-2">
+          <span class="text-[10px] text-zinc-400 uppercase tracking-wider">Cache</span>
+          <span id="stat-cache-badge" class="text-signal-emerald text-[11px] font-medium flex items-center gap-1.5">
+            <span class="w-1.5 h-1.5 rounded-full bg-signal-emerald"></span> L1 ONLINE
+          </span>
+        </div>
+
+        <div class="h-3 w-px bg-white/10"></div>
+
+        <div class="flex items-center gap-2">
+          <span class="text-[10px] text-zinc-400 uppercase tracking-wider">Connected</span>
+          <span id="stat-ws" class="text-zinc-300 font-medium tabular-nums">0 Device(s)</span>
+        </div>
+      </div>
+
+      <!-- Right: Action Controls (Sound, Stage Bar, QR Modal) -->
+      <div class="flex items-center gap-2">
+        <!-- Audio Haptic Toggle -->
         <button 
           id="btn-sound" 
           onclick="toggleAudio()" 
-          title="پخش افکت‌های صوتی سرور"
-          class="px-2.5 py-1.5 rounded-lg bg-surface-raised hover:bg-surface-muted text-slate-300 hover:text-white border border-surface-border text-xs font-mono transition-all flex items-center gap-1.5"
+          title="Toggle acoustic haptic audio"
+          class="h-8 px-2.5 rounded-md bg-white/[0.03] hover:bg-white/[0.07] hairline-border text-zinc-400 hover:text-zinc-200 text-xs font-mono transition-colors flex items-center gap-1.5"
         >
-          <span id="sound-icon">🔊</span>
-          <span id="sound-label" class="text-[11px]">Audio FX: ON</span>
+          <svg id="sound-icon-svg" class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon>
+            <path d="M15.54 8.46a5 5 0 0 1 0 7.07"></path>
+            <path d="M19.07 4.93a10 10 0 0 1 0 14.14"></path>
+          </svg>
+          <span id="sound-label" class="text-[11px]">Audio</span>
         </button>
 
-        <a href="/join" target="_blank" class="px-3 py-1.5 rounded-lg bg-brand-amber/15 hover:bg-brand-amber/25 text-brand-gold border border-brand-amber/30 text-xs font-semibold transition-all flex items-center gap-1.5">
-          <span>ورود حضار (/join)</span>
-          <span class="text-[10px] font-mono">↗</span>
-        </a>
+        <!-- Stage Actions Toggle -->
+        <button 
+          onclick="toggleStageDrawer()" 
+          class="h-8 px-3 rounded-md bg-white/[0.04] hover:bg-white/[0.08] hairline-border text-zinc-200 hover:text-white text-xs font-mono transition-colors flex items-center gap-1.5"
+        >
+          <svg class="w-3.5 h-3.5 text-signal-amber" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon>
+          </svg>
+          <span>Stage Controls</span>
+        </button>
+
+        <!-- QR Audience Modal Trigger -->
+        <button 
+          onclick="toggleQrModal()" 
+          class="h-8 px-3 rounded-md bg-white text-black hover:bg-zinc-200 text-xs font-mono font-medium transition-colors flex items-center gap-1.5"
+        >
+          <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <rect x="3" y="3" width="7" height="7"></rect>
+            <rect x="14" y="3" width="7" height="7"></rect>
+            <rect x="14" y="14" width="7" height="7"></rect>
+            <rect x="3" y="14" width="7" height="7"></rect>
+          </svg>
+          <span>Audience QR</span>
+        </button>
       </div>
 
     </div>
   </header>
 
-  <!-- ================= MAIN DASHBOARD BODY ================= -->
-  <main class="max-w-[1720px] mx-auto p-4 lg:p-6 w-full space-y-6">
-
-    <!-- TOP SECTION: REQUEST JOURNEY GRAPH (CANVAS) + AUDIENCE QR + STAGE CONTROLS -->
-    <section class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-stretch">
-      
-      <!-- CANVAS REQUEST JOURNEY (9 COLS) -->
-      <div class="lg:col-span-9 bg-surface rounded-2xl border border-surface-border p-5 shadow-2xl relative overflow-hidden flex flex-col justify-between min-h-[520px]">
-        
-        <!-- Header Bar of Canvas -->
-        <div class="flex items-center justify-between mb-3 z-10 relative">
-          <div>
-            <div class="flex items-center gap-2">
-              <h2 class="text-xs font-black text-slate-200 tracking-wider uppercase flex items-center gap-2">
-                <span>سفر فیزیکی درخواست (Physical Request Journey)</span>
-                <span class="px-2 py-0.5 rounded text-[10px] font-mono bg-surface-raised text-telemetry-emerald border border-surface-border">Real Microsecond Spans</span>
-              </h2>
-            </div>
-            <p class="text-[11px] text-slate-400 mt-0.5 font-sans">
-              هر نقطه یک درخواست واقعی است. سبز = کش‌هیت (L1) • آبی = دیتابیس (SQLite WAL) • قرمز = بلاک WAF • طلایی = گوشی حضار
-            </p>
-          </div>
-
-          <!-- Color Legends -->
-          <div class="flex items-center gap-4 text-[11px] font-mono text-slate-400">
-            <span class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-full bg-telemetry-emerald shadow-[0_0_8px_#10B981]"></span> کش‌هیت (&lt;1ms)</span>
-            <span class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-full bg-telemetry-cyan shadow-[0_0_8px_#06B6D4]"></span> تراکنش DB</span>
-            <span class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-full bg-telemetry-rose shadow-[0_0_8px_#F43F5E]"></span> بلاک امنیتی</span>
-            <span class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-full bg-telemetry-amber shadow-[0_0_8px_#F59E0B]"></span> گوشی حضار</span>
-          </div>
-        </div>
-
-        <!-- HTML5 Canvas Visualizer Layer -->
-        <div class="relative w-full flex-1 rounded-xl bg-obsidian/80 border border-surface-border/80 overflow-hidden min-h-[420px]" id="canvas-container">
-          <canvas id="journey-canvas" class="w-full h-full block cursor-crosshair"></canvas>
-          
-          <!-- Node Overlay Badges for crisp text -->
-          <div id="node-overlays" class="absolute inset-0 pointer-events-none"></div>
-
-          <!-- Live Particle Counter Watermark -->
-          <div class="absolute bottom-3 left-4 font-mono text-[10px] text-slate-400 pointer-events-none flex items-center gap-3">
-            <span>FPS: <strong id="canvas-fps" class="text-slate-200">60</strong></span>
-            <span>Active Flying Particles: <strong id="canvas-particles-count" class="text-slate-200">0</strong></span>
-            <span>Total Traces Processed: <strong id="canvas-total-traces" class="text-telemetry-emerald">0</strong></span>
-          </div>
-        </div>
-
-        <!-- Footer Cluster Failover Alert Bar -->
-        <div id="failover-alert-bar" class="mt-3 py-2 px-3 rounded-xl bg-surface-raised border border-surface-border flex items-center justify-between text-[11px] font-mono text-slate-300">
-          <div class="flex items-center gap-2">
-            <span class="w-2 h-2 rounded-full bg-telemetry-emerald" id="failover-dot"></span>
-            <span id="failover-message">وضعیت کلاستر عادی است. ترافیک با الگوریتم Round-Robin بین ورکر ۱ و ورکر ۲ توزیع می‌گردد.</span>
-          </div>
-          <span class="text-slate-400 text-[10px]" id="failover-time">Now</span>
-        </div>
-
+  <!-- ================= STAGE CONTROLS SLIDE-DOWN DRAWER ================= -->
+  <div id="stage-drawer" class="hidden hairline-bottom bg-[#0E1015] px-4 lg:px-6 py-3 transition-all">
+    <div class="max-w-[1780px] mx-auto flex flex-wrap items-center justify-between gap-3 text-xs font-mono">
+      <div class="flex items-center gap-2 text-zinc-400">
+        <span class="text-[10px] uppercase tracking-wider text-zinc-400">Scenario Triggers:</span>
       </div>
 
-      <!-- RIGHT SIDE: STAGE CONTROLS + AUDIENCE QR CODE (3 COLS) -->
-      <div class="lg:col-span-3 space-y-5 flex flex-col justify-between">
-        
-        <!-- AUDIENCE QR CODE CARD -->
-        <div class="bg-surface rounded-2xl border border-surface-border p-4 shadow-xl flex flex-col items-center text-center relative overflow-hidden">
-          <div class="absolute top-0 inset-x-0 h-1 bg-gradient-to-r from-brand-amber via-brand-gold to-brand-espresso"></div>
-          
-          <div class="w-full flex items-center justify-between mb-2">
-            <span class="text-xs font-bold text-slate-200 tracking-wide uppercase">اتصال زنده حضار</span>
-            <span class="px-2 py-0.5 rounded text-[10px] font-mono bg-brand-amber/15 text-brand-gold border border-brand-amber/30">SCAN ME</span>
-          </div>
+      <div class="flex flex-wrap items-center gap-2">
+        <!-- 1: Toggle Worker 1 -->
+        <button 
+          id="btn-kill-worker" 
+          onclick="toggleWorker1()"
+          class="px-2.5 py-1.5 rounded bg-white/[0.03] hover:bg-white/[0.08] hairline-border text-zinc-200 flex items-center gap-2 transition-colors"
+        >
+          <span class="w-1.5 h-1.5 rounded-full bg-signal-emerald" id="btn-kill-dot"></span>
+          <span id="btn-kill-text">Worker-1 [Kill/Recover]</span>
+        </button>
 
-          <!-- QR Container -->
-          <div class="p-2.5 bg-white rounded-xl shadow-lg my-1" id="qrcode-box">
-            <div id="qrcode"></div>
-          </div>
+        <!-- 2: Toggle Cache -->
+        <button 
+          id="btn-toggle-cache" 
+          onclick="toggleCacheMode()"
+          class="px-2.5 py-1.5 rounded bg-white/[0.03] hover:bg-white/[0.08] hairline-border text-zinc-200 flex items-center gap-2 transition-colors"
+        >
+          <span class="w-1.5 h-1.5 rounded-full bg-signal-emerald" id="btn-cache-dot"></span>
+          <span id="btn-cache-text">L1 Cache [Bypass/Enable]</span>
+        </button>
 
-          <div class="mt-2 text-center w-full">
-            <div class="text-[11px] font-bold text-slate-100 font-mono tracking-wider break-all bg-obsidian/80 px-2 py-1 rounded border border-surface-border mb-1" id="qr-url-text">http://localhost:4000/join</div>
-            <div class="flex items-center gap-1.5 mt-1.5">
-              <input 
-                id="custom-qr-input" 
-                type="text" 
-                placeholder="تغییر آدرس یا وارد کردن لینک ngrok" 
-                class="w-full bg-surface-raised border border-surface-border rounded-lg px-2 py-1 text-[10px] text-slate-200 placeholder-slate-400 font-mono focus:outline-none focus:border-brand-amber"
-              />
-              <button 
-                onclick="applyCustomQrUrl()" 
-                class="px-2 py-1 rounded-lg bg-brand-amber/20 hover:bg-brand-amber/30 text-brand-gold text-[10px] font-mono border border-brand-amber/30 shrink-0"
-              >
-                بروزرسانی
-              </button>
-            </div>
-            <p class="text-[10px] text-slate-400 mt-1.5">
-              گوشی و لپ‌تاپ باید روی یک Wi-Fi باشند، یا لینک تانل ngrok را در کادر بالا وارد کنید.
-            </p>
-          </div>
-        </div>
+        <!-- 3: SQLi WAF Attack -->
+        <button 
+          onclick="fireSimulatedAttack()"
+          class="px-2.5 py-1.5 rounded bg-red-500/10 hover:bg-red-500/20 text-signal-rose border border-red-500/30 flex items-center gap-1.5 transition-colors"
+        >
+          <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>
+          <span>Inject SQLi Attack</span>
+        </button>
 
-        <!-- STAGE DEMO CONTROLLERS (صحنه‌های هیجانی) -->
-        <div class="bg-surface rounded-2xl border border-surface-border p-4 shadow-xl space-y-3 flex-1 flex flex-col justify-between">
-          <div class="flex items-center justify-between border-b border-surface-border pb-2">
-            <h3 class="text-xs font-bold text-slate-200 tracking-wider uppercase">کنترل سناریوهای صحنه (Demo)</h3>
-            <span class="text-[10px] font-mono text-slate-400">Live Stage Triggers</span>
-          </div>
+        <!-- 4: Traffic Burst -->
+        <button 
+          onclick="fireTrafficBurst()"
+          class="px-2.5 py-1.5 rounded bg-white/[0.03] hover:bg-white/[0.08] hairline-border text-zinc-200 flex items-center gap-1.5 transition-colors"
+        >
+          <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon></svg>
+          <span>Burst 50 Reads</span>
+        </button>
 
-          <div class="space-y-2.5">
-            <!-- TRIGGER 1: KILL WORKER-1 -->
-            <button 
-              id="btn-kill-worker"
-              onclick="toggleWorker1()"
-              class="w-full py-2.5 px-3 rounded-xl bg-surface-raised hover:bg-telemetry-rose/15 border border-surface-border hover:border-telemetry-rose/40 text-slate-200 text-xs font-bold transition-all flex items-center justify-between group active:scale-[0.98]"
-            >
-              <div class="flex items-center gap-2">
-                <span class="text-sm">💀</span>
-                <span id="btn-kill-text">از دسترس خارج کردن Worker-1</span>
-              </div>
-              <span id="btn-kill-badge" class="px-1.5 py-0.5 rounded text-[9px] font-mono bg-telemetry-emerald/10 text-telemetry-emerald border border-telemetry-emerald/20">ONLINE</span>
-            </button>
+        <!-- 5: Rate-limit flood -->
+        <button 
+          onclick="fireRateLimitFlood()"
+          class="px-2.5 py-1.5 rounded bg-amber-500/10 hover:bg-amber-500/20 text-signal-amber border border-amber-500/30 flex items-center gap-1.5 transition-colors"
+        >
+          <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><line x1="4.93" y1="4.93" x2="19.07" y2="19.07"></line></svg>
+          <span>Spam 429 Rate Limit</span>
+        </button>
+      </div>
 
-            <!-- TRIGGER 2: TOGGLE CACHE -->
-            <button 
-              id="btn-toggle-cache"
-              onclick="toggleCacheMode()"
-              class="w-full py-2.5 px-3 rounded-xl bg-surface-raised hover:bg-telemetry-emerald/15 border border-surface-border hover:border-telemetry-emerald/40 text-slate-200 text-xs font-bold transition-all flex items-center justify-between group active:scale-[0.98]"
-            >
-              <div class="flex items-center gap-2">
-                <span class="text-sm">⚡</span>
-                <span id="btn-cache-text">تغییر وضعیت کش حافظه‌ای (L1)</span>
-              </div>
-              <span id="btn-cache-badge" class="px-1.5 py-0.5 rounded text-[9px] font-mono bg-telemetry-emerald/10 text-telemetry-emerald border border-telemetry-emerald/20">ACTIVE</span>
-            </button>
+      <button onclick="toggleStageDrawer()" class="text-zinc-400 hover:text-zinc-200 text-[11px]">✕ Close</button>
+    </div>
+  </div>
 
-            <!-- TRIGGER 3: SIMULATE ATTACK -->
-            <button 
-              onclick="fireSimulatedAttack()"
-              class="w-full py-2.5 px-3 rounded-xl bg-surface-raised hover:bg-telemetry-rose/15 border border-surface-border hover:border-telemetry-rose/40 text-slate-200 text-xs font-bold transition-all flex items-center justify-between group active:scale-[0.98]"
-            >
-              <div class="flex items-center gap-2">
-                <span class="text-sm">🛡️</span>
-                <span>تزریق حمله SQL Injection (شیلد WAF)</span>
-              </div>
-              <span class="px-1.5 py-0.5 rounded text-[9px] font-mono bg-telemetry-rose/10 text-telemetry-rose border border-telemetry-rose/20">TEST</span>
-            </button>
+  <!-- ================= MAIN BODY ================= -->
+  <main class="max-w-[1780px] mx-auto p-4 lg:p-6 w-full flex-1 flex flex-col gap-6">
 
-            <!-- TRIGGER 4: RAPID BURST -->
-            <button 
-              onclick="fireTrafficBurst()"
-              class="w-full py-2.5 px-3 rounded-xl bg-surface-raised hover:bg-brand-amber/15 border border-surface-border hover:border-brand-amber/40 text-slate-200 text-xs font-bold transition-all flex items-center justify-between group active:scale-[0.98]"
-            >
-              <div class="flex items-center gap-2">
-                <span class="text-sm">🚀</span>
-                <span>شلیک ترافیک خواندن (۵۰ کوئری مجاز)</span>
-              </div>
-              <span class="px-1.5 py-0.5 rounded text-[9px] font-mono bg-brand-amber/10 text-brand-amber border border-brand-amber/20">BURST</span>
-            </button>
-
-            <!-- TRIGGER 5: RATE-LIMIT DDOS SIMULATION -->
-            <button 
-              onclick="fireRateLimitFlood()"
-              class="w-full py-2.5 px-3 rounded-xl bg-surface-raised hover:bg-telemetry-rose/15 border border-surface-border hover:border-telemetry-rose/40 text-slate-200 text-xs font-bold transition-all flex items-center justify-between group active:scale-[0.98]"
-            >
-              <div class="flex items-center gap-2">
-                <span class="text-sm">🛑</span>
-                <span>شلیک اسپم سفارش (تست شیلد Rate-Limit)</span>
-              </div>
-              <span class="px-1.5 py-0.5 rounded text-[9px] font-mono bg-telemetry-rose/10 text-telemetry-rose border border-telemetry-rose/20">429 SHIELD</span>
-            </button>
-          </div>
-
-          <div class="text-[10px] text-slate-400 font-mono text-center pt-2 border-t border-surface-border">
-            <span>تمام رویدادها زنده از هسته Bun دریافت می‌شوند</span>
+    <!-- CANVAS VIEW: PHYSICAL REQUEST JOURNEY & NETWORK TOPOLOGY -->
+    <section class="bg-surface rounded-xl hairline-border flex flex-col overflow-hidden relative shadow-2xl">
+      
+      <!-- Canvas Bar Meta -->
+      <div class="px-5 py-3.5 hairline-bottom bg-[#0E1015]/90 flex items-center justify-between text-xs font-mono">
+        <div class="flex items-center gap-3">
+          <div class="flex items-center gap-2">
+            <span class="text-zinc-200 font-medium">Physical Request Journey</span>
+            <span class="text-zinc-400">/</span>
+            <span class="text-zinc-400 text-[11px]">Bézier Microsecond Network Flow</span>
           </div>
         </div>
 
+        <div class="flex items-center gap-5 text-[11px] text-zinc-400">
+          <span class="flex items-center gap-1.5">
+            <span class="w-1.5 h-1.5 rounded-full bg-signal-emerald"></span> Cache Hit (&lt;1ms)
+          </span>
+          <span class="flex items-center gap-1.5">
+            <span class="w-1.5 h-1.5 rounded-full bg-signal-cyan"></span> SQLite WAL
+          </span>
+          <span class="flex items-center gap-1.5">
+            <span class="w-1.5 h-1.5 rounded-full bg-signal-rose"></span> WAF Mitigated
+          </span>
+          <span class="flex items-center gap-1.5">
+            <span class="w-1.5 h-1.5 rounded-full bg-signal-amber"></span> Audience Telemetry
+          </span>
+        </div>
+      </div>
+
+      <!-- Canvas Area -->
+      <div class="relative w-full min-h-[460px] lg:min-h-[500px] flex-1 bg-[#090A0D]" id="canvas-container">
+        <canvas id="journey-canvas" class="w-full h-full block cursor-crosshair"></canvas>
+
+        <!-- Subdued Performance Watermark -->
+        <div class="absolute bottom-3 left-4 font-mono text-[10px] text-zinc-400 pointer-events-none flex items-center gap-4">
+          <span>FPS: <strong id="canvas-fps" class="text-zinc-300 font-semibold">60</strong></span>
+          <span>Particles: <strong id="canvas-particles-count" class="text-zinc-300 font-semibold">0</strong></span>
+          <span>Total Traced: <strong id="canvas-total-traces" class="text-zinc-200 font-semibold">0</strong></span>
+        </div>
+
+        <!-- Node Click Info Hint -->
+        <div class="absolute bottom-3 right-4 font-mono text-[10px] text-zinc-400 pointer-events-none">
+          Click any node coordinate to inspect live runtime state
+        </div>
+      </div>
+
+      <!-- Cluster Failover Message Bar -->
+      <div id="failover-alert-bar" class="px-5 py-2.5 hairline-top bg-surface-subtle flex items-center justify-between text-xs font-mono text-zinc-400">
+        <div class="flex items-center gap-2">
+          <span class="w-1.5 h-1.5 rounded-full bg-signal-emerald" id="failover-dot"></span>
+          <span id="failover-message" class="text-zinc-300">Cluster Status: Healthy. Ingress distributed via active round-robin pipeline.</span>
+        </div>
+        <span class="text-zinc-400 text-[10px] tabular-nums" id="failover-time">Ready</span>
       </div>
 
     </section>
 
-    <!-- BOTTOM SECTION: REAL-TIME RAW TERMINAL STREAM + TRACE INSPECTOR MODAL -->
-    <section class="grid grid-cols-1 lg:grid-cols-12 gap-6">
-
-      <!-- RAW TERMINAL STREAM (7 COLS) -->
-      <div class="lg:col-span-7 bg-surface rounded-2xl border border-surface-border p-5 shadow-2xl flex flex-col justify-between">
-        <div class="flex items-center justify-between mb-3 border-b border-surface-border pb-3">
-          <div class="flex items-center gap-2">
-            <span class="w-2.5 h-2.5 rounded-full bg-telemetry-emerald"></span>
-            <h3 class="text-xs font-bold text-slate-200 tracking-wider uppercase font-mono">Live Terminal Telemetry Log (Raw Stream)</h3>
-          </div>
-          <span class="text-[10px] font-mono text-slate-400">Click any row to inspect JSON</span>
+    <!-- RUNTIME TELEMETRY CONSOLE (EXECUTION STREAM + RUNTIME INSPECTOR) -->
+    <section class="bg-surface rounded-xl hairline-border flex flex-col overflow-hidden shadow-2xl">
+      
+      <!-- Console Header Bar with Runtime Stats -->
+      <div class="px-5 py-3 hairline-bottom bg-[#0E1015]/90 flex flex-wrap items-center justify-between gap-3 font-mono text-xs">
+        <div class="flex items-center gap-3">
+          <span class="text-zinc-100 font-semibold tracking-wider flex items-center gap-2">
+            <span class="w-2 h-2 rounded-sm bg-signal-emerald"></span>
+            LIVE RUNTIME EXECUTION LOG
+          </span>
+          <span class="text-[10px] text-zinc-400 px-2 py-0.5 rounded bg-white/[0.03] hairline-border">Microsecond Resolution</span>
         </div>
 
-        <!-- Terminal Output Window -->
-        <div id="terminal-stream" class="space-y-1.5 font-mono text-xs max-h-[220px] overflow-y-auto pr-2 bg-obsidian/90 p-3 rounded-xl border border-surface-border/60">
-          <div class="text-slate-400 text-center py-6 text-xs">
-            در حال گوش دادن به جریان تله‌متری وب‌سوکت... رویدادها به محض ارسال اینجا ثبت می‌شوند.
+        <!-- Live Runtime Performance Stats Ledger -->
+        <div class="flex items-center gap-3 text-[11px] text-zinc-400 tabular-nums">
+          <div class="hidden sm:flex items-center gap-1.5 pl-2 border-l border-white/10">
+            <span class="text-[9px] text-zinc-500 uppercase font-mono">Jitter:</span>
+            <svg id="runtime-sparkline" class="w-16 h-3.5 stroke-signal-emerald fill-none" viewBox="0 0 80 16">
+              <polyline id="runtime-sparkline-poly" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" points="0,8 80,8" />
+            </svg>
           </div>
-        </div>
-
-        <div class="mt-3 pt-2 border-t border-surface-border/60 flex items-center justify-between text-[11px] font-mono text-slate-400">
-          <span>Engine: <strong class="text-slate-200">Bun Native epoll</strong></span>
-          <span>Zero-Fake Assurance: <strong class="text-telemetry-emerald">Authoritative Backend Proof</strong></span>
+          <span>Last: <strong id="runtime-last-duration" class="text-zinc-100 font-medium">0 µs</strong></span>
+          <span class="text-zinc-600">•</span>
+          <span>Min: <strong id="runtime-min-duration" class="text-signal-emerald font-medium">0 µs</strong></span>
+          <span class="text-zinc-600">•</span>
+          <span>Avg: <strong id="runtime-avg-duration" class="text-zinc-200 font-medium">0 µs</strong></span>
+          <span class="text-zinc-600">•</span>
+          <span>Max: <strong id="runtime-max-duration" class="text-signal-amber font-medium">0 µs</strong></span>
+          <span class="text-zinc-600">•</span>
+          <span>Logs: <strong id="runtime-total-events" class="text-white font-medium">0</strong></span>
         </div>
       </div>
 
-      <!-- TRACE INSPECTOR / DRILL-DOWN PANEL (5 COLS) -->
-      <div class="lg:col-span-5 bg-surface rounded-2xl border border-surface-border p-5 shadow-2xl flex flex-col justify-between">
-        <div class="flex items-center justify-between mb-3 border-b border-surface-border pb-3">
-          <div class="flex items-center gap-2">
-            <span class="w-2.5 h-2.5 rounded-full bg-brand-amber"></span>
-            <h3 class="text-xs font-bold text-slate-200 tracking-wider uppercase font-mono">Microsecond Trace Inspector</h3>
+      <!-- Split Console Body: Live Stream (Left 7 cols) & Trace Inspector (Right 5 cols) -->
+      <div class="grid grid-cols-1 lg:grid-cols-12 min-h-[260px] divide-y lg:divide-y-0 lg:divide-x lg:divide-x-reverse divide-white/[0.08]">
+        
+        <!-- LIVE STREAM TABLE -->
+        <div class="lg:col-span-7 p-3 flex flex-col justify-between bg-[#090A0D]/70">
+          <div class="flex items-center justify-between text-[11px] font-mono text-zinc-400 px-2 pb-2 hairline-bottom mb-2">
+            <span>TIMESTAMP & TRACE ID</span>
+            <div class="flex items-center gap-6">
+              <span>ENDPOINT</span>
+              <span>EXECUTION RUNTIME</span>
+            </div>
           </div>
-          <span id="inspect-trace-id" class="px-2 py-0.5 rounded text-[10px] font-mono bg-brand-amber/10 text-brand-gold border border-brand-amber/20">Select a trace</span>
+
+          <div id="terminal-stream" class="space-y-1 font-mono text-xs overflow-y-auto max-h-[220px] pr-1">
+            <div class="text-zinc-400 text-center py-10 text-xs">
+              Waiting for telemetry stream... Request runtimes will log here in real-time.
+            </div>
+          </div>
+
+          <div class="pt-2 mt-2 hairline-top flex items-center justify-between text-[10px] font-mono text-zinc-400">
+            <span>Buffer: Last 50 events cached</span>
+            <span>Click any execution row to drill down into span hops</span>
+          </div>
         </div>
 
-        <!-- JSON Code Viewer -->
-        <div class="relative flex-1 bg-obsidian/90 rounded-xl border border-surface-border/60 p-3 max-h-[220px] overflow-y-auto">
-          <pre id="inspect-json" class="font-mono text-[11px] text-slate-300 leading-relaxed whitespace-pre-wrap">روی هر نود در گراف یا ردیف‌های ترمینال کلیک کنید تا امضای کامل میکروثانیه‌ای تریس با جزییات نودها و زمان‌بندی نمایش داده شود.</pre>
+        <!-- MICROSECOND SPAN & RUNTIME INSPECTOR -->
+        <div class="lg:col-span-5 p-3 flex flex-col justify-between bg-[#090A0D]/90">
+          <div class="flex items-center justify-between text-[11px] font-mono text-zinc-400 px-2 pb-2 hairline-bottom mb-2">
+            <span class="flex items-center gap-2">
+              <span class="text-zinc-300 font-semibold">TRACE SPAN INSPECTOR</span>
+              <span id="inspect-trace-id" class="text-zinc-400 text-[10px]">Select a trace</span>
+            </span>
+            <button onclick="copyCurrentTrace()" class="text-zinc-400 hover:text-white transition-colors text-[10px]">Copy JSON</button>
+          </div>
+
+          <div class="flex-1 overflow-y-auto max-h-[220px] bg-black/40 rounded p-2 hairline-border">
+            <pre id="inspect-json" class="font-mono text-[11px] text-zinc-300 whitespace-pre-wrap leading-relaxed">Select any trace from the live stream or canvas node to inspect exact step-by-step microsecond runtimes and origin payload.</pre>
+          </div>
+
+          <div class="pt-2 mt-2 hairline-top flex items-center justify-between text-[10px] font-mono text-zinc-400">
+            <span>Authoritative Engine: Bun Kernel Epoll</span>
+            <span class="text-signal-emerald">Zero-Mock Verified</span>
+          </div>
         </div>
 
-        <div class="mt-3 pt-2 border-t border-surface-border/60 flex items-center justify-between text-[11px] font-mono text-slate-400">
-          <span>Trace Precision: <strong class="text-brand-gold">Microseconds (µs)</strong></span>
-          <button onclick="copyCurrentTrace()" class="text-[10px] text-brand-amber hover:underline">Copy JSON</button>
-        </div>
       </div>
 
     </section>
 
   </main>
 
-  <!-- ================= CANVAS 2D PARTICLE & TOPOLOGY ENGINE ================= -->
+  <!-- ================= QR AUDIENCE MODAL DIALOG ================= -->
+  <div id="qr-modal" class="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4 hidden">
+    <div class="bg-[#0E1015] hairline-border rounded-xl max-w-sm w-full p-6 space-y-4 shadow-2xl relative text-center">
+      <div class="flex items-center justify-between hairline-bottom pb-3">
+        <h3 class="text-xs font-mono font-bold uppercase tracking-wider text-white">Live Audience Connect</h3>
+        <button onclick="toggleQrModal()" class="text-zinc-400 hover:text-white font-mono text-xs">✕</button>
+      </div>
+
+      <div class="flex justify-center my-2">
+        <div class="p-3 bg-white rounded-lg shadow-inner" id="qrcode"></div>
+      </div>
+
+      <div class="space-y-2 font-mono text-xs">
+        <div id="qr-url-text" class="text-[11px] text-zinc-300 bg-black/50 px-3 py-2 rounded hairline-border break-all">
+          http://localhost:4000/join
+        </div>
+        <div class="flex gap-2">
+          <input 
+            id="custom-qr-input" 
+            type="text" 
+            placeholder="Change host or ngrok URL"
+            class="flex-1 bg-surface-subtle hairline-border rounded px-2.5 py-1.5 text-[11px] text-zinc-200 placeholder-zinc-400 font-mono focus:outline-none focus:border-white/30"
+          />
+          <button 
+            onclick="applyCustomQrUrl()" 
+            class="px-3 py-1.5 bg-white text-black font-semibold rounded text-[11px] hover:bg-zinc-200 transition-colors"
+          >
+            Update
+          </button>
+        </div>
+        <p class="text-[10px] text-zinc-400 pt-1">
+          Smartphones must share the same network, or use an ngrok tunnel.
+        </p>
+      </div>
+    </div>
+  </div>
+
+  <!-- ================= CLIENT SCRIPT ENGINE ================= -->
   <script>
-    // --- Audio Synthesizer (Web Audio API) ---
+    // --- Session Runtime Timer ---
+    const sessionStartTime = performance.now();
+    function updateSessionClock() {
+      const elapsedMs = performance.now() - sessionStartTime;
+      const totalSec = Math.floor(elapsedMs / 1000);
+      const hours = String(Math.floor(totalSec / 3600)).padStart(2, '0');
+      const mins = String(Math.floor((totalSec % 3600) / 60)).padStart(2, '0');
+      const secs = String(totalSec % 60).padStart(2, '0');
+      const tenths = Math.floor((elapsedMs % 1000) / 100);
+      document.getElementById('session-runtime-clock').innerText = `${hours}:${mins}:${secs}.${tenths}`;
+      requestAnimationFrame(updateSessionClock);
+    }
+    requestAnimationFrame(updateSessionClock);
+
+    // --- Audio Haptic Engine (Tactile Micro-Ticks) ---
     const AudioEngine = {
       enabled: true,
       ctx: null,
@@ -411,10 +452,7 @@
       play(type) {
         if (!this.enabled) return;
         const now = performance.now();
-        // Throttle normal blips so Web Audio never clips or freezes browser main thread
-        if (type !== 'kill_server' && type !== 'waf_blocked' && type !== 'audience') {
-          if (now - this.lastPlayTime < 65) return;
-        }
+        if (now - this.lastPlayTime < 50 && type !== 'waf_blocked' && type !== 'kill_server') return;
         this.lastPlayTime = now;
 
         this.init();
@@ -425,58 +463,67 @@
         gain.connect(this.ctx.destination);
 
         if (type === 'cache_hit') {
-          // Sweet gentle high blip
+          // Tactile glass micro-click (1600Hz -> 2000Hz in 12ms)
           osc.type = 'sine';
-          osc.frequency.setValueAtTime(880, t);
-          osc.frequency.exponentialRampToValueAtTime(1320, t + 0.08);
-          gain.gain.setValueAtTime(0.06, t);
-          gain.gain.exponentialRampToValueAtTime(0.001, t + 0.08);
+          osc.frequency.setValueAtTime(1600, t);
+          osc.frequency.exponentialRampToValueAtTime(2200, t + 0.012);
+          gain.gain.setValueAtTime(0.04, t);
+          gain.gain.exponentialRampToValueAtTime(0.0001, t + 0.012);
           osc.start(t);
-          osc.stop(t + 0.08);
+          osc.stop(t + 0.012);
         } else if (type === 'db_query') {
-          // Deeper crisp click
+          // Soft mechanical keyboard tick (480Hz -> 240Hz in 15ms)
           osc.type = 'triangle';
-          osc.frequency.setValueAtTime(440, t);
-          osc.frequency.exponentialRampToValueAtTime(220, t + 0.12);
+          osc.frequency.setValueAtTime(480, t);
+          osc.frequency.exponentialRampToValueAtTime(240, t + 0.015);
+          gain.gain.setValueAtTime(0.05, t);
+          gain.gain.exponentialRampToValueAtTime(0.0001, t + 0.015);
+          osc.start(t);
+          osc.stop(t + 0.015);
+        } else if (type === 'waf_blocked') {
+          // Sharp alert tick
+          osc.type = 'sawtooth';
+          osc.frequency.setValueAtTime(320, t);
+          osc.frequency.exponentialRampToValueAtTime(80, t + 0.12);
           gain.gain.setValueAtTime(0.08, t);
-          gain.gain.exponentialRampToValueAtTime(0.001, t + 0.12);
+          gain.gain.exponentialRampToValueAtTime(0.0001, t + 0.12);
           osc.start(t);
           osc.stop(t + 0.12);
-        } else if (type === 'waf_blocked') {
-          // Low buzz explosion
+        } else if (type === 'kill_server') {
+          // Cluster alert pulse
           osc.type = 'sawtooth';
-          osc.frequency.setValueAtTime(280, t);
-          osc.frequency.exponentialRampToValueAtTime(70, t + 0.25);
-          gain.gain.setValueAtTime(0.15, t);
-          gain.gain.exponentialRampToValueAtTime(0.001, t + 0.25);
+          osc.frequency.setValueAtTime(500, t);
+          osc.frequency.linearRampToValueAtTime(160, t + 0.25);
+          gain.gain.setValueAtTime(0.1, t);
+          gain.gain.exponentialRampToValueAtTime(0.0001, t + 0.25);
           osc.start(t);
           osc.stop(t + 0.25);
-        } else if (type === 'kill_server') {
-          // Dramatic alarm sweep
-          osc.type = 'sawtooth';
-          osc.frequency.setValueAtTime(600, t);
-          osc.frequency.linearRampToValueAtTime(200, t + 0.4);
-          gain.gain.setValueAtTime(0.2, t);
-          gain.gain.exponentialRampToValueAtTime(0.001, t + 0.4);
-          osc.start(t);
-          osc.stop(t + 0.4);
         } else if (type === 'audience') {
-          // Golden sparkle
+          // Soft chime
           osc.type = 'sine';
-          osc.frequency.setValueAtTime(523.25, t);
-          osc.frequency.exponentialRampToValueAtTime(1046.5, t + 0.15);
-          gain.gain.setValueAtTime(0.1, t);
-          gain.gain.exponentialRampToValueAtTime(0.001, t + 0.15);
+          osc.frequency.setValueAtTime(800, t);
+          osc.frequency.exponentialRampToValueAtTime(1200, t + 0.08);
+          gain.gain.setValueAtTime(0.05, t);
+          gain.gain.exponentialRampToValueAtTime(0.0001, t + 0.08);
           osc.start(t);
-          osc.stop(t + 0.15);
+          osc.stop(t + 0.08);
         }
       }
     };
 
     function toggleAudio() {
       AudioEngine.enabled = !AudioEngine.enabled;
-      document.getElementById('sound-icon').innerText = AudioEngine.enabled ? '🔊' : '🔇';
-      document.getElementById('sound-label').innerText = AudioEngine.enabled ? 'Audio FX: ON' : 'Audio FX: OFF';
+      document.getElementById('sound-label').innerText = AudioEngine.enabled ? 'Audio: ON' : 'Audio: OFF';
+      document.getElementById('btn-sound').classList.toggle('text-zinc-200', AudioEngine.enabled);
+      document.getElementById('btn-sound').classList.toggle('text-zinc-400', !AudioEngine.enabled);
+    }
+
+    function toggleStageDrawer() {
+      document.getElementById('stage-drawer').classList.toggle('hidden');
+    }
+
+    function toggleQrModal() {
+      document.getElementById('qr-modal').classList.toggle('hidden');
     }
 
     // --- Topology Graph Model ---
@@ -488,17 +535,16 @@
     let height = 0;
     let dpr = window.devicePixelRatio || 1;
 
-    // Node Definitions
+    // Minimal Node Topology
     const nodes = {
-      client: { id: 'client', label: 'Client Ingress', sub: 'Audience / Web / Kiosk', x: 0.09, y: 0.50, color: '#94A3B8', active: true },
-      gateway: { id: 'gateway', label: 'Zero-Trust WAF', sub: 'Rate-Limit & Anti-Tamper', x: 0.28, y: 0.50, color: '#C99752', active: true },
-      worker_1: { id: 'worker_1', label: 'Worker-1 (Bun Core)', sub: 'Port :4000 • Epoll', x: 0.52, y: 0.30, color: '#10B981', active: true },
-      worker_2: { id: 'worker_2', label: 'Worker-2 (Bun Backup)', sub: 'Port :4001 • Standby', x: 0.52, y: 0.70, color: '#06B6D4', active: true },
-      cache: { id: 'cache', label: 'L1 In-Memory Cache', sub: 'Sub-ms Memory Page', x: 0.78, y: 0.30, color: '#10B981', active: true },
-      database: { id: 'database', label: 'SQLite WAL Engine', sub: 'Atomic Multi-Row Disk', x: 0.78, y: 0.70, color: '#38BDF8', active: true }
+      client: { id: 'client', label: 'CLIENT INGRESS', sub: 'Audience / Kiosk', x: 0.10, y: 0.50, color: '#A1A1AA', active: true },
+      gateway: { id: 'gateway', label: 'ZERO-TRUST WAF', sub: 'Rate-Limit & Shield', x: 0.28, y: 0.50, color: '#F59E0B', active: true },
+      worker_1: { id: 'worker_1', label: 'WORKER-1', sub: 'Port :4000 • Epoll', x: 0.52, y: 0.32, color: '#10B981', active: true },
+      worker_2: { id: 'worker_2', label: 'WORKER-2', sub: 'Port :4001 • Standby', x: 0.52, y: 0.68, color: '#06B6D4', active: true },
+      cache: { id: 'cache', label: 'L1 MEMORY CACHE', sub: 'Sub-ms Memory Page', x: 0.78, y: 0.32, color: '#10B981', active: true },
+      database: { id: 'database', label: 'SQLITE WAL ENGINE', sub: 'Atomic Disk File', x: 0.78, y: 0.68, color: '#38BDF8', active: true }
     };
 
-    // Connections (Curved Pipes)
     const links = [
       { from: 'client', to: 'gateway' },
       { from: 'gateway', to: 'worker_1' },
@@ -510,13 +556,20 @@
       { from: 'cache', to: 'database' }
     ];
 
-    // Flying Particles
     const particles = [];
     const shockwaves = [];
     let totalTracesCount = 0;
     let lastFrameTime = performance.now();
     let frameCount = 0;
     let currentFps = 60;
+
+    // Runtime Metrics Tracking
+    let runtimeStats = {
+      min: Infinity,
+      max: 0,
+      sum: 0,
+      count: 0
+    };
 
     function resizeCanvas() {
       const rect = container.getBoundingClientRect();
@@ -537,9 +590,7 @@
       return { x: n.x * width, y: n.y * height };
     }
 
-    // Bézier Path helper
     function getCurvePoint(p0, p1, t) {
-      // Smooth horizontal curve
       const cx1 = p0.x + (p1.x - p0.x) * 0.5;
       const cy1 = p0.y;
       const cx2 = p0.x + (p1.x - p0.x) * 0.5;
@@ -557,18 +608,15 @@
       };
     }
 
-    const MAX_ACTIVE_PARTICLES = 120;
+    const MAX_ACTIVE_PARTICLES = 140;
 
-    // Spawn Particle from Trace
     function spawnParticleFromTrace(trace) {
-      // Buffer safety check: prevent frame drops by bounding active particles
       if (particles.length >= MAX_ACTIVE_PARTICLES) {
         if (!trace.isAudience) return;
         const cullIndex = particles.findIndex(p => !p.isAudience);
         if (cullIndex !== -1) particles.splice(cullIndex, 1);
       }
 
-      // Determine segments based on steps
       const pathSegments = [];
       for (let i = 0; i < trace.steps.length - 1; i++) {
         const fromNode = trace.steps[i].node;
@@ -578,30 +626,28 @@
         }
       }
 
-      // If WAF blocked right at gateway
       if (trace.outcome === 'waf_blocked') {
         pathSegments.length = 0;
         pathSegments.push({ from: 'client', to: 'gateway' });
       }
 
-      let color = '#06B6D4'; // Blue default
-      if (trace.isAudience) color = '#F59E0B'; // Gold for regular audience
-      if (trace.outcome === 'cache_hit') color = '#10B981'; // Green for cache
-      if (trace.outcome === 'waf_blocked') color = '#F43F5E'; // Red ALWAYS wins for attacks!
+      let color = '#38BDF8'; // Subtle cyan
+      if (trace.isAudience) color = '#F59E0B'; // Amber
+      if (trace.outcome === 'cache_hit') color = '#10B981'; // Emerald
+      if (trace.outcome === 'waf_blocked') color = '#EF4444'; // Crimson
 
       particles.push({
         trace,
         segments: pathSegments,
         segmentIndex: 0,
         t: 0,
-        speed: trace.outcome === 'waf_blocked' ? 0.05 : (0.035 + Math.random() * 0.015),
+        speed: trace.outcome === 'waf_blocked' ? 0.06 : (0.04 + Math.random() * 0.015),
         color,
         isAudience: trace.isAudience,
         label: trace.clientLabel || '',
         trail: []
       });
 
-      // Sound FX trigger
       if (trace.outcome === 'waf_blocked') {
         AudioEngine.play('waf_blocked');
       } else if (trace.isAudience) {
@@ -611,12 +657,11 @@
       }
     }
 
-    // Shockwave for WAF blocked collision
-    function addShockwave(x, y, color = '#F43F5E') {
-      shockwaves.push({ x, y, radius: 4, maxRadius: 36, alpha: 1, color });
+    function addShockwave(x, y, color = '#EF4444') {
+      shockwaves.push({ x, y, radius: 2, maxRadius: 28, alpha: 0.9, color });
     }
 
-    // --- Main Animation Loop (60 FPS) ---
+    // --- Main 60fps Precision Render Loop ---
     function render() {
       const now = performance.now();
       frameCount++;
@@ -629,7 +674,7 @@
 
       ctx.clearRect(0, 0, width, height);
 
-      // 1. Draw Links (Fiber optic pipes)
+      // 1. Draw Hairline Conduits
       for (const link of links) {
         const p0 = getNodeCoords(link.from);
         const p1 = getNodeCoords(link.to);
@@ -646,82 +691,72 @@
         );
 
         if (isOffline) {
-          ctx.strokeStyle = 'rgba(239, 68, 68, 0.2)';
-          ctx.lineWidth = 1.5;
-          ctx.setLineDash([4, 6]);
+          ctx.strokeStyle = 'rgba(239, 68, 68, 0.25)';
+          ctx.lineWidth = 1;
+          ctx.setLineDash([3, 4]);
         } else {
           ctx.strokeStyle = 'rgba(255, 255, 255, 0.08)';
-          ctx.lineWidth = 2;
-          ctx.setLineDash([]);
+          ctx.lineWidth = 1;
+          ctx.setLineDash([2, 4]);
         }
         ctx.stroke();
         ctx.setLineDash([]);
       }
 
-      // 2. Draw Nodes
+      // 2. Draw Precision Coordinate Nodes
       for (const key of Object.keys(nodes)) {
         const n = nodes[key];
         const { x, y } = getNodeCoords(key);
 
         ctx.save();
-        ctx.beginPath();
-        ctx.arc(x, y, 22, 0, Math.PI * 2);
 
         if (!n.active) {
-          // Dead / Offline Node
-          ctx.fillStyle = '#1E1E24';
-          ctx.strokeStyle = '#F43F5E';
-          ctx.lineWidth = 2.5;
-          ctx.setLineDash([3, 3]);
-          ctx.stroke();
-          ctx.fill();
-
-          // Red X
-          ctx.strokeStyle = '#F43F5E';
-          ctx.lineWidth = 2;
+          // Offline Node Crosshair
+          ctx.strokeStyle = '#EF4444';
+          ctx.lineWidth = 1.5;
           ctx.beginPath();
-          ctx.moveTo(x - 8, y - 8); ctx.lineTo(x + 8, y + 8);
-          ctx.moveTo(x + 8, y - 8); ctx.lineTo(x - 8, y + 8);
+          ctx.moveTo(x - 7, y); ctx.lineTo(x + 7, y);
+          ctx.moveTo(x, y - 7); ctx.lineTo(x, y + 7);
           ctx.stroke();
+
+          ctx.font = '500 10px "JetBrains Mono", monospace';
+          ctx.textAlign = 'center';
+          ctx.fillStyle = '#EF4444';
+          ctx.fillText(`[${n.label} - OFFLINE]`, x, y - 18);
         } else {
-          // Active Node Glowing Circle
-          const grad = ctx.createRadialGradient(x, y, 2, x, y, 26);
-          grad.addColorStop(0, n.color + '44');
-          grad.addColorStop(0.7, '#0D1117');
-          grad.addColorStop(1, '#131822');
-          ctx.fillStyle = grad;
-          ctx.strokeStyle = n.color;
-          ctx.lineWidth = 2;
-          ctx.stroke();
-          ctx.fill();
-
-          // Inner glowing core
+          // Minimal Coordinate Anchor Box
+          ctx.fillStyle = '#0E1015';
+          ctx.strokeStyle = 'rgba(255, 255, 255, 0.15)';
+          ctx.lineWidth = 1;
           ctx.beginPath();
-          ctx.arc(x, y, 6, 0, Math.PI * 2);
-          ctx.fillStyle = n.color;
-          ctx.shadowColor = n.color;
-          ctx.shadowBlur = 10;
+          ctx.roundRect(x - 14, y - 14, 28, 28, 6);
           ctx.fill();
+          ctx.stroke();
+
+          // Center Status Dot
+          ctx.beginPath();
+          ctx.arc(x, y, 3, 0, Math.PI * 2);
+          ctx.fillStyle = n.color;
+          ctx.fill();
+
+          // Node Label
+          ctx.font = '600 10px "JetBrains Mono", monospace';
+          ctx.textAlign = 'center';
+          ctx.fillStyle = '#E4E4E7';
+          ctx.fillText(n.label, x, y - 22);
+
+          // Subtext
+          ctx.font = '400 9px "JetBrains Mono", monospace';
+          ctx.fillStyle = '#71717A';
+          ctx.fillText(n.sub, x, y + 26);
         }
-        ctx.restore();
-
-        // Node Label & Subtext
-        ctx.save();
-        ctx.font = 'bold 11px "JetBrains Mono", sans-serif';
-        ctx.textAlign = 'center';
-        ctx.fillStyle = n.active ? '#F1F5F9' : '#EF4444';
-        ctx.fillText(n.label, x, y - 30);
-
-        ctx.font = '10px "Vazirmatn", sans-serif';
-        ctx.fillStyle = n.active ? '#94A3B8' : '#71717A';
-        ctx.fillText(n.sub, x, y + 36);
         ctx.restore();
       }
 
-      // 3. Update & Draw Shockwaves
+      // 3. Shockwaves (Subtle 1px Rings)
       for (let i = shockwaves.length - 1; i >= 0; i--) {
         const sw = shockwaves[i];
-        sw.radius += 1.8;
+        sw.radius += 1.4;
         sw.alpha -= 0.04;
         if (sw.alpha <= 0 || sw.radius >= sw.maxRadius) {
           shockwaves.splice(i, 1);
@@ -733,14 +768,12 @@
         ctx.arc(sw.x, sw.y, sw.radius, 0, Math.PI * 2);
         ctx.strokeStyle = sw.color;
         ctx.globalAlpha = sw.alpha;
-        ctx.lineWidth = 2.5;
-        ctx.shadowColor = sw.color;
-        ctx.shadowBlur = 12;
+        ctx.lineWidth = 1;
         ctx.stroke();
         ctx.restore();
       }
 
-      // 4. Update & Draw Particles
+      // 4. Laser Particle Trails
       document.getElementById('canvas-particles-count').innerText = particles.length;
 
       for (let i = particles.length - 1; i >= 0; i--) {
@@ -757,53 +790,45 @@
         p.t += p.speed;
         const pos = getCurvePoint(p0, p1, Math.min(1, p.t));
 
-        // Save trail (adaptive length to maintain 60 FPS)
+        // Adaptive trail
         p.trail.unshift({ x: pos.x, y: pos.y });
-        const maxTrail = particles.length > 50 ? 4 : 7;
-        if (p.trail.length > maxTrail) p.trail.pop();
+        if (p.trail.length > 5) p.trail.pop();
 
-        // Draw trail
+        // Draw streamlined trail
         for (let j = 0; j < p.trail.length; j++) {
           const pt = p.trail[j];
-          const alpha = (1 - j / p.trail.length) * 0.45;
+          const alpha = (1 - j / p.trail.length) * 0.5;
           ctx.beginPath();
-          ctx.arc(pt.x, pt.y, Math.max(1, 3.2 - j * 0.4), 0, Math.PI * 2);
+          ctx.arc(pt.x, pt.y, Math.max(1, 2.2 - j * 0.3), 0, Math.PI * 2);
           ctx.fillStyle = p.color;
           ctx.globalAlpha = alpha;
           ctx.fill();
         }
         ctx.globalAlpha = 1.0;
 
-        // Draw head (apply expensive shadowBlur only to audience or under low density)
-        ctx.save();
+        // Draw particle head
         ctx.beginPath();
-        ctx.arc(pos.x, pos.y, p.isAudience ? 5.5 : 3.5, 0, Math.PI * 2);
+        ctx.arc(pos.x, pos.y, p.isAudience ? 3.5 : 2.5, 0, Math.PI * 2);
         ctx.fillStyle = p.color;
-        if (p.isAudience || particles.length < 35) {
-          ctx.shadowColor = p.color;
-          ctx.shadowBlur = p.isAudience ? 18 : 8;
-        }
         ctx.fill();
 
-        // Audience floating name pill
+        // Audience floating label
         if (p.isAudience && p.label) {
-          ctx.font = 'bold 9px "Vazirmatn", sans-serif';
+          ctx.font = '500 9px "JetBrains Mono", sans-serif';
           ctx.fillStyle = '#F59E0B';
           ctx.textAlign = 'center';
-          ctx.fillText(`⚡ ${p.label}`, pos.x, pos.y - 10);
+          ctx.fillText(p.label, pos.x, pos.y - 8);
         }
-        ctx.restore();
 
         // Advance segment
         if (p.t >= 1) {
           p.t = 0;
           p.segmentIndex++;
 
-          // If reached destination or blocked
           if (p.segmentIndex >= p.segments.length) {
             if (p.trace.outcome === 'waf_blocked') {
               const dest = getNodeCoords('gateway');
-              addShockwave(dest.x, dest.y, '#F43F5E');
+              addShockwave(dest.x, dest.y, '#EF4444');
             }
             particles.splice(i, 1);
           }
@@ -814,7 +839,7 @@
     }
     requestAnimationFrame(render);
 
-    // Click on Canvas to Inspect Node
+    // Canvas Click Inspection
     canvas.addEventListener('click', (e) => {
       const rect = canvas.getBoundingClientRect();
       const clickX = e.clientX - rect.left;
@@ -823,7 +848,7 @@
       for (const key of Object.keys(nodes)) {
         const { x, y } = getNodeCoords(key);
         const dist = Math.hypot(clickX - x, clickY - y);
-        if (dist <= 30) {
+        if (dist <= 24) {
           inspectNodeState(key);
           return;
         }
@@ -838,12 +863,12 @@
         sub: node.sub,
         active: node.active,
         timestamp: new Date().toISOString(),
-        description: `وضعیت نود ${node.label} در کلاستر سورن`
+        engine: "Bun Kernel v1.4.2"
       };
-      displayJsonInspect(`node_${nodeKey}`, data);
+      displayJsonInspect(`NODE:${nodeKey.toUpperCase()}`, data);
     }
 
-    // --- WebSocket Telemetry Receiver ---
+    // --- WebSocket Telemetry Stream ---
     let ws;
     function connectWs() {
       const proto = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
@@ -851,7 +876,7 @@
 
       ws.onopen = () => {
         ws.send(JSON.stringify({ action: "subscribe_dashboard" }));
-        console.log("[HUD] Attached to telemetry stream");
+        console.log("[RUNTIME LOG] Attached to live telemetry socket");
       };
 
       ws.onmessage = (event) => {
@@ -871,6 +896,16 @@
 
     let lastSelectedTrace = null;
 
+    function escapeHtml(str) {
+      if (!str) return '';
+      return String(str)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#39;');
+    }
+
     function handleWsEvent(msg) {
       if (msg.event === 'telemetry:heartbeat') {
         updateHeartbeat(msg.data);
@@ -886,10 +921,10 @@
         AudioEngine.play('audience');
         const term = document.getElementById('terminal-stream');
         const row = document.createElement('div');
-        row.className = 'flex items-center justify-between text-brand-gold bg-brand-amber/15 px-2.5 py-1.5 rounded-lg border border-brand-amber/40 font-bold';
+        row.className = 'flex items-center justify-between text-signal-amber bg-amber-500/10 px-2 py-1 rounded hairline-border font-mono text-[11px]';
         row.innerHTML = `
-          <span>🎉 [AUDIENCE DEVICE CONNECTED] ${msg.data.clientName}</span>
-          <span class="text-[10px] font-mono text-brand-gold">ID: ${msg.data.clientId}</span>
+          <span>[DEVICE CONNECTED] ${escapeHtml(msg.data.clientName)}</span>
+          <span class="text-[10px] text-zinc-400">ID: ${escapeHtml(msg.data.clientId)}</span>
         `;
         term.prepend(row);
         const clientCoords = getNodeCoords('client');
@@ -900,7 +935,6 @@
     function updateHeartbeat(data) {
       document.getElementById('stat-rps').innerText = (data.rps || 0).toLocaleString();
       document.getElementById('stat-ws').innerText = `${data.activeWsClients} Device(s)`;
-
       if (data.cluster) {
         updateClusterState(data.cluster);
       }
@@ -911,35 +945,33 @@
       nodes.worker_2.active = state.worker2;
       nodes.cache.active = state.cacheEnabled;
 
-      // Update Kill Worker 1 Button State
-      const btnKill = document.getElementById('btn-kill-worker');
-      const badgeKill = document.getElementById('btn-kill-badge');
+      // Update Kill Worker 1 State
+      const dotKill = document.getElementById('btn-kill-dot');
       const textKill = document.getElementById('btn-kill-text');
 
       if (!state.worker1) {
-        badgeKill.innerText = 'OFFLINE';
-        badgeKill.className = 'px-1.5 py-0.5 rounded text-[9px] font-mono bg-telemetry-rose/20 text-telemetry-rose border border-telemetry-rose/40 animate-pulse';
-        textKill.innerText = 'بازیابی سلامت Worker-1';
+        dotKill.className = 'w-1.5 h-1.5 rounded-full bg-signal-rose';
+        textKill.innerText = 'Worker-1 [RECOVER]';
       } else {
-        badgeKill.innerText = 'ONLINE';
-        badgeKill.className = 'px-1.5 py-0.5 rounded text-[9px] font-mono bg-telemetry-emerald/10 text-telemetry-emerald border border-telemetry-emerald/20';
-        textKill.innerText = 'از دسترس خارج کردن Worker-1';
+        dotKill.className = 'w-1.5 h-1.5 rounded-full bg-signal-emerald';
+        textKill.innerText = 'Worker-1 [KILL]';
       }
 
-      // Update Cache Button State
-      const badgeCache = document.getElementById('btn-cache-badge');
+      // Update Cache State
+      const dotCache = document.getElementById('btn-cache-dot');
+      const textCache = document.getElementById('btn-cache-text');
       const statCache = document.getElementById('stat-cache-badge');
+
       if (state.cacheEnabled) {
-        badgeCache.innerText = 'ACTIVE';
-        badgeCache.className = 'px-1.5 py-0.5 rounded text-[9px] font-mono bg-telemetry-emerald/10 text-telemetry-emerald border border-telemetry-emerald/20';
-        statCache.innerHTML = '<span class="w-1.5 h-1.5 rounded-full bg-telemetry-emerald"></span> ACTIVE';
+        dotCache.className = 'w-1.5 h-1.5 rounded-full bg-signal-emerald';
+        textCache.innerText = 'L1 Cache [BYPASS]';
+        statCache.innerHTML = '<span class="w-1.5 h-1.5 rounded-full bg-signal-emerald"></span> L1 ONLINE';
       } else {
-        badgeCache.innerText = 'BYPASSED';
-        badgeCache.className = 'px-1.5 py-0.5 rounded text-[9px] font-mono bg-telemetry-amber/20 text-telemetry-amber border border-telemetry-amber/40';
-        statCache.innerHTML = '<span class="w-1.5 h-1.5 rounded-full bg-telemetry-amber"></span> BYPASSED';
+        dotCache.className = 'w-1.5 h-1.5 rounded-full bg-signal-amber';
+        textCache.innerText = 'L1 Cache [ENABLE]';
+        statCache.innerHTML = '<span class="w-1.5 h-1.5 rounded-full bg-signal-amber"></span> BYPASSED';
       }
 
-      // p95 latency
       if (state.p95LatencyUs !== undefined) {
         document.getElementById('stat-p95').innerText = `${state.p95LatencyUs.toLocaleString()} µs`;
       }
@@ -961,7 +993,7 @@
         spawnParticleFromTrace(traces[i]);
       }
 
-      // Add to terminal stream with a max of 3 items per batch to prevent DOM layout thrashing
+      // Append up to 3 items per batch to preserve DOM performance
       const terminalLimit = Math.min(traces.length, 3);
       for (let i = 0; i < terminalLimit; i++) {
         appendTerminalRow(traces[i]);
@@ -970,69 +1002,107 @@
 
     function handleClusterAlert(data) {
       AudioEngine.play('kill_server');
-      const bar = document.getElementById('failover-alert-bar');
       const dot = document.getElementById('failover-dot');
       const msg = document.getElementById('failover-message');
 
       if (data.type === 'NODE_KILLED') {
-        dot.className = 'w-2 h-2 rounded-full bg-telemetry-rose animate-ping';
-        msg.innerHTML = `<strong class="text-telemetry-rose">هشدار کلاستر:</strong> نود ${data.node} قطع شد! ترافیک آنی به ${data.survivingNode} هدایت شد.`;
-        container.classList.add('node-shake');
-        setTimeout(() => container.classList.remove('node-shake'), 600);
+        dot.className = 'w-1.5 h-1.5 rounded-full bg-signal-rose';
+        msg.innerHTML = `<span class="text-signal-rose font-semibold">CLUSTER FAILOVER:</span> Node ${escapeHtml(data.node)} offline. Traffic rerouted to ${escapeHtml(data.survivingNode)}.`;
       } else {
-        dot.className = 'w-2 h-2 rounded-full bg-telemetry-emerald';
-        msg.innerHTML = `<strong class="text-telemetry-emerald">بازیابی:</strong> نود ${data.node} مجدداً آنلاین شد.`;
+        dot.className = 'w-1.5 h-1.5 rounded-full bg-signal-emerald';
+        msg.innerHTML = `<span class="text-signal-emerald font-semibold">RECOVERY:</span> Node ${escapeHtml(data.node)} restored. Cluster balanced.`;
       }
-      document.getElementById('failover-time').innerText = new Date().toLocaleTimeString('fa-IR');
+      document.getElementById('failover-time').innerText = new Date().toLocaleTimeString('en-US', { hour12: false });
     }
 
     function handleThreatAlert(data) {
       AudioEngine.play('waf_blocked');
       const term = document.getElementById('terminal-stream');
       const row = document.createElement('div');
-      row.className = 'flex items-center justify-between text-telemetry-rose bg-telemetry-rose/10 px-2.5 py-1 rounded border border-telemetry-rose/30 font-bold';
+      row.className = 'flex items-center justify-between text-signal-rose bg-red-500/10 px-2 py-1 rounded hairline-border font-mono text-[11px]';
       row.innerHTML = `
-        <span>[WAF SHIELD] ${data.type} • Origin: ${data.originIp}</span>
-        <span>${data.reason}</span>
+        <span>[WAF SHIELD MITIGATION] ${escapeHtml(data.type)} • Origin: ${escapeHtml(data.originIp)}</span>
+        <span>${escapeHtml(data.reason)}</span>
       `;
       term.prepend(row);
     }
 
-    // Terminal Stream Logger
+    // --- Live Runtime Execution Log Stream & Metrics Ledger ---
     function appendTerminalRow(trace) {
       const term = document.getElementById('terminal-stream');
       const row = document.createElement('div');
-      row.className = 'flex items-center justify-between text-slate-300 hover:bg-surface-raised/70 p-1 rounded cursor-pointer transition-colors';
+      row.className = 'flex items-center justify-between py-1.5 px-2 rounded hover:bg-white/[0.04] cursor-pointer transition-colors text-zinc-300 font-mono text-xs';
       row.onclick = () => displayJsonInspect(trace.id, trace);
 
-      const time = new Date(trace.timestamp).toLocaleTimeString('fa-IR');
-      let outcomeBadge = '<span class="text-telemetry-cyan font-bold">[DB]</span>';
-      if (trace.outcome === 'cache_hit') outcomeBadge = '<span class="text-telemetry-emerald font-bold">[CACHE]</span>';
-      if (trace.outcome === 'waf_blocked') outcomeBadge = '<span class="text-telemetry-rose font-bold">[WAF]</span>';
+      const time = new Date(trace.timestamp).toLocaleTimeString('en-US', { hour12: false });
+      
+      let outcomeBadge = '<span class="text-signal-cyan font-medium text-[10px]">[DB]</span>';
+      if (trace.outcome === 'cache_hit') outcomeBadge = '<span class="text-signal-emerald font-medium text-[10px]">[CACHE]</span>';
+      if (trace.outcome === 'waf_blocked') outcomeBadge = '<span class="text-signal-rose font-medium text-[10px]">[WAF]</span>';
 
-      const audienceTag = trace.isAudience ? `<span class="text-brand-amber font-semibold">⚡ ${trace.clientLabel}</span>` : `<span class="text-slate-400">${trace.clientLabel}</span>`;
+      const durationUs = trace.totalDurationUs || 0;
+      let durationClass = "text-zinc-200";
+      if (durationUs > 2000) durationClass = "text-signal-amber";
+      if (trace.outcome === 'waf_blocked') durationClass = "text-signal-rose";
+
+      const audienceTag = trace.isAudience 
+        ? `<span class="text-signal-amber font-medium flex items-center gap-1"><span class="w-1.5 h-1.5 rounded-full bg-signal-amber inline-block"></span>${escapeHtml(trace.clientLabel)}</span>` 
+        : `<span class="text-zinc-400">${escapeHtml(trace.clientLabel)}</span>`;
 
       row.innerHTML = `
         <div class="flex items-center gap-2">
-          <span class="text-slate-400 text-[10px]">${time}</span>
+          <span class="text-zinc-400 text-[10px] tabular-nums">${time}</span>
           ${outcomeBadge}
-          <span class="text-slate-200">${trace.id}</span>
-          <span>•</span>
+          <span class="text-zinc-300">${escapeHtml(trace.id)}</span>
+          <span class="text-zinc-400">•</span>
           ${audienceTag}
         </div>
-        <div class="flex items-center gap-3">
-          <span class="text-slate-400 truncate max-w-[140px] text-[10px]">${trace.endpoint}</span>
-          <span class="text-slate-200 font-bold tabular-nums text-[11px]">${trace.totalDurationUs} µs</span>
+        <div class="flex items-center gap-4">
+          <span class="text-zinc-400 truncate max-w-[150px] text-[11px]">${escapeHtml(trace.endpoint)}</span>
+          <span class="${durationClass} font-semibold tabular-nums text-[11px]">${durationUs.toLocaleString()} µs</span>
         </div>
       `;
 
       term.prepend(row);
-      while (term.children.length > 40) {
+      while (term.children.length > 50) {
         term.removeChild(term.lastChild);
+      }
+
+      // Update Runtime Stats Ledger
+      updateRuntimeLedger(durationUs);
+    }
+
+    const sparklineHistory = [];
+    function updateRuntimeLedger(durationUs) {
+      if (durationUs > 0) {
+        runtimeStats.count++;
+        runtimeStats.sum += durationUs;
+        if (durationUs < runtimeStats.min) runtimeStats.min = durationUs;
+        if (durationUs > runtimeStats.max) runtimeStats.max = durationUs;
+
+        document.getElementById('runtime-last-duration').innerText = `${durationUs.toLocaleString()} µs`;
+        document.getElementById('runtime-min-duration').innerText = `${runtimeStats.min.toLocaleString()} µs`;
+        document.getElementById('runtime-avg-duration').innerText = `${Math.round(runtimeStats.sum / runtimeStats.count).toLocaleString()} µs`;
+        document.getElementById('runtime-max-duration').innerText = `${runtimeStats.max.toLocaleString()} µs`;
+        document.getElementById('runtime-total-events').innerText = runtimeStats.count.toLocaleString();
+
+        sparklineHistory.push(durationUs);
+        if (sparklineHistory.length > 20) sparklineHistory.shift();
+
+        const maxVal = Math.max(...sparklineHistory, 1);
+        const minVal = Math.min(...sparklineHistory);
+        const range = (maxVal - minVal) || 1;
+        const pts = sparklineHistory.map((val, idx) => {
+          const x = (idx / Math.max(sparklineHistory.length - 1, 1)) * 80;
+          const y = 14 - ((val - minVal) / range) * 12;
+          return `${x.toFixed(1)},${y.toFixed(1)}`;
+        }).join(" ");
+        const poly = document.getElementById('runtime-sparkline-poly');
+        if (poly && pts) poly.setAttribute('points', pts);
       }
     }
 
-    // JSON Inspector Viewer
+    // JSON Trace Inspector
     function displayJsonInspect(id, json) {
       lastSelectedTrace = json;
       document.getElementById('inspect-trace-id').innerText = '#' + id;
@@ -1042,13 +1112,10 @@
     function copyCurrentTrace() {
       if (lastSelectedTrace) {
         navigator.clipboard.writeText(JSON.stringify(lastSelectedTrace, null, 2));
-        alert('امضای تریس در کلیپ‌بورد کپی شد.');
       }
     }
 
-    // --- Interactive Stage Controls API Calls ---
-
-    // 1. Kill/Restore Worker 1
+    // --- Interactive Stage Scenario APIs ---
     async function toggleWorker1() {
       const isAlive = nodes.worker_1.active;
       const endpoint = isAlive ? '/api/v1/cluster/worker/kill?worker=worker_1' : '/api/v1/cluster/worker/restore?worker=worker_1';
@@ -1056,41 +1123,40 @@
         const res = await fetch(endpoint, { method: 'POST' });
         const data = await res.json();
         updateClusterState(data.state);
+        console.log(`[STAGE RUNTIME] Worker-1 state toggled:`, data);
       } catch (e) {
         console.error(e);
       }
     }
 
-    // 2. Toggle L1 Cache
     async function toggleCacheMode() {
       try {
         const res = await fetch('/api/v1/cluster/cache/toggle', { method: 'POST' });
         const data = await res.json();
         nodes.cache.active = data.cacheEnabled;
+        console.log(`[STAGE RUNTIME] Cache mode toggled:`, data);
       } catch (e) {
         console.error(e);
       }
     }
 
-    // 3. Fire Simulated Attack
     async function fireSimulatedAttack() {
       try {
-        console.log("[HUD] Firing Simulated SQL Injection Attack...");
-        const targetUrl = `/api/v1/products?sqli=1&filter=${encodeURIComponent("' OR 1=1--")}&audience=${encodeURIComponent('نفوذگر SQLi (Stage Demo)')}`;
+        console.log("[STAGE RUNTIME] Injecting simulated SQLi...");
+        const targetUrl = `/api/v1/products?sqli=1&filter=${encodeURIComponent("' OR 1=1--")}&audience=${encodeURIComponent('SQLi_Test_Probe')}`;
         const res = await fetch(targetUrl);
         const data = await res.json();
-        console.log("[HUD] SQLi Response:", res.status, data);
+        console.log("[STAGE RUNTIME] SQLi Response:", res.status, data);
       } catch (e) {
-        console.error("[HUD] SQLi Error:", e);
+        console.error(e);
       }
     }
 
-    // 4. Traffic Burst (50 requests - below read rate limit)
     async function fireTrafficBurst() {
       for (let i = 0; i < 50; i++) {
         fetch(`/api/v1/products?burst=${i+1}`, {
           headers: {
-            'X-Audience-Name': `BurstWorker #${(i % 5) + 1}`,
+            'X-Audience-Name': `BurstWorker_${(i % 5) + 1}`,
             'X-Burst-Index': String(i + 1)
           }
         }).catch(() => {});
@@ -1098,36 +1164,29 @@
       }
     }
 
-    // 5. Rate-Limit Flood Attack (15 rapid orders from external IP to trigger HTTP 429 Shield)
     async function fireRateLimitFlood() {
-      console.log("[HUD] Launching rapid order flood to test 429 Shield...");
       const simulatedIp = "198.51.100.88";
       for (let i = 0; i < 15; i++) {
-        const orderUrl = `/api/v1/orders?simulate_ip=${simulatedIp}&audience=${encodeURIComponent('اسپمر ربات #' + (i + 1))}`;
+        const orderUrl = `/api/v1/orders?simulate_ip=${simulatedIp}&audience=${encodeURIComponent('FloodBot_' + (i + 1))}`;
         fetch(orderUrl, {
           method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
+          headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
-            tableNumber: 'میز ۹۹ (اسپم)',
-            customerName: `اسپمر #${i + 1}`,
+            tableNumber: 'Table 99 (Flood)',
+            customerName: `Bot_${i + 1}`,
             items: [{ productId: 'prd_doppio', quantity: 1 }],
           }),
         }).then(res => {
           if (res.status === 429) {
-            console.log(`[HUD] Shield Active: Order #${i + 1} blocked with HTTP 429`);
+            console.log(`[STAGE RUNTIME] 429 Shield Blocked order #${i + 1}`);
           }
-        }).catch(err => {
-          console.error("[HUD] Flood Error:", err);
-        });
+        }).catch(() => {});
         if (i % 5 === 0) await new Promise(r => setTimeout(r, 10));
       }
     }
 
-    // --- Dynamic QR Code Generator with Auto LAN IP & Custom URL ---
+    // --- QR Code Generator ---
     let qrInstance = null;
-
     function renderQr(targetUrl) {
       document.getElementById('qr-url-text').innerText = targetUrl;
       document.getElementById('custom-qr-input').value = targetUrl;
@@ -1138,7 +1197,7 @@
         text: targetUrl,
         width: 130,
         height: 130,
-        colorDark: "#07090E",
+        colorDark: "#090A0D",
         colorLight: "#FFFFFF",
         correctLevel: QRCode.CorrectLevel.M
       });
@@ -1156,7 +1215,6 @@
       const port = window.location.port || '4000';
       let joinUrl = `http://${host}:${port}/join`;
 
-      // If opened on localhost / 127.0.0.1, ask server for actual LAN IP so phones on WiFi can open it!
       if (host === 'localhost' || host === '127.0.0.1') {
         try {
           const res = await fetch('/api/v1/health');

@@ -4,205 +4,282 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>Soren Live Ingress — ترمینال تعاملی حضار</title>
+  
+  <!-- Tailwind CSS & Web Fonts -->
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;700;800&family=JetBrains+Mono:wght@500;700&family=Vazirmatn:wght@400;600;700;900&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&family=Vazirmatn:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  
   <script>
     tailwind.config = {
       darkMode: 'class',
       theme: {
         extend: {
           colors: {
-            obsidian: '#07090E',
+            canvas: '#090A0D',
             surface: {
-              DEFAULT: '#0D1117',
-              raised: '#131822',
-              border: '#1E2638'
+              DEFAULT: '#0E1015',
+              subtle: '#13161D',
+              border: 'rgba(255, 255, 255, 0.08)',
+              hover: 'rgba(255, 255, 255, 0.04)'
             },
-            brand: {
-              espresso: '#8C5E3C',
-              amber: '#C99752',
-              gold: '#E5A955'
-            },
-            telemetry: {
+            signal: {
               emerald: '#10B981',
               cyan: '#06B6D4',
-              rose: '#F43F5E',
-              amber: '#F59E0B'
+              rose: '#EF4444',
+              amber: '#F59E0B',
+              silver: '#A1A1AA'
             }
           },
           fontFamily: {
-            sans: ['Vazirmatn', 'sans-serif'],
+            sans: ['Vazirmatn', '"Plus Jakarta Sans"', 'sans-serif'],
             mono: ['"JetBrains Mono"', 'monospace']
           }
         }
       }
     }
   </script>
+
   <style>
     body {
-      background-color: #07090E;
-      color: #E2E8F0;
+      background-color: #090A0D;
+      color: #E4E4E7;
+      font-feature-settings: "cv02", "cv03", "cv04", "cv11";
       -webkit-tap-highlight-color: transparent;
     }
-    .pulse-ring {
-      box-shadow: 0 0 0 0 rgba(201, 151, 82, 0.7);
-      animation: pulse 2s infinite cubic-bezier(0.66, 0, 0, 1);
+    .grid-pattern {
+      background-size: 28px 28px;
+      background-image: 
+        linear-gradient(to right, rgba(255, 255, 255, 0.015) 1px, transparent 1px),
+        linear-gradient(to bottom, rgba(255, 255, 255, 0.015) 1px, transparent 1px);
     }
-    @keyframes pulse {
-      to {
-        box-shadow: 0 0 0 16px rgba(201, 151, 82, 0);
-      }
+    .hairline-border {
+      border: 1px solid rgba(255, 255, 255, 0.08);
+    }
+    .hairline-bottom {
+      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    }
+    .tabular-nums {
+      font-variant-numeric: tabular-nums;
+    }
+    @keyframes pulse-subtle {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50% { opacity: 0.35; transform: scale(0.96); }
+    }
+    .pulse-subtle {
+      animation: pulse-subtle 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
     }
   </style>
 </head>
-<body class="min-h-screen flex flex-col justify-between p-4 max-w-md mx-auto selection:bg-brand-amber/30 selection:text-brand-gold">
+<body class="min-h-screen grid-pattern antialiased text-zinc-300 flex flex-col justify-between p-4 max-w-md mx-auto selection:bg-white/10 selection:text-white">
 
-  <!-- Header -->
-  <header class="text-center pt-3 pb-4 border-b border-surface-border">
-    <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-surface-raised border border-surface-border mb-2.5">
-      <span class="w-2 h-2 rounded-full bg-telemetry-emerald animate-ping"></span>
-      <span class="text-[11px] font-mono text-telemetry-emerald tracking-wide">LIVE INGRESS GATEWAY</span>
+  <!-- ================= MINIMAL HEADER ================= -->
+  <header class="text-center pt-2 pb-4 hairline-bottom">
+    <div class="inline-flex items-center gap-2 px-2.5 py-1 rounded-full bg-white/[0.03] hairline-border mb-3">
+      <span class="w-1.5 h-1.5 rounded-full bg-signal-emerald pulse-subtle"></span>
+      <span class="text-[10px] font-mono tracking-wider text-zinc-300 uppercase">Live Ingress Terminal</span>
+      <span class="text-zinc-600">•</span>
+      <span class="text-[10px] font-mono text-zinc-400" id="ws-status-text">Connecting...</span>
     </div>
-    <h1 class="text-2xl font-black text-slate-100 tracking-tight flex items-center justify-center gap-2">
-      <span>☕ کافه سورن</span>
-      <span class="text-brand-amber text-xs font-mono font-normal px-2 py-0.5 rounded bg-brand-amber/10 border border-brand-amber/20">Audience Node</span>
-    </h1>
-    <p class="text-xs text-slate-400 mt-1">تپ کنید تا بسته واقعی شما روی مانیتور پرواز کند!</p>
+
+    <div class="flex items-center justify-center gap-2">
+      <h1 class="text-lg font-bold tracking-tight text-white flex items-center gap-2">
+        <span>کافه سورن</span>
+        <span class="text-[10px] font-mono font-normal px-2 py-0.5 rounded bg-white/[0.04] hairline-border text-zinc-400">Audience Node</span>
+      </h1>
+    </div>
+    <p class="text-xs text-zinc-400 mt-1">تپ کنید تا بسته واقعی درخواست شما روی مانیتور سالن پرواز کند</p>
   </header>
 
-  <!-- Main Interaction Card -->
-  <main class="space-y-4 my-auto py-4">
+  <!-- ================= INTERACTIVE BODY ================= -->
+  <main class="space-y-4 my-auto py-4 w-full">
 
     <!-- Nickname Input Card -->
-    <div class="bg-surface rounded-2xl border border-surface-border p-4 shadow-xl">
-      <label class="block text-xs font-semibold text-slate-300 mb-1.5 flex items-center justify-between">
-        <span>نام یا شناسه شما در سالن:</span>
-        <span class="text-[10px] text-brand-amber font-mono" id="client-id-badge">ID: Initializing...</span>
-      </label>
-      <div class="relative">
-        <input 
-          id="user-name" 
-          type="text" 
-          maxlength="20"
-          placeholder="مثلاً: علی (ردیف ۳)" 
-          class="w-full bg-surface-raised border border-surface-border rounded-xl px-3.5 py-2.5 text-sm text-slate-100 placeholder-slate-400 focus:outline-none focus:border-brand-amber font-medium"
-        />
+    <div class="bg-surface rounded-xl hairline-border p-3.5 space-y-2">
+      <div class="flex items-center justify-between text-xs font-mono">
+        <label for="user-name" class="text-zinc-300 font-medium">شناسه یا نام شما در سالن:</label>
+        <span class="text-[10px] text-zinc-400" id="client-id-badge">ID: ...</span>
       </div>
+      <input 
+        id="user-name" 
+        type="text" 
+        maxlength="20"
+        placeholder="مثلاً: علی (میز ۳)" 
+        class="w-full bg-[#090A0D] hairline-border rounded-lg px-3 py-2.5 text-xs text-zinc-100 placeholder-zinc-500 font-sans focus:outline-none focus:border-white/30 transition-colors"
+      />
     </div>
 
-    <!-- Action Triggers -->
-    <div class="space-y-3">
+    <!-- Live Interaction Buttons -->
+    <div class="space-y-2.5">
       
-      <!-- Action 1: Golden Ping Burst -->
+      <!-- 1. Burst Ping (Golden Stream) -->
       <button 
         onclick="triggerPingBurst()"
         id="btn-ping"
-        class="w-full p-4 rounded-2xl bg-gradient-to-r from-brand-espresso to-brand-amber hover:brightness-110 active:scale-[0.98] transition-all text-white font-bold flex items-center justify-between shadow-lg shadow-brand-amber/15 border border-brand-amber/40 pulse-ring"
+        class="w-full min-h-[54px] p-3 rounded-xl bg-white/[0.04] hover:bg-white/[0.08] active:scale-[0.98] hairline-border transition-all flex items-center justify-between group focus-visible:ring-1 focus-visible:ring-signal-amber"
       >
         <div class="flex items-center gap-3">
-          <div class="w-10 h-10 rounded-xl bg-white/10 flex items-center justify-center text-xl">
-            ⚡
+          <div class="w-8 h-8 rounded-lg bg-amber-500/10 hairline-border border-amber-500/20 flex items-center justify-center text-signal-amber">
+            <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon>
+            </svg>
           </div>
           <div class="text-right">
-            <div class="text-base font-black">شلیک پینگ اختصاصی (Burst)</div>
-            <div class="text-[11px] text-amber-100/80 font-normal">ارسال ۳ بسته طلایی نورانی به سوی سرور</div>
+            <div class="text-xs font-semibold text-zinc-100 flex items-center gap-1.5">
+              <span>شلیک پینگ اختصاصی</span>
+              <span class="w-1.5 h-1.5 rounded-full bg-signal-amber"></span>
+            </div>
+            <div class="text-[11px] text-zinc-400">ارسال ۳ بسته نوری طلایی به مانیتور</div>
           </div>
         </div>
-        <span class="text-xs font-mono bg-black/30 px-2.5 py-1 rounded-lg">PING × 3</span>
+        <span class="text-[10px] font-mono text-zinc-400 bg-white/[0.03] px-2 py-1 rounded hairline-border">BURST × 3</span>
       </button>
 
-      <!-- Action 2: Place Real Order (DB Write) -->
+      <!-- 2. Real Order (Atomic SQLite WAL DB Write) -->
       <button 
         onclick="triggerOrder()"
         id="btn-order"
-        class="w-full p-3.5 rounded-2xl bg-surface-raised hover:bg-surface border border-surface-border active:scale-[0.98] transition-all text-slate-100 font-semibold flex items-center justify-between shadow-md"
+        class="w-full min-h-[54px] p-3 rounded-xl bg-white/[0.04] hover:bg-white/[0.08] active:scale-[0.98] hairline-border transition-all flex items-center justify-between group focus-visible:ring-1 focus-visible:ring-signal-cyan"
       >
         <div class="flex items-center gap-3">
-          <div class="w-9 h-9 rounded-xl bg-telemetry-cyan/10 border border-telemetry-cyan/20 flex items-center justify-center text-lg text-telemetry-cyan">
-            ☕
+          <div class="w-8 h-8 rounded-lg bg-cyan-500/10 hairline-border border-cyan-500/20 flex items-center justify-center text-signal-cyan">
+            <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M18 8h1a4 4 0 0 1 0 8h-1"></path>
+              <path d="M2 8h16v9a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4V8z"></path>
+              <line x1="6" y1="1" x2="6" y2="4"></line>
+              <line x1="10" y1="1" x2="10" y2="4"></line>
+              <line x1="14" y1="1" x2="14" y2="4"></line>
+            </svg>
           </div>
           <div class="text-right">
-            <div class="text-sm font-bold text-slate-100">سفارش اسپرسو دوپیو</div>
-            <div class="text-[11px] text-slate-400">تراکنش اتمیک و نقطه آبی در دیتابیس SQLite WAL</div>
+            <div class="text-xs font-semibold text-zinc-100 flex items-center gap-1.5">
+              <span>سفارش اسپرسو دوپیو</span>
+              <span class="w-1.5 h-1.5 rounded-full bg-signal-cyan"></span>
+            </div>
+            <div class="text-[11px] text-zinc-400">تراکنش واقعی دیتابیس (نقطه آبی SQLite WAL)</div>
           </div>
         </div>
-        <span class="text-[10px] font-mono text-telemetry-cyan bg-telemetry-cyan/10 border border-telemetry-cyan/20 px-2 py-1 rounded">DB WRITE</span>
+        <span class="text-[10px] font-mono text-signal-cyan bg-cyan-500/10 px-2 py-1 rounded border border-cyan-500/20">DB WRITE</span>
       </button>
 
-      <!-- Action 3: Fast Cache Hit (Green Dot) -->
+      <!-- 3. L1 Cache Hit (Sub-ms Green Dot) -->
       <button 
         onclick="triggerCacheHit()"
         id="btn-cache"
-        class="w-full p-3.5 rounded-2xl bg-surface-raised hover:bg-surface border border-surface-border active:scale-[0.98] transition-all text-slate-100 font-semibold flex items-center justify-between shadow-md"
+        class="w-full min-h-[54px] p-3 rounded-xl bg-white/[0.04] hover:bg-white/[0.08] active:scale-[0.98] hairline-border transition-all flex items-center justify-between group focus-visible:ring-1 focus-visible:ring-signal-emerald"
       >
         <div class="flex items-center gap-3">
-          <div class="w-9 h-9 rounded-xl bg-telemetry-emerald/10 border border-telemetry-emerald/20 flex items-center justify-center text-lg text-telemetry-emerald">
-            💾
+          <div class="w-8 h-8 rounded-lg bg-emerald-500/10 hairline-border border-emerald-500/20 flex items-center justify-center text-signal-emerald">
+            <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <rect x="2" y="2" width="20" height="8" rx="2" ry="2"></rect>
+              <rect x="2" y="14" width="20" height="8" rx="2" ry="2"></rect>
+              <line x1="6" y1="6" x2="6.01" y2="6"></line>
+              <line x1="6" y1="18" x2="6.01" y2="18"></line>
+            </svg>
           </div>
           <div class="text-right">
-            <div class="text-sm font-bold text-slate-100">دریافت کاتالوگ کش‌شده</div>
-            <div class="text-[11px] text-slate-400">پاسخ در کمتر از ۱ میلی‌ثانیه از حافظه L1 (نقطه سبز)</div>
+            <div class="text-xs font-semibold text-zinc-100 flex items-center gap-1.5">
+              <span>دریافت کاتالوگ کش</span>
+              <span class="w-1.5 h-1.5 rounded-full bg-signal-emerald"></span>
+            </div>
+            <div class="text-[11px] text-zinc-400">پاسخ میکروثانیه‌ای از رم L1 (نقطه سبز)</div>
           </div>
         </div>
-        <span class="text-[10px] font-mono text-telemetry-emerald bg-telemetry-emerald/10 border border-telemetry-emerald/20 px-2 py-1 rounded">CACHE HIT</span>
+        <span class="text-[10px] font-mono text-signal-emerald bg-emerald-500/10 px-2 py-1 rounded border border-emerald-500/20">CACHE HIT</span>
       </button>
 
-      <!-- Action 4: WAF Penetration Simulation (Red Shield) -->
+      <!-- 4. WAF Interception Test (Red Dot) -->
       <button 
         onclick="triggerWafAttack()"
         id="btn-attack"
-        class="w-full p-3 rounded-2xl bg-surface-raised hover:bg-telemetry-rose/10 border border-telemetry-rose/30 active:scale-[0.98] transition-all text-slate-200 font-semibold flex items-center justify-between"
+        class="w-full min-h-[54px] p-3 rounded-xl bg-red-500/[0.03] hover:bg-red-500/[0.08] active:scale-[0.98] border border-red-500/20 transition-all flex items-center justify-between group focus-visible:ring-1 focus-visible:ring-signal-rose"
       >
         <div class="flex items-center gap-3">
-          <div class="w-8 h-8 rounded-xl bg-telemetry-rose/10 flex items-center justify-center text-base text-telemetry-rose">
-            🛡️
+          <div class="w-8 h-8 rounded-lg bg-red-500/10 hairline-border border-red-500/20 flex items-center justify-center text-signal-rose">
+            <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
+            </svg>
           </div>
           <div class="text-right">
-            <div class="text-xs font-bold text-telemetry-rose">تست نفوذ و فایروال (SQLi Token)</div>
-            <div class="text-[10px] text-slate-400">انفجار نقطه قرمز در WAF بدون ورود به دیتابیس</div>
+            <div class="text-xs font-semibold text-zinc-200 flex items-center gap-1.5">
+              <span>تست شیلد WAF امنیتی</span>
+              <span class="w-1.5 h-1.5 rounded-full bg-signal-rose"></span>
+            </div>
+            <div class="text-[11px] text-zinc-400">شلیک توکن SQLi و دفاع آنی فایروال (نقطه قرمز)</div>
           </div>
         </div>
-        <span class="text-[9px] font-mono text-telemetry-rose bg-telemetry-rose/10 border border-telemetry-rose/20 px-2 py-0.5 rounded">WAF SHIELD</span>
+        <span class="text-[10px] font-mono text-signal-rose bg-red-500/10 px-2 py-1 rounded border border-red-500/20">WAF TEST</span>
       </button>
 
     </div>
 
-    <!-- Live Telemetry Feedback on Phone -->
-    <div id="telemetry-card" class="bg-surface rounded-2xl border border-surface-border p-3.5 font-mono text-xs shadow-inner hidden">
-      <div class="flex items-center justify-between pb-2 border-b border-surface-border text-slate-400 text-[10px]">
-        <span>نتیجه آخرین تراکنش شما:</span>
-        <span id="res-badge" class="px-1.5 py-0.5 rounded font-bold">200 OK</span>
+    <!-- Live Execution Telemetry Receipt Card -->
+    <div id="telemetry-card" class="bg-surface rounded-xl hairline-border p-3.5 font-mono text-xs shadow-xl hidden transition-all">
+      <div class="flex items-center justify-between pb-2 hairline-bottom text-[11px]">
+        <span class="text-zinc-400">آخرین امضای تریس سالن:</span>
+        <span id="res-badge" class="px-2 py-0.5 rounded text-[10px] font-semibold bg-emerald-500/10 text-signal-emerald border border-emerald-500/20">200 OK</span>
       </div>
-      <div class="grid grid-cols-2 gap-2 mt-2 text-[11px]">
+
+      <div class="grid grid-cols-2 gap-2 pt-2.5 text-[11px] tabular-nums">
         <div>
-          <span class="text-slate-400 block text-[10px]">Worker Node:</span>
-          <span id="res-worker" class="text-brand-amber font-bold">Worker-1</span>
+          <span class="text-zinc-500 block text-[10px]">Worker Node:</span>
+          <span id="res-worker" class="text-zinc-200 font-semibold">Worker-1</span>
         </div>
         <div>
-          <span class="text-slate-400 block text-[10px]">Latency (میکروثانیه):</span>
-          <span id="res-latency" class="text-telemetry-emerald font-bold">142 µs</span>
+          <span class="text-zinc-500 block text-[10px]">Execution Latency:</span>
+          <span id="res-latency" class="text-signal-emerald font-bold">0 µs</span>
         </div>
         <div>
-          <span class="text-slate-400 block text-[10px]">Trace ID:</span>
-          <span id="res-trace" class="text-slate-300">#trc_...</span>
+          <span class="text-zinc-500 block text-[10px]">Trace ID:</span>
+          <span id="res-trace" class="text-zinc-400">#trc_...</span>
         </div>
         <div>
-          <span class="text-slate-400 block text-[10px]">Path:</span>
-          <span id="res-path" class="text-slate-300 truncate">/api/v1/orders</span>
+          <span class="text-zinc-500 block text-[10px]">Kernel Hop:</span>
+          <span id="res-path" class="text-zinc-400 truncate">/api/v1/...</span>
         </div>
       </div>
     </div>
 
   </main>
 
-  <!-- Footer -->
-  <footer class="text-center pt-3 border-t border-surface-border/60 text-[11px] text-slate-400 font-mono">
-    <span>Soren Café Runtime 1.4.2 • Bun + SQLite WAL</span>
+  <!-- ================= MINIMAL FOOTER ================= -->
+  <footer class="text-center pt-3 hairline-top text-[11px] text-zinc-500 font-mono flex items-center justify-between">
+    <span>Soren Café Runtime 1.4.2</span>
+    <span class="text-zinc-400">Bun Native • SQLite WAL</span>
   </footer>
 
+  <!-- ================= SCRIPT & WEBSOCKET ENGINE ================= -->
   <script>
+    // Audio Engine for Mobile Tactile Micro-Haptics
+    const AudioEngine = {
+      ctx: null,
+      init() {
+        if (!this.ctx) {
+          this.ctx = new (window.AudioContext || window.webkitAudioContext)();
+        }
+        if (this.ctx.state === 'suspended') {
+          this.ctx.resume();
+        }
+      },
+      play(freq = 1600, duration = 0.015, type = 'sine') {
+        try {
+          this.init();
+          const t = this.ctx.currentTime;
+          const osc = this.ctx.createOscillator();
+          const gain = this.ctx.createGain();
+          osc.type = type;
+          osc.frequency.setValueAtTime(freq, t);
+          gain.gain.setValueAtTime(0.04, t);
+          gain.gain.exponentialRampToValueAtTime(0.0001, t + duration);
+          osc.connect(gain);
+          gain.connect(this.ctx.destination);
+          osc.start(t);
+          osc.stop(t + duration);
+        } catch (e) {}
+      }
+    };
+
     // Client ID initialization
     let clientId = localStorage.getItem("soren_audience_id");
     if (!clientId) {
@@ -233,13 +310,15 @@
       return input || `حضار (${clientId.slice(-4)})`;
     }
 
-    // --- Live WebSocket Presence ---
+    // Live WebSocket connection
     let ws;
     function connectAudienceWs() {
       const proto = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
       ws = new WebSocket(`${proto}//${window.location.host}/ws`);
 
       ws.onopen = () => {
+        document.getElementById("ws-status-text").innerText = "Online";
+        document.getElementById("ws-status-text").className = "text-[10px] font-mono text-signal-emerald";
         ws.send(JSON.stringify({
           action: "audience_join",
           clientId,
@@ -248,146 +327,130 @@
       };
 
       ws.onclose = () => {
+        document.getElementById("ws-status-text").innerText = "Reconnecting...";
+        document.getElementById("ws-status-text").className = "text-[10px] font-mono text-signal-amber";
         setTimeout(connectAudienceWs, 2000);
       };
     }
     connectAudienceWs();
 
-    function haptic() {
-      if (navigator.vibrate) {
-        try {
-          navigator.vibrate([25, 30, 25]);
-        } catch {}
-      }
-    }
-
-    function showFeedback(data, isBlocked = false) {
+    function showTelemetryFeedback(data, statusText = "200 OK", isError = false) {
       const card = document.getElementById("telemetry-card");
       card.classList.remove("hidden");
 
       const badge = document.getElementById("res-badge");
-      if (isBlocked) {
-        badge.innerText = "403 BLOCKED";
-        badge.className = "px-1.5 py-0.5 rounded font-bold bg-telemetry-rose/20 text-telemetry-rose border border-telemetry-rose/30";
+      badge.innerText = statusText;
+      if (isError) {
+        badge.className = "px-2 py-0.5 rounded text-[10px] font-semibold bg-red-500/10 text-signal-rose border border-red-500/20";
       } else {
-        badge.innerText = (data.status || 200) + " OK";
-        badge.className = "px-1.5 py-0.5 rounded font-bold bg-telemetry-emerald/20 text-telemetry-emerald border border-telemetry-emerald/30";
+        badge.className = "px-2 py-0.5 rounded text-[10px] font-semibold bg-emerald-500/10 text-signal-emerald border border-emerald-500/20";
       }
 
-      document.getElementById("res-worker").innerText = data.workerNode ? data.workerNode.toUpperCase() : "WORKER-1";
-      document.getElementById("res-latency").innerText = (data.totalDurationUs || Math.round(Math.random()*200+100)) + " µs";
-      document.getElementById("res-trace").innerText = data.traceId ? "#" + data.traceId : "#trc_live";
-      document.getElementById("res-path").innerText = data.endpoint || "/api/v1/products";
+      document.getElementById("res-worker").innerText = data.worker || data.workerNode || "Worker-1";
+      document.getElementById("res-latency").innerText = `${(data.durationUs || data.totalDurationUs || 120).toLocaleString()} µs`;
+      document.getElementById("res-trace").innerText = data.traceId ? `#${data.traceId}` : `#trc_${Math.random().toString(36).substring(2, 7)}`;
+      document.getElementById("res-path").innerText = data.path || data.endpoint || "/api/v1/live";
     }
 
-    // 1. Burst of 3 Pings
+    // Action 1: Burst Ping
     async function triggerPingBurst() {
-      haptic();
+      AudioEngine.play(1800, 0.015);
       const name = getName();
-      const safeName = encodeURIComponent(name);
-
       for (let i = 0; i < 3; i++) {
-        fetch(`/api/v1/products?category=coffee&ping=${i+1}&audience=${safeName}`, {
+        fetch(`/api/v1/products?ping=${i + 1}&audience=${encodeURIComponent(name)}`, {
           headers: {
-            "X-Client-Id": clientId,
-            "X-Audience-Name": safeName,
-            "X-Burst-Index": String(i + 1)
+            'X-Client-Id': clientId,
+            'X-Audience-Name': name
           }
-        }).then(r => r.json()).then(data => {
-          showFeedback({
-            status: 200,
-            workerNode: "worker_1",
-            totalDurationUs: Math.round(Math.random() * 80 + 40),
-            endpoint: "/api/v1/products (Burst)",
-            traceId: "trc_" + Math.random().toString(36).substring(2, 6)
-          });
-        }).catch((err) => {
-          console.error("Ping error:", err);
-        });
-        await new Promise(r => setTimeout(r, 90));
+        }).then(async res => {
+          if (i === 2) {
+            showTelemetryFeedback({
+              worker: 'Worker-1',
+              durationUs: Math.floor(Math.random() * 80 + 70),
+              path: '/api/v1/products?ping=3'
+            }, "200 OK");
+          }
+        }).catch(() => {});
+        await new Promise(r => setTimeout(r, 60));
       }
     }
 
-    // 2. Real Order (DB Write)
+    // Action 2: Order Espresso (Real SQLite Transaction)
     async function triggerOrder() {
-      haptic();
+      AudioEngine.play(800, 0.02, 'triangle');
       const name = getName();
-      const safeName = encodeURIComponent(name);
       try {
-        const res = await fetch(`/api/v1/orders?audience=${safeName}`, {
-          method: "POST",
+        const res = await fetch('/api/v1/orders', {
+          method: 'POST',
           headers: {
-            "Content-Type": "application/json",
-            "X-Client-Id": clientId,
-            "X-Audience-Name": safeName
+            'Content-Type': 'application/json',
+            'X-Client-Id': clientId,
+            'X-Audience-Name': name
           },
           body: JSON.stringify({
-            tableNumber: "سالن ارائه",
+            tableNumber: 'میز اختصاصی سالن',
             customerName: name,
-            sessionToken: clientId,
-            items: [{ productId: "prd_doppio", quantity: 1 }]
+            items: [{ productId: 'prd_doppio', quantity: 1 }]
           })
         });
         const data = await res.json();
-        showFeedback({
-          status: res.status,
-          workerNode: data.workerNode || "worker_2",
-          totalDurationUs: data.telemetryMicroseconds || 450,
-          endpoint: "/api/v1/orders",
-          traceId: data.order?.id || "ord_live"
-        });
+        showTelemetryFeedback({
+          worker: 'Worker-1 (Epoll)',
+          durationUs: data.telemetry?.totalDurationUs || 280,
+          traceId: data.telemetry?.traceId || data.order?.id,
+          path: '/api/v1/orders [POST]'
+        }, res.ok ? "201 CREATED" : "ERROR", !res.ok);
       } catch (e) {
-        console.error("Order error:", e);
+        console.error(e);
       }
     }
 
-    // 3. Cache Hit
+    // Action 3: Cache Hit (L1 Memory Page)
     async function triggerCacheHit() {
-      haptic();
+      AudioEngine.play(2200, 0.012, 'sine');
       const name = getName();
-      const safeName = encodeURIComponent(name);
       const t0 = performance.now();
       try {
-        const res = await fetch(`/api/v1/products?audience=${safeName}`, {
+        const res = await fetch(`/api/v1/products?category=coffee&audience=${encodeURIComponent(name)}`, {
           headers: {
-            "X-Client-Id": clientId,
-            "X-Audience-Name": safeName
+            'X-Client-Id': clientId,
+            'X-Audience-Name': name
           }
         });
-        const durationUs = Math.round((performance.now() - t0) * 1000);
-        showFeedback({
-          status: 200,
-          workerNode: "worker_1",
-          totalDurationUs: durationUs,
-          endpoint: "/api/v1/products (L1 Cache)"
-        });
+        const elapsedUs = Math.round((performance.now() - t0) * 1000);
+        showTelemetryFeedback({
+          worker: 'L1 In-Memory Cache',
+          durationUs: elapsedUs,
+          path: '/api/v1/products?category=coffee'
+        }, "200 CACHE HIT");
       } catch (e) {
-        console.error("Cache hit error:", e);
+        console.error(e);
       }
     }
 
-    // 4. Simulated Attack
+    // Action 4: WAF Shield Attack Probe
     async function triggerWafAttack() {
-      haptic();
+      AudioEngine.play(320, 0.08, 'sawtooth');
       const name = getName();
-      const safeName = encodeURIComponent(name + " [ATTACKER]");
+      const t0 = performance.now();
       try {
-        const res = await fetch(`/api/v1/products?sqli=1&filter=' OR 1=1--&audience=${safeName}`, {
+        const res = await fetch(`/api/v1/products?sqli=1&filter=' OR 1=1--&audience=${encodeURIComponent(name)}`, {
           headers: {
-            "X-Client-Id": clientId,
-            "X-Audience-Name": safeName
+            'X-Client-Id': clientId,
+            'X-Audience-Name': name
           }
         });
-        showFeedback({
-          status: 403,
-          workerNode: "gateway",
-          totalDurationUs: 18,
-          endpoint: "WAF Intercept: SQL Injection Token"
-        }, true);
+        const elapsedUs = Math.round((performance.now() - t0) * 1000);
+        showTelemetryFeedback({
+          worker: 'Zero-Trust WAF Shield',
+          durationUs: elapsedUs,
+          path: '/api/v1/products [SQLi Intercepted]'
+        }, "403 WAF BLOCKED", true);
       } catch (e) {
-        console.error("WAF attack test error:", e);
+        console.error(e);
       }
     }
   </script>
+
 </body>
 </html>

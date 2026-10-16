@@ -364,3 +364,51 @@ export function useCafeSocket(onEvent: (event: string, data: any) => void) {
   return wsRef;
 }
 ```
+
+---
+
+## ۶. اندپوینت‌های تله‌متری، کلاستر و شبیه‌سازی صحنه (Cluster & Telemetry Theatre)
+
+برای نمایش زنده معماری توزیع‌شده، فیل‌اور بین ورکرها و مانیتورینگ میکروثانیه‌ای:
+
+### ۶.۱ دریافت وضعیت زنده کلاستر:
+* **مسیر:** `GET /api/v1/cluster/state`
+* **پاسخ موفق (200):**
+```json
+{
+  "worker1": true,
+  "worker2": true,
+  "activeWorkerCount": 2,
+  "cacheEnabled": true,
+  "totalTracesRecorded": 420,
+  "p50LatencyUs": 76,
+  "p95LatencyUs": 540,
+  "currentRps": 4
+}
+```
+
+### ۶.۲ از دسترس خارج کردن یا بازیابی ورکر (Failover Test):
+* **مسیر قطع ورکر:** `POST /api/v1/cluster/worker/kill?worker=worker_1`
+* **مسیر بازیابی ورکر:** `POST /api/v1/cluster/worker/restore?worker=worker_1`
+* **رفتار:** قطع ورکر ۱ بلافاصله ترافیک ورودی را به ورکر ۲ هدایت کرده و یک رویداد `telemetry:cluster_alert` در سوکت منتشر می‌کند.
+
+### ۶.۳ فعال‌سازی یا بای‌پس کش حافظه‌ای (L1 In-Memory Cache):
+* **مسیر:** `POST /api/v1/cluster/cache/toggle`
+* **پاسخ موفق (200):**
+```json
+{
+  "success": true,
+  "cacheEnabled": false,
+  "message": "L1 In-Memory Cache Bypassed (Direct Disk WAL writes)"
+}
+```
+
+### ۶.۴ جستجو و بررسی تریس‌های میکروثانیه‌ای:
+* **دریافت ۵۰ تریس اخیر:** `GET /api/v1/telemetry/traces?limit=50`
+* **دریافت جزییات تریس با شناسه:** `GET /api/v1/telemetry/traces/{traceId}`
+
+### ۶.۵ صفحات وب تعاملی سرور:
+* **کنسول معماری و تله‌متری زنده:** `http://localhost:4000/dashboard`
+* **ترمینال تعاملی موبایل حضار:** `http://localhost:4000/join`
+* **مستندات تعاملی استاندارد Scalar:** `http://localhost:4000/docs`
+
