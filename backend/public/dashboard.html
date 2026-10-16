@@ -1,13 +1,19 @@
 <!DOCTYPE html>
-<html lang="en" class="dark">
+<html lang="fa" dir="rtl" class="dark">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Soren Engine — Observability & Telemetry HUD</title>
+  <title>Soren Distributed Engine — Live Request Journey & Architecture Theatre</title>
+  
+  <!-- Tailwind CSS & Fonts -->
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&family=Vazirmatn:wght@400;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&family=Vazirmatn:wght@400;500;600;700;900&display=swap" rel="stylesheet">
+  
+  <!-- QRCode.js Library -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+
   <script>
     tailwind.config = {
       darkMode: 'class',
@@ -34,14 +40,14 @@
             }
           },
           fontFamily: {
-            sans: ['"Plus Jakarta Sans"', 'Vazirmatn', 'sans-serif'],
-            mono: ['"JetBrains Mono"', 'monospace'],
-            persian: ['Vazirmatn', 'sans-serif']
+            sans: ['Vazirmatn', '"Plus Jakarta Sans"', 'sans-serif'],
+            mono: ['"JetBrains Mono"', 'monospace']
           }
         }
       }
     }
   </script>
+
   <style>
     body {
       background-color: #07090E;
@@ -57,183 +63,266 @@
         linear-gradient(to right, rgba(255, 255, 255, 0.02) 1px, transparent 1px),
         linear-gradient(to bottom, rgba(255, 255, 255, 0.02) 1px, transparent 1px);
     }
-    /* Subtle glow tokens */
-    .glow-border-emerald {
-      box-shadow: inset 0 0 0 1px rgba(16, 185, 129, 0.25), 0 0 20px -5px rgba(16, 185, 129, 0.15);
+    .glow-emerald {
+      box-shadow: 0 0 25px -4px rgba(16, 185, 129, 0.25);
     }
-    .glow-border-rose {
-      box-shadow: inset 0 0 0 1px rgba(244, 63, 94, 0.4), 0 0 25px -5px rgba(244, 63, 94, 0.25);
+    .glow-rose {
+      box-shadow: 0 0 25px -4px rgba(244, 63, 94, 0.35);
     }
-    /* Custom sleek scrollbars */
-    ::-webkit-scrollbar { width: 4px; height: 4px; }
+    .glow-amber {
+      box-shadow: 0 0 25px -4px rgba(245, 158, 11, 0.25);
+    }
+    .node-shake {
+      animation: shake 0.5s cubic-bezier(.36,.07,.19,.97) both;
+    }
+    @keyframes shake {
+      10%, 90% { transform: translate3d(-1px, 0, 0); }
+      20%, 80% { transform: translate3d(2px, 0, 0); }
+      30%, 50%, 70% { transform: translate3d(-4px, 0, 0); }
+      40%, 60% { transform: translate3d(4px, 0, 0); }
+    }
+    ::-webkit-scrollbar { width: 5px; height: 5px; }
     ::-webkit-scrollbar-track { background: transparent; }
     ::-webkit-scrollbar-thumb { background: #1E2638; border-radius: 9999px; }
     ::-webkit-scrollbar-thumb:hover { background: #28334A; }
   </style>
 </head>
-<body class="min-h-screen grid-bg antialiased selection:bg-brand-amber/20 selection:text-brand-gold">
+<body class="min-h-screen grid-bg antialiased selection:bg-brand-amber/30 selection:text-brand-gold flex flex-col justify-between">
 
-  <!-- Top Enterprise Status Navigation -->
-  <header class="border-b border-surface-border bg-obsidian/80 backdrop-blur-xl sticky top-0 z-50">
-    <div class="max-w-[1600px] mx-auto px-4 lg:px-8 h-16 flex items-center justify-between gap-4">
+  <!-- ================= TOP NAVIGATION HUD ================= -->
+  <header class="border-b border-surface-border bg-obsidian/90 backdrop-blur-xl sticky top-0 z-50">
+    <div class="max-w-[1720px] mx-auto px-4 lg:px-8 h-16 flex items-center justify-between gap-4">
       
-      <!-- Brand & Engine Specs -->
+      <!-- Logo & Title -->
       <div class="flex items-center gap-3.5">
-        <div class="w-8 h-8 rounded-lg bg-surface-raised border border-surface-border flex items-center justify-center font-bold text-brand-amber text-sm shadow-inner">
-          <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M18 8h1a4 4 0 0 1 0 8h-1"></path>
-            <path d="M2 8h16v9a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4V8z"></path>
-            <line x1="6" y1="1" x2="6" y2="4"></line>
-            <line x1="10" y1="1" x2="10" y2="4"></line>
-            <line x1="14" y1="1" x2="14" y2="4"></line>
-          </svg>
+        <div class="w-9 h-9 rounded-xl bg-gradient-to-br from-brand-amber/30 to-brand-espresso/20 border border-brand-amber/40 flex items-center justify-center font-black text-brand-gold text-base shadow-inner">
+          ⚡
         </div>
         <div>
           <div class="flex items-center gap-2">
-            <span class="font-bold tracking-tight text-slate-100 text-sm">SOREN OBSERVABILITY HUD</span>
-            <span class="px-1.5 py-0.5 rounded text-[10px] font-mono font-medium tracking-wide bg-telemetry-emerald/10 text-telemetry-emerald border border-telemetry-emerald/20 flex items-center gap-1">
+            <h1 class="font-bold tracking-tight text-slate-100 text-sm font-mono uppercase">SOREN ARCHITECTURE THEATRE</h1>
+            <span id="cluster-status-pill" class="px-2 py-0.5 rounded text-[10px] font-mono font-medium tracking-wide bg-telemetry-emerald/10 text-telemetry-emerald border border-telemetry-emerald/20 flex items-center gap-1.5">
               <span class="w-1.5 h-1.5 rounded-full bg-telemetry-emerald animate-ping"></span>
-              CLUSTER ONLINE
+              <span id="cluster-status-text">KEEPALIVE ONLINE • 2 NODES</span>
             </span>
           </div>
-          <p class="text-[11px] text-slate-400 font-mono">Bun Native Runtime 1.4.2 • SQLite WAL Engine • Zero-Trust WAF</p>
+          <p class="text-[11px] text-slate-400 font-mono">Bun 1.4.2 Native • Zero-Trust WAF • SQLite WAL • 50ms Batch Trace</p>
         </div>
       </div>
 
       <!-- Live Global Telemetry Metrics -->
-      <div class="hidden md:flex items-center gap-6 font-mono text-xs">
+      <div class="hidden lg:flex items-center gap-6 font-mono text-xs">
+        
         <div class="flex flex-col text-right">
-          <span class="text-[10px] text-slate-400 font-sans uppercase tracking-wider">WebSocket Gateway</span>
-          <span class="text-slate-200 font-semibold flex items-center gap-1.5 justify-end">
-            <span class="w-2 h-2 rounded-full bg-telemetry-emerald"></span>
-            <span id="stat-ws" class="tabular-nums">1</span> Client(s)
+          <span class="text-[10px] text-slate-400 font-sans uppercase tracking-wider">Throughput Rate</span>
+          <span class="text-slate-100 font-bold flex items-center gap-1 justify-end">
+            <span id="stat-rps" class="text-telemetry-emerald text-base tabular-nums">0</span> <span class="text-[10px] text-slate-400">RPS</span>
           </span>
         </div>
 
         <div class="h-8 w-px bg-surface-border"></div>
 
         <div class="flex flex-col text-right">
-          <span class="text-[10px] text-slate-400 font-sans uppercase tracking-wider">Process Memory (RSS)</span>
-          <span id="stat-memory" class="text-brand-gold font-semibold tabular-nums">22.6 MB</span>
+          <span class="text-[10px] text-slate-400 font-sans uppercase tracking-wider">p95 Trace Latency</span>
+          <span id="stat-p95" class="text-brand-gold font-bold text-base tabular-nums">0 µs</span>
         </div>
 
         <div class="h-8 w-px bg-surface-border"></div>
 
         <div class="flex flex-col text-right">
-          <span class="text-[10px] text-slate-400 font-sans uppercase tracking-wider">Engine Uptime</span>
-          <span id="stat-uptime" class="text-slate-300 font-semibold tabular-nums">00:00:00</span>
+          <span class="text-[10px] text-slate-400 font-sans uppercase tracking-wider">L1 Cache Engine</span>
+          <span id="stat-cache-badge" class="text-telemetry-emerald font-bold flex items-center gap-1.5 justify-end">
+            <span class="w-1.5 h-1.5 rounded-full bg-telemetry-emerald"></span> ACTIVE
+          </span>
         </div>
 
         <div class="h-8 w-px bg-surface-border"></div>
 
         <div class="flex flex-col text-right">
-          <span class="text-[10px] text-slate-400 font-sans uppercase tracking-wider">Total Ingress</span>
-          <span id="stat-requests" class="text-telemetry-cyan font-semibold tabular-nums">0</span>
+          <span class="text-[10px] text-slate-400 font-sans uppercase tracking-wider">Audience Devices</span>
+          <span id="stat-ws" class="text-telemetry-cyan font-bold text-base tabular-nums">0 Client(s)</span>
         </div>
       </div>
 
-      <!-- External Links -->
-      <div class="flex items-center gap-2.5">
-        <a href="/docs" target="_blank" class="px-3 py-1.5 rounded-lg bg-surface-raised hover:bg-surface-muted text-slate-300 hover:text-white border border-surface-border text-xs font-medium transition-all flex items-center gap-1.5">
-          <svg class="w-3.5 h-3.5 text-brand-amber" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path>
-            <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path>
-          </svg>
-          <span>OpenAPI Spec</span>
+      <!-- Action Nav & Audio Toggle -->
+      <div class="flex items-center gap-3">
+        <button 
+          id="btn-sound" 
+          onclick="toggleAudio()" 
+          title="پخش افکت‌های صوتی سرور"
+          class="px-2.5 py-1.5 rounded-lg bg-surface-raised hover:bg-surface-muted text-slate-300 hover:text-white border border-surface-border text-xs font-mono transition-all flex items-center gap-1.5"
+        >
+          <span id="sound-icon">🔊</span>
+          <span id="sound-label" class="text-[11px]">Audio FX: ON</span>
+        </button>
+
+        <a href="/join" target="_blank" class="px-3 py-1.5 rounded-lg bg-brand-amber/15 hover:bg-brand-amber/25 text-brand-gold border border-brand-amber/30 text-xs font-semibold transition-all flex items-center gap-1.5">
+          <span>ورود حضار (/join)</span>
+          <span class="text-[10px] font-mono">↗</span>
         </a>
       </div>
 
     </div>
   </header>
 
-  <!-- Main Multi-Tier Grid Container -->
-  <main class="max-w-[1600px] mx-auto p-4 lg:p-8 space-y-6">
+  <!-- ================= MAIN DASHBOARD BODY ================= -->
+  <main class="max-w-[1720px] mx-auto p-4 lg:p-6 w-full space-y-6">
 
-    <!-- Row 1: Time-Series Throughput Chart & Key Metrics -->
-    <section class="grid grid-cols-1 lg:grid-cols-12 gap-6">
-
-      <!-- Real-time Ingress Time-Series (8 Cols) -->
-      <div class="lg:col-span-8 bg-surface rounded-2xl border border-surface-border p-5 shadow-2xl relative overflow-hidden flex flex-col justify-between">
+    <!-- TOP SECTION: REQUEST JOURNEY GRAPH (CANVAS) + AUDIENCE QR + STAGE CONTROLS -->
+    <section class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-stretch">
+      
+      <!-- CANVAS REQUEST JOURNEY (9 COLS) -->
+      <div class="lg:col-span-9 bg-surface rounded-2xl border border-surface-border p-5 shadow-2xl relative overflow-hidden flex flex-col justify-between min-h-[520px]">
         
-        <!-- Header row -->
-        <div class="flex items-center justify-between mb-3">
+        <!-- Header Bar of Canvas -->
+        <div class="flex items-center justify-between mb-3 z-10 relative">
           <div>
             <div class="flex items-center gap-2">
-              <h2 class="text-xs font-bold text-slate-200 tracking-wider uppercase">Ingress Traffic Rate (Time-Series)</h2>
-              <span class="px-2 py-0.5 rounded text-[10px] font-mono bg-surface-raised text-slate-400 border border-surface-border">Window: 60s</span>
+              <h2 class="text-xs font-black text-slate-200 tracking-wider uppercase flex items-center gap-2">
+                <span>سفر فیزیکی درخواست (Physical Request Journey)</span>
+                <span class="px-2 py-0.5 rounded text-[10px] font-mono bg-surface-raised text-telemetry-emerald border border-surface-border">Real Microsecond Spans</span>
+              </h2>
             </div>
-            <p class="text-[11px] text-slate-400 mt-0.5">Real-time HTTP and WebSocket transaction frequency per second</p>
+            <p class="text-[11px] text-slate-400 mt-0.5 font-sans">
+              هر نقطه یک درخواست واقعی است. سبز = کش‌هیت (L1) • آبی = دیتابیس (SQLite WAL) • قرمز = بلاک WAF • طلایی = گوشی حضار
+            </p>
           </div>
 
-          <div class="text-right">
-            <div class="flex items-baseline gap-1 justify-end font-mono">
-              <span id="current-rps" class="text-3xl font-extrabold text-telemetry-emerald tabular-nums">0</span>
-              <span class="text-xs text-slate-400">RPS</span>
-            </div>
-            <div class="text-[10px] font-mono text-slate-400">Peak: <span id="peak-rps" class="text-slate-200 tabular-nums">0</span> req/s</div>
-          </div>
-        </div>
-
-        <!-- Canvas Chart Area -->
-        <div class="relative w-full h-56 bg-obsidian/60 rounded-xl border border-surface-border/60 overflow-hidden">
-          <canvas id="traffic-chart" class="w-full h-full"></canvas>
-          <div class="absolute top-2 left-3 flex items-center gap-3 text-[10px] font-mono text-slate-400 pointer-events-none">
-            <span class="flex items-center gap-1.5"><span class="w-2 h-2 rounded-full bg-telemetry-emerald"></span> Ingress Rate</span>
-            <span class="flex items-center gap-1.5"><span class="w-2 h-2 rounded-full bg-telemetry-rose"></span> Blocked/Shielded</span>
+          <!-- Color Legends -->
+          <div class="flex items-center gap-4 text-[11px] font-mono text-slate-400">
+            <span class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-full bg-telemetry-emerald shadow-[0_0_8px_#10B981]"></span> کش‌هیت (&lt;1ms)</span>
+            <span class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-full bg-telemetry-cyan shadow-[0_0_8px_#06B6D4]"></span> تراکنش DB</span>
+            <span class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-full bg-telemetry-rose shadow-[0_0_8px_#F43F5E]"></span> بلاک امنیتی</span>
+            <span class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-full bg-telemetry-amber shadow-[0_0_8px_#F59E0B]"></span> گوشی حضار</span>
           </div>
         </div>
 
-        <!-- Footer status -->
-        <div class="mt-3 pt-3 border-t border-surface-border/60 flex items-center justify-between text-[11px] text-slate-400 font-mono">
-          <span>Concurrency Engine: <strong class="text-slate-200">Asynchronous epoll/kqueue (Bun)</strong></span>
-          <span>Buffer Health: <strong class="text-telemetry-emerald">0% Drop</strong></span>
+        <!-- HTML5 Canvas Visualizer Layer -->
+        <div class="relative w-full flex-1 rounded-xl bg-obsidian/80 border border-surface-border/80 overflow-hidden min-h-[420px]" id="canvas-container">
+          <canvas id="journey-canvas" class="w-full h-full block cursor-crosshair"></canvas>
+          
+          <!-- Node Overlay Badges for crisp text -->
+          <div id="node-overlays" class="absolute inset-0 pointer-events-none"></div>
+
+          <!-- Live Particle Counter Watermark -->
+          <div class="absolute bottom-3 left-4 font-mono text-[10px] text-slate-400 pointer-events-none flex items-center gap-3">
+            <span>FPS: <strong id="canvas-fps" class="text-slate-200">60</strong></span>
+            <span>Active Flying Particles: <strong id="canvas-particles-count" class="text-slate-200">0</strong></span>
+            <span>Total Traces Processed: <strong id="canvas-total-traces" class="text-telemetry-emerald">0</strong></span>
+          </div>
         </div>
+
+        <!-- Footer Cluster Failover Alert Bar -->
+        <div id="failover-alert-bar" class="mt-3 py-2 px-3 rounded-xl bg-surface-raised border border-surface-border flex items-center justify-between text-[11px] font-mono text-slate-300">
+          <div class="flex items-center gap-2">
+            <span class="w-2 h-2 rounded-full bg-telemetry-emerald" id="failover-dot"></span>
+            <span id="failover-message">وضعیت کلاستر عادی است. ترافیک با الگوریتم Round-Robin بین ورکر ۱ و ورکر ۲ توزیع می‌گردد.</span>
+          </div>
+          <span class="text-slate-400 text-[10px]" id="failover-time">Now</span>
+        </div>
+
       </div>
 
-      <!-- Quick Telemetry Scorecards & Network Node Status (4 Cols) -->
-      <div class="lg:col-span-4 space-y-4">
+      <!-- RIGHT SIDE: STAGE CONTROLS + AUDIENCE QR CODE (3 COLS) -->
+      <div class="lg:col-span-3 space-y-5 flex flex-col justify-between">
         
-        <!-- Scorecard: Latency & Event Loop -->
-        <div class="bg-surface rounded-2xl border border-surface-border p-5 shadow-xl">
-          <h3 class="text-xs font-bold text-slate-200 tracking-wider uppercase mb-3 flex items-center justify-between">
-            <span>Latency & Engine Diagnostics</span>
-            <span class="w-2 h-2 rounded-full bg-telemetry-emerald"></span>
-          </h3>
+        <!-- AUDIENCE QR CODE CARD -->
+        <div class="bg-surface rounded-2xl border border-surface-border p-4 shadow-xl flex flex-col items-center text-center relative overflow-hidden">
+          <div class="absolute top-0 inset-x-0 h-1 bg-gradient-to-r from-brand-amber via-brand-gold to-brand-espresso"></div>
+          
+          <div class="w-full flex items-center justify-between mb-2">
+            <span class="text-xs font-bold text-slate-200 tracking-wide uppercase">اتصال زنده حضار</span>
+            <span class="px-2 py-0.5 rounded text-[10px] font-mono bg-brand-amber/15 text-brand-gold border border-brand-amber/30">SCAN ME</span>
+          </div>
 
-          <div class="grid grid-cols-2 gap-3 font-mono">
-            <div class="p-3 rounded-xl bg-surface-raised border border-surface-border/70">
-              <span class="text-[10px] text-slate-400 block">Avg Response</span>
-              <span id="avg-latency" class="text-xl font-bold text-slate-100 tabular-nums">1.4 <span class="text-xs text-slate-400">ms</span></span>
-              <span class="text-[10px] text-telemetry-emerald block mt-1">Sub-millisecond</span>
+          <!-- QR Container -->
+          <div class="p-2.5 bg-white rounded-xl shadow-lg my-1" id="qrcode-box">
+            <div id="qrcode"></div>
+          </div>
+
+          <div class="mt-2 text-center w-full">
+            <div class="text-[11px] font-bold text-slate-100 font-mono tracking-wider break-all bg-obsidian/80 px-2 py-1 rounded border border-surface-border mb-1" id="qr-url-text">http://localhost:4000/join</div>
+            <div class="flex items-center gap-1.5 mt-1.5">
+              <input 
+                id="custom-qr-input" 
+                type="text" 
+                placeholder="تغییر آدرس یا وارد کردن لینک ngrok" 
+                class="w-full bg-surface-raised border border-surface-border rounded-lg px-2 py-1 text-[10px] text-slate-200 placeholder-slate-400 font-mono focus:outline-none focus:border-brand-amber"
+              />
+              <button 
+                onclick="applyCustomQrUrl()" 
+                class="px-2 py-1 rounded-lg bg-brand-amber/20 hover:bg-brand-amber/30 text-brand-gold text-[10px] font-mono border border-brand-amber/30 shrink-0"
+              >
+                بروزرسانی
+              </button>
             </div>
-            <div class="p-3 rounded-xl bg-surface-raised border border-surface-border/70">
-              <span class="text-[10px] text-slate-400 block">Event Loop Lag</span>
-              <span id="loop-lag" class="text-xl font-bold text-slate-100 tabular-nums">0.2 <span class="text-xs text-slate-400">ms</span></span>
-              <span class="text-[10px] text-telemetry-emerald block mt-1">Non-blocking</span>
-            </div>
+            <p class="text-[10px] text-slate-400 mt-1.5">
+              گوشی و لپ‌تاپ باید روی یک Wi-Fi باشند، یا لینک تانل ngrok را در کادر بالا وارد کنید.
+            </p>
           </div>
         </div>
 
-        <!-- Scorecard: Database Engine Odometer -->
-        <div class="bg-surface rounded-2xl border border-surface-border p-5 shadow-xl">
-          <div class="flex items-center justify-between mb-3">
-            <h3 class="text-xs font-bold text-slate-200 tracking-wider uppercase">SQLite WAL State</h3>
-            <span class="px-2 py-0.5 rounded text-[10px] font-mono bg-telemetry-emerald/10 text-telemetry-emerald border border-telemetry-emerald/20 font-medium">Synchronous WAL</span>
+        <!-- STAGE DEMO CONTROLLERS (صحنه‌های هیجانی) -->
+        <div class="bg-surface rounded-2xl border border-surface-border p-4 shadow-xl space-y-3 flex-1 flex flex-col justify-between">
+          <div class="flex items-center justify-between border-b border-surface-border pb-2">
+            <h3 class="text-xs font-bold text-slate-200 tracking-wider uppercase">کنترل سناریوهای صحنه (Demo)</h3>
+            <span class="text-[10px] font-mono text-slate-400">Live Stage Triggers</span>
           </div>
 
-          <div class="grid grid-cols-3 gap-2 font-mono text-center">
-            <div class="p-2.5 rounded-xl bg-surface-raised border border-surface-border/70">
-              <span class="text-[10px] text-slate-400 block">Products</span>
-              <span id="count-products" class="text-base font-bold text-brand-amber tabular-nums">18</span>
-            </div>
-            <div class="p-2.5 rounded-xl bg-surface-raised border border-surface-border/70">
-              <span class="text-[10px] text-slate-400 block">Orders</span>
-              <span id="count-orders" class="text-base font-bold text-telemetry-emerald tabular-nums">0</span>
-            </div>
-            <div class="p-2.5 rounded-xl bg-surface-raised border border-surface-border/70">
-              <span class="text-[10px] text-slate-400 block">Items</span>
-              <span id="count-items" class="text-base font-bold text-telemetry-cyan tabular-nums">0</span>
-            </div>
+          <div class="space-y-2.5">
+            <!-- TRIGGER 1: KILL WORKER-1 -->
+            <button 
+              id="btn-kill-worker"
+              onclick="toggleWorker1()"
+              class="w-full py-2.5 px-3 rounded-xl bg-surface-raised hover:bg-telemetry-rose/15 border border-surface-border hover:border-telemetry-rose/40 text-slate-200 text-xs font-bold transition-all flex items-center justify-between group active:scale-[0.98]"
+            >
+              <div class="flex items-center gap-2">
+                <span class="text-sm">💀</span>
+                <span id="btn-kill-text">از دسترس خارج کردن Worker-1</span>
+              </div>
+              <span id="btn-kill-badge" class="px-1.5 py-0.5 rounded text-[9px] font-mono bg-telemetry-emerald/10 text-telemetry-emerald border border-telemetry-emerald/20">ONLINE</span>
+            </button>
+
+            <!-- TRIGGER 2: TOGGLE CACHE -->
+            <button 
+              id="btn-toggle-cache"
+              onclick="toggleCacheMode()"
+              class="w-full py-2.5 px-3 rounded-xl bg-surface-raised hover:bg-telemetry-emerald/15 border border-surface-border hover:border-telemetry-emerald/40 text-slate-200 text-xs font-bold transition-all flex items-center justify-between group active:scale-[0.98]"
+            >
+              <div class="flex items-center gap-2">
+                <span class="text-sm">⚡</span>
+                <span id="btn-cache-text">تغییر وضعیت کش حافظه‌ای (L1)</span>
+              </div>
+              <span id="btn-cache-badge" class="px-1.5 py-0.5 rounded text-[9px] font-mono bg-telemetry-emerald/10 text-telemetry-emerald border border-telemetry-emerald/20">ACTIVE</span>
+            </button>
+
+            <!-- TRIGGER 3: SIMULATE ATTACK -->
+            <button 
+              onclick="fireSimulatedAttack()"
+              class="w-full py-2.5 px-3 rounded-xl bg-surface-raised hover:bg-telemetry-rose/15 border border-surface-border hover:border-telemetry-rose/40 text-slate-200 text-xs font-bold transition-all flex items-center justify-between group active:scale-[0.98]"
+            >
+              <div class="flex items-center gap-2">
+                <span class="text-sm">🛡️</span>
+                <span>تزریق حمله SQL Injection (شیلد WAF)</span>
+              </div>
+              <span class="px-1.5 py-0.5 rounded text-[9px] font-mono bg-telemetry-rose/10 text-telemetry-rose border border-telemetry-rose/20">TEST</span>
+            </button>
+
+            <!-- TRIGGER 4: RAPID BURST -->
+            <button 
+              onclick="fireTrafficBurst()"
+              class="w-full py-2.5 px-3 rounded-xl bg-surface-raised hover:bg-brand-amber/15 border border-surface-border hover:border-brand-amber/40 text-slate-200 text-xs font-bold transition-all flex items-center justify-between group active:scale-[0.98]"
+            >
+              <div class="flex items-center gap-2">
+                <span class="text-sm">🚀</span>
+                <span>شلیک رگبار ترافیک (۵۰ پکت متوالی)</span>
+              </div>
+              <span class="px-1.5 py-0.5 rounded text-[9px] font-mono bg-brand-amber/10 text-brand-amber border border-brand-amber/20">BURST</span>
+            </button>
+          </div>
+
+          <div class="text-[10px] text-slate-400 font-mono text-center pt-2 border-t border-surface-border">
+            <span>تمام رویدادها زنده از هسته Bun دریافت می‌شوند</span>
           </div>
         </div>
 
@@ -241,358 +330,773 @@
 
     </section>
 
-    <!-- Row 2: Distributed Trace Waterfall & Security Operations Center (SOC) -->
+    <!-- BOTTOM SECTION: REAL-TIME RAW TERMINAL STREAM + TRACE INSPECTOR MODAL -->
     <section class="grid grid-cols-1 lg:grid-cols-12 gap-6">
 
-      <!-- OpenTelemetry-Style Transaction Waterfall (7 Cols) -->
-      <div class="lg:col-span-7 bg-surface rounded-2xl border border-surface-border p-5 shadow-2xl">
-        <div class="flex items-center justify-between mb-4">
-          <div>
-            <div class="flex items-center gap-2">
-              <h2 class="text-xs font-bold text-slate-200 tracking-wider uppercase">Atomic Database Trace Waterfall</h2>
-              <span class="px-2 py-0.5 rounded text-[10px] font-mono bg-surface-raised text-telemetry-emerald border border-surface-border font-medium">Trace Spans</span>
-            </div>
-            <p class="text-[11px] text-slate-400 mt-0.5">Microsecond resolution breakdown of atomic SQLite transactions upon order ingestion</p>
+      <!-- RAW TERMINAL STREAM (7 COLS) -->
+      <div class="lg:col-span-7 bg-surface rounded-2xl border border-surface-border p-5 shadow-2xl flex flex-col justify-between">
+        <div class="flex items-center justify-between mb-3 border-b border-surface-border pb-3">
+          <div class="flex items-center gap-2">
+            <span class="w-2.5 h-2.5 rounded-full bg-telemetry-emerald"></span>
+            <h3 class="text-xs font-bold text-slate-200 tracking-wider uppercase font-mono">Live Terminal Telemetry Log (Raw Stream)</h3>
           </div>
-          <span class="text-[11px] font-mono text-slate-400" id="last-txn-id">Txn: None</span>
+          <span class="text-[10px] font-mono text-slate-400">Click any row to inspect JSON</span>
         </div>
 
-        <!-- Waterfall Visual Cards Stream -->
-        <div id="trace-stream" class="space-y-3 font-mono text-xs max-h-[360px] overflow-y-auto pr-1">
-          <!-- Initial Default Trace Card -->
-          <div class="p-4 bg-obsidian rounded-xl border border-surface-border/80">
-            <div class="flex items-center justify-between text-slate-400 pb-2 mb-3 border-b border-surface-border/60">
-              <span class="font-bold text-brand-amber">ord_1001 • Table 04 (Cold Brew + Basque)</span>
-              <span class="text-telemetry-emerald font-bold">Total: 382 µs (0.38 ms)</span>
-            </div>
-
-            <!-- Spans Visual Representation -->
-            <div class="space-y-2 text-[11px]">
-              <div>
-                <div class="flex justify-between text-slate-300 mb-0.5">
-                  <span>1. BEGIN TRANSACTION (Lock Acquire)</span>
-                  <span class="text-telemetry-emerald tabular-nums">42 µs</span>
-                </div>
-                <div class="w-full bg-surface-raised rounded-full h-1.5 overflow-hidden">
-                  <div class="bg-telemetry-emerald h-full rounded-full" style="width: 15%"></div>
-                </div>
-              </div>
-
-              <div>
-                <div class="flex justify-between text-slate-300 mb-0.5">
-                  <span>2. PRICE AUDIT & SNAPSHOT (Zero-Trust Validation)</span>
-                  <span class="text-telemetry-emerald tabular-nums">85 µs</span>
-                </div>
-                <div class="w-full bg-surface-raised rounded-full h-1.5 overflow-hidden">
-                  <div class="bg-telemetry-emerald h-full rounded-full" style="width: 25%"></div>
-                </div>
-              </div>
-
-              <div>
-                <div class="flex justify-between text-slate-300 mb-0.5">
-                  <span>3. INSERT orders (Memory WAL Page Append)</span>
-                  <span class="text-telemetry-emerald tabular-nums">115 µs</span>
-                </div>
-                <div class="w-full bg-surface-raised rounded-full h-1.5 overflow-hidden">
-                  <div class="bg-telemetry-emerald h-full rounded-full" style="width: 35%"></div>
-                </div>
-              </div>
-
-              <div>
-                <div class="flex justify-between text-slate-300 mb-0.5">
-                  <span>4. COMMIT TRANSACTION (Atomic Persistence)</span>
-                  <span class="text-telemetry-emerald tabular-nums">65 µs</span>
-                </div>
-                <div class="w-full bg-surface-raised rounded-full h-1.5 overflow-hidden">
-                  <div class="bg-telemetry-emerald h-full rounded-full" style="width: 20%"></div>
-                </div>
-              </div>
-            </div>
+        <!-- Terminal Output Window -->
+        <div id="terminal-stream" class="space-y-1.5 font-mono text-xs max-h-[220px] overflow-y-auto pr-2 bg-obsidian/90 p-3 rounded-xl border border-surface-border/60">
+          <div class="text-slate-400 text-center py-6 text-xs">
+            در حال گوش دادن به جریان تله‌متری وب‌سوکت... رویدادها به محض ارسال اینجا ثبت می‌شوند.
           </div>
         </div>
 
+        <div class="mt-3 pt-2 border-t border-surface-border/60 flex items-center justify-between text-[11px] font-mono text-slate-400">
+          <span>Engine: <strong class="text-slate-200">Bun Native epoll</strong></span>
+          <span>Zero-Fake Assurance: <strong class="text-telemetry-emerald">Authoritative Backend Proof</strong></span>
+        </div>
       </div>
 
-      <!-- Security Radar & Threat Mitigation Log (5 Cols) -->
-      <div class="lg:col-span-5 bg-surface rounded-2xl border border-surface-border p-5 shadow-2xl flex flex-col justify-between" id="soc-card">
-        
-        <div>
-          <!-- Header -->
-          <div class="flex items-center justify-between mb-3">
-            <div class="flex items-center gap-2">
-              <span class="w-2.5 h-2.5 rounded-full bg-telemetry-emerald" id="soc-indicator"></span>
-              <h2 class="text-xs font-bold text-slate-200 tracking-wider uppercase">WAF & Cyber Threat Radar</h2>
-            </div>
-            <span id="threat-badge" class="px-2 py-0.5 rounded text-[10px] font-mono bg-surface-raised text-slate-400 border border-surface-border">
-              0 Incidents
-            </span>
+      <!-- TRACE INSPECTOR / DRILL-DOWN PANEL (5 COLS) -->
+      <div class="lg:col-span-5 bg-surface rounded-2xl border border-surface-border p-5 shadow-2xl flex flex-col justify-between">
+        <div class="flex items-center justify-between mb-3 border-b border-surface-border pb-3">
+          <div class="flex items-center gap-2">
+            <span class="w-2.5 h-2.5 rounded-full bg-brand-amber"></span>
+            <h3 class="text-xs font-bold text-slate-200 tracking-wider uppercase font-mono">Microsecond Trace Inspector</h3>
           </div>
-
-          <p class="text-[11px] text-slate-400 mb-3 font-sans">
-            Autonomous threat interception stream. External penetration tests run via <code class="text-slate-300 font-mono">bun scripts/security-audit.ts</code> appear here in real time.
-          </p>
-
-          <!-- Threat Log Stream -->
-          <div id="threat-stream" class="space-y-2.5 font-mono text-xs max-h-[300px] overflow-y-auto pr-1">
-            <div class="p-3 bg-obsidian/70 rounded-xl border border-surface-border/60 text-slate-400 text-center py-8">
-              <svg class="w-6 h-6 mx-auto mb-2 text-slate-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
-                <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
-              </svg>
-              <span>Defense layer listening • Zero active intrusions detected</span>
-            </div>
-          </div>
+          <span id="inspect-trace-id" class="px-2 py-0.5 rounded text-[10px] font-mono bg-brand-amber/10 text-brand-gold border border-brand-amber/20">Select a trace</span>
         </div>
 
-        <!-- WAF Policies Status Bar -->
-        <div class="mt-4 pt-3 border-t border-surface-border/60 grid grid-cols-3 gap-2 text-center text-[10px] font-mono text-slate-400">
-          <div class="p-1.5 rounded bg-surface-raised border border-surface-border">Zero-Trust: <strong class="text-telemetry-emerald">Active</strong></div>
-          <div class="p-1.5 rounded bg-surface-raised border border-surface-border">Rate-Limiter: <strong class="text-telemetry-emerald">12/min</strong></div>
-          <div class="p-1.5 rounded bg-surface-raised border border-surface-border">Auth Gate: <strong class="text-telemetry-emerald">PIN/Bearer</strong></div>
+        <!-- JSON Code Viewer -->
+        <div class="relative flex-1 bg-obsidian/90 rounded-xl border border-surface-border/60 p-3 max-h-[220px] overflow-y-auto">
+          <pre id="inspect-json" class="font-mono text-[11px] text-slate-300 leading-relaxed whitespace-pre-wrap">روی هر نود در گراف یا ردیف‌های ترمینال کلیک کنید تا امضای کامل میکروثانیه‌ای تریس با جزییات نودها و زمان‌بندی نمایش داده شود.</pre>
         </div>
 
+        <div class="mt-3 pt-2 border-t border-surface-border/60 flex items-center justify-between text-[11px] font-mono text-slate-400">
+          <span>Trace Precision: <strong class="text-brand-gold">Microseconds (µs)</strong></span>
+          <button onclick="copyCurrentTrace()" class="text-[10px] text-brand-amber hover:underline">Copy JSON</button>
+        </div>
       </div>
 
     </section>
 
   </main>
 
-  <!-- High-Performance JavaScript Telemetry Client -->
+  <!-- ================= CANVAS 2D PARTICLE & TOPOLOGY ENGINE ================= -->
   <script>
-    // Audio synthesizer for security alerts (Web Audio API)
-    const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-    function playThreatAlert() {
-      if (audioCtx.state === 'suspended') audioCtx.resume();
-      const osc = audioCtx.createOscillator();
-      const gain = audioCtx.createGain();
-      osc.type = 'sawtooth';
-      osc.frequency.setValueAtTime(320, audioCtx.currentTime);
-      osc.frequency.exponentialRampToValueAtTime(140, audioCtx.currentTime + 0.35);
-      gain.gain.setValueAtTime(0.12, audioCtx.currentTime);
-      gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.35);
-      osc.connect(gain);
-      gain.connect(audioCtx.destination);
-      osc.start();
-      osc.stop(audioCtx.currentTime + 0.35);
+    // --- Audio Synthesizer (Web Audio API) ---
+    const AudioEngine = {
+      enabled: true,
+      ctx: null,
+      init() {
+        if (!this.ctx) {
+          this.ctx = new (window.AudioContext || window.webkitAudioContext)();
+        }
+        if (this.ctx.state === 'suspended') {
+          this.ctx.resume();
+        }
+      },
+      play(type) {
+        if (!this.enabled) return;
+        this.init();
+        const t = this.ctx.currentTime;
+        const osc = this.ctx.createOscillator();
+        const gain = this.ctx.createGain();
+        osc.connect(gain);
+        gain.connect(this.ctx.destination);
+
+        if (type === 'cache_hit') {
+          // Sweet gentle high blip
+          osc.type = 'sine';
+          osc.frequency.setValueAtTime(880, t);
+          osc.frequency.exponentialRampToValueAtTime(1320, t + 0.08);
+          gain.gain.setValueAtTime(0.06, t);
+          gain.gain.exponentialRampToValueAtTime(0.001, t + 0.08);
+          osc.start(t);
+          osc.stop(t + 0.08);
+        } else if (type === 'db_query') {
+          // Deeper crisp click
+          osc.type = 'triangle';
+          osc.frequency.setValueAtTime(440, t);
+          osc.frequency.exponentialRampToValueAtTime(220, t + 0.12);
+          gain.gain.setValueAtTime(0.08, t);
+          gain.gain.exponentialRampToValueAtTime(0.001, t + 0.12);
+          osc.start(t);
+          osc.stop(t + 0.12);
+        } else if (type === 'waf_blocked') {
+          // Low buzz explosion
+          osc.type = 'sawtooth';
+          osc.frequency.setValueAtTime(280, t);
+          osc.frequency.exponentialRampToValueAtTime(70, t + 0.25);
+          gain.gain.setValueAtTime(0.15, t);
+          gain.gain.exponentialRampToValueAtTime(0.001, t + 0.25);
+          osc.start(t);
+          osc.stop(t + 0.25);
+        } else if (type === 'kill_server') {
+          // Dramatic alarm sweep
+          osc.type = 'sawtooth';
+          osc.frequency.setValueAtTime(600, t);
+          osc.frequency.linearRampToValueAtTime(200, t + 0.4);
+          gain.gain.setValueAtTime(0.2, t);
+          gain.gain.exponentialRampToValueAtTime(0.001, t + 0.4);
+          osc.start(t);
+          osc.stop(t + 0.4);
+        } else if (type === 'audience') {
+          // Golden sparkle
+          osc.type = 'sine';
+          osc.frequency.setValueAtTime(523.25, t);
+          osc.frequency.exponentialRampToValueAtTime(1046.5, t + 0.15);
+          gain.gain.setValueAtTime(0.1, t);
+          gain.gain.exponentialRampToValueAtTime(0.001, t + 0.15);
+          osc.start(t);
+          osc.stop(t + 0.15);
+        }
+      }
+    };
+
+    function toggleAudio() {
+      AudioEngine.enabled = !AudioEngine.enabled;
+      document.getElementById('sound-icon').innerText = AudioEngine.enabled ? '🔊' : '🔇';
+      document.getElementById('sound-label').innerText = AudioEngine.enabled ? 'Audio FX: ON' : 'Audio FX: OFF';
     }
 
-    // WebSocket Telemetry Connection
-    let ws;
-    let totalThreats = 0;
-    let peakRps = 0;
-    const chartHistory = Array(60).fill(0);
+    // --- Topology Graph Model ---
+    const canvas = document.getElementById('journey-canvas');
+    const ctx = canvas.getContext('2d');
+    const container = document.getElementById('canvas-container');
 
-    function connectTelemetry() {
+    let width = 0;
+    let height = 0;
+    let dpr = window.devicePixelRatio || 1;
+
+    // Node Definitions
+    const nodes = {
+      client: { id: 'client', label: 'Client Ingress', sub: 'Audience / Web / Kiosk', x: 0.09, y: 0.50, color: '#94A3B8', active: true },
+      gateway: { id: 'gateway', label: 'Zero-Trust WAF', sub: 'Rate-Limit & Anti-Tamper', x: 0.28, y: 0.50, color: '#C99752', active: true },
+      worker_1: { id: 'worker_1', label: 'Worker-1 (Bun Core)', sub: 'Port :4000 • Epoll', x: 0.52, y: 0.30, color: '#10B981', active: true },
+      worker_2: { id: 'worker_2', label: 'Worker-2 (Bun Backup)', sub: 'Port :4001 • Standby', x: 0.52, y: 0.70, color: '#06B6D4', active: true },
+      cache: { id: 'cache', label: 'L1 In-Memory Cache', sub: 'Sub-ms Memory Page', x: 0.78, y: 0.30, color: '#10B981', active: true },
+      database: { id: 'database', label: 'SQLite WAL Engine', sub: 'Atomic Multi-Row Disk', x: 0.78, y: 0.70, color: '#38BDF8', active: true }
+    };
+
+    // Connections (Curved Pipes)
+    const links = [
+      { from: 'client', to: 'gateway' },
+      { from: 'gateway', to: 'worker_1' },
+      { from: 'gateway', to: 'worker_2' },
+      { from: 'worker_1', to: 'cache' },
+      { from: 'worker_1', to: 'database' },
+      { from: 'worker_2', to: 'cache' },
+      { from: 'worker_2', to: 'database' },
+      { from: 'cache', to: 'database' }
+    ];
+
+    // Flying Particles
+    const particles = [];
+    const shockwaves = [];
+    let totalTracesCount = 0;
+    let lastFrameTime = performance.now();
+    let frameCount = 0;
+    let currentFps = 60;
+
+    function resizeCanvas() {
+      const rect = container.getBoundingClientRect();
+      width = rect.width;
+      height = rect.height;
+      dpr = window.devicePixelRatio || 1;
+
+      canvas.width = width * dpr;
+      canvas.height = height * dpr;
+      ctx.scale(dpr, dpr);
+    }
+    window.addEventListener('resize', resizeCanvas);
+    resizeCanvas();
+
+    function getNodeCoords(nodeKey) {
+      const n = nodes[nodeKey];
+      if (!n) return { x: 0, y: 0 };
+      return { x: n.x * width, y: n.y * height };
+    }
+
+    // Bézier Path helper
+    function getCurvePoint(p0, p1, t) {
+      // Smooth horizontal curve
+      const cx1 = p0.x + (p1.x - p0.x) * 0.5;
+      const cy1 = p0.y;
+      const cx2 = p0.x + (p1.x - p0.x) * 0.5;
+      const cy2 = p1.y;
+
+      const u = 1 - t;
+      const tt = t * t;
+      const uu = u * u;
+      const uuu = uu * u;
+      const ttt = tt * t;
+
+      return {
+        x: uuu * p0.x + 3 * uu * t * cx1 + 3 * u * tt * cx2 + ttt * p1.x,
+        y: uuu * p0.y + 3 * uu * t * cy1 + 3 * u * tt * cy2 + ttt * p1.y
+      };
+    }
+
+    // Spawn Particle from Trace
+    function spawnParticleFromTrace(trace) {
+      totalTracesCount++;
+      document.getElementById('canvas-total-traces').innerText = totalTracesCount.toLocaleString();
+
+      // Determine segments based on steps
+      const pathSegments = [];
+      for (let i = 0; i < trace.steps.length - 1; i++) {
+        const fromNode = trace.steps[i].node;
+        const toNode = trace.steps[i + 1].node;
+        if (fromNode && toNode && nodes[fromNode] && nodes[toNode]) {
+          pathSegments.push({ from: fromNode, to: toNode });
+        }
+      }
+
+      // If WAF blocked right at gateway
+      if (trace.outcome === 'waf_blocked') {
+        pathSegments.length = 0;
+        pathSegments.push({ from: 'client', to: 'gateway' });
+      }
+
+      let color = '#06B6D4'; // Blue default
+      if (trace.outcome === 'cache_hit') color = '#10B981'; // Green
+      if (trace.outcome === 'waf_blocked') color = '#F43F5E'; // Red
+      if (trace.isAudience) color = '#F59E0B'; // Gold
+
+      particles.push({
+        trace,
+        segments: pathSegments,
+        segmentIndex: 0,
+        t: 0,
+        speed: 0.035 + Math.random() * 0.015,
+        color,
+        isAudience: trace.isAudience,
+        label: trace.clientLabel || '',
+        trail: []
+      });
+
+      // Sound FX trigger
+      if (trace.isAudience) {
+        AudioEngine.play('audience');
+      } else {
+        AudioEngine.play(trace.outcome);
+      }
+    }
+
+    // Shockwave for WAF blocked collision
+    function addShockwave(x, y, color = '#F43F5E') {
+      shockwaves.push({ x, y, radius: 4, maxRadius: 36, alpha: 1, color });
+    }
+
+    // --- Main Animation Loop (60 FPS) ---
+    function render() {
+      const now = performance.now();
+      frameCount++;
+      if (now - lastFrameTime >= 1000) {
+        currentFps = frameCount;
+        frameCount = 0;
+        lastFrameTime = now;
+        document.getElementById('canvas-fps').innerText = currentFps;
+      }
+
+      ctx.clearRect(0, 0, width, height);
+
+      // 1. Draw Links (Fiber optic pipes)
+      for (const link of links) {
+        const p0 = getNodeCoords(link.from);
+        const p1 = getNodeCoords(link.to);
+        const sourceActive = nodes[link.from].active;
+        const targetActive = nodes[link.to].active;
+        const isOffline = !sourceActive || !targetActive;
+
+        ctx.beginPath();
+        ctx.moveTo(p0.x, p0.y);
+        ctx.bezierCurveTo(
+          p0.x + (p1.x - p0.x) * 0.5, p0.y,
+          p0.x + (p1.x - p0.x) * 0.5, p1.y,
+          p1.x, p1.y
+        );
+
+        if (isOffline) {
+          ctx.strokeStyle = 'rgba(239, 68, 68, 0.2)';
+          ctx.lineWidth = 1.5;
+          ctx.setLineDash([4, 6]);
+        } else {
+          ctx.strokeStyle = 'rgba(255, 255, 255, 0.08)';
+          ctx.lineWidth = 2;
+          ctx.setLineDash([]);
+        }
+        ctx.stroke();
+        ctx.setLineDash([]);
+      }
+
+      // 2. Draw Nodes
+      for (const key of Object.keys(nodes)) {
+        const n = nodes[key];
+        const { x, y } = getNodeCoords(key);
+
+        ctx.save();
+        ctx.beginPath();
+        ctx.arc(x, y, 22, 0, Math.PI * 2);
+
+        if (!n.active) {
+          // Dead / Offline Node
+          ctx.fillStyle = '#1E1E24';
+          ctx.strokeStyle = '#F43F5E';
+          ctx.lineWidth = 2.5;
+          ctx.setLineDash([3, 3]);
+          ctx.stroke();
+          ctx.fill();
+
+          // Red X
+          ctx.strokeStyle = '#F43F5E';
+          ctx.lineWidth = 2;
+          ctx.beginPath();
+          ctx.moveTo(x - 8, y - 8); ctx.lineTo(x + 8, y + 8);
+          ctx.moveTo(x + 8, y - 8); ctx.lineTo(x - 8, y + 8);
+          ctx.stroke();
+        } else {
+          // Active Node Glowing Circle
+          const grad = ctx.createRadialGradient(x, y, 2, x, y, 26);
+          grad.addColorStop(0, n.color + '44');
+          grad.addColorStop(0.7, '#0D1117');
+          grad.addColorStop(1, '#131822');
+          ctx.fillStyle = grad;
+          ctx.strokeStyle = n.color;
+          ctx.lineWidth = 2;
+          ctx.stroke();
+          ctx.fill();
+
+          // Inner glowing core
+          ctx.beginPath();
+          ctx.arc(x, y, 6, 0, Math.PI * 2);
+          ctx.fillStyle = n.color;
+          ctx.shadowColor = n.color;
+          ctx.shadowBlur = 10;
+          ctx.fill();
+        }
+        ctx.restore();
+
+        // Node Label & Subtext
+        ctx.save();
+        ctx.font = 'bold 11px "JetBrains Mono", sans-serif';
+        ctx.textAlign = 'center';
+        ctx.fillStyle = n.active ? '#F1F5F9' : '#EF4444';
+        ctx.fillText(n.label, x, y - 30);
+
+        ctx.font = '10px "Vazirmatn", sans-serif';
+        ctx.fillStyle = n.active ? '#94A3B8' : '#71717A';
+        ctx.fillText(n.sub, x, y + 36);
+        ctx.restore();
+      }
+
+      // 3. Update & Draw Shockwaves
+      for (let i = shockwaves.length - 1; i >= 0; i--) {
+        const sw = shockwaves[i];
+        sw.radius += 1.8;
+        sw.alpha -= 0.04;
+        if (sw.alpha <= 0 || sw.radius >= sw.maxRadius) {
+          shockwaves.splice(i, 1);
+          continue;
+        }
+
+        ctx.save();
+        ctx.beginPath();
+        ctx.arc(sw.x, sw.y, sw.radius, 0, Math.PI * 2);
+        ctx.strokeStyle = sw.color;
+        ctx.globalAlpha = sw.alpha;
+        ctx.lineWidth = 2.5;
+        ctx.shadowColor = sw.color;
+        ctx.shadowBlur = 12;
+        ctx.stroke();
+        ctx.restore();
+      }
+
+      // 4. Update & Draw Particles
+      document.getElementById('canvas-particles-count').innerText = particles.length;
+
+      for (let i = particles.length - 1; i >= 0; i--) {
+        const p = particles[i];
+        if (p.segmentIndex >= p.segments.length) {
+          particles.splice(i, 1);
+          continue;
+        }
+
+        const seg = p.segments[p.segmentIndex];
+        const p0 = getNodeCoords(seg.from);
+        const p1 = getNodeCoords(seg.to);
+
+        p.t += p.speed;
+        const pos = getCurvePoint(p0, p1, Math.min(1, p.t));
+
+        // Save trail
+        p.trail.unshift({ x: pos.x, y: pos.y });
+        if (p.trail.length > 8) p.trail.pop();
+
+        // Draw trail
+        for (let j = 0; j < p.trail.length; j++) {
+          const pt = p.trail[j];
+          const alpha = (1 - j / p.trail.length) * 0.45;
+          ctx.beginPath();
+          ctx.arc(pt.x, pt.y, Math.max(1, 3.5 - j * 0.4), 0, Math.PI * 2);
+          ctx.fillStyle = p.color;
+          ctx.globalAlpha = alpha;
+          ctx.fill();
+        }
+        ctx.globalAlpha = 1.0;
+
+        // Draw head
+        ctx.save();
+        ctx.beginPath();
+        ctx.arc(pos.x, pos.y, p.isAudience ? 5.5 : 4, 0, Math.PI * 2);
+        ctx.fillStyle = p.color;
+        ctx.shadowColor = p.color;
+        ctx.shadowBlur = p.isAudience ? 18 : 10;
+        ctx.fill();
+
+        // Audience floating name pill
+        if (p.isAudience && p.label) {
+          ctx.font = 'bold 9px "Vazirmatn", sans-serif';
+          ctx.fillStyle = '#F59E0B';
+          ctx.textAlign = 'center';
+          ctx.fillText(`⚡ ${p.label}`, pos.x, pos.y - 10);
+        }
+        ctx.restore();
+
+        // Advance segment
+        if (p.t >= 1) {
+          p.t = 0;
+          p.segmentIndex++;
+
+          // If reached destination or blocked
+          if (p.segmentIndex >= p.segments.length) {
+            if (p.trace.outcome === 'waf_blocked') {
+              const dest = getNodeCoords('gateway');
+              addShockwave(dest.x, dest.y, '#F43F5E');
+            }
+            particles.splice(i, 1);
+          }
+        }
+      }
+
+      requestAnimationFrame(render);
+    }
+    requestAnimationFrame(render);
+
+    // Click on Canvas to Inspect Node
+    canvas.addEventListener('click', (e) => {
+      const rect = canvas.getBoundingClientRect();
+      const clickX = e.clientX - rect.left;
+      const clickY = e.clientY - rect.top;
+
+      for (const key of Object.keys(nodes)) {
+        const { x, y } = getNodeCoords(key);
+        const dist = Math.hypot(clickX - x, clickY - y);
+        if (dist <= 30) {
+          inspectNodeState(key);
+          return;
+        }
+      }
+    });
+
+    function inspectNodeState(nodeKey) {
+      const node = nodes[nodeKey];
+      const data = {
+        nodeId: node.id,
+        label: node.label,
+        sub: node.sub,
+        active: node.active,
+        timestamp: new Date().toISOString(),
+        description: `وضعیت نود ${node.label} در کلاستر سورن`
+      };
+      displayJsonInspect(`node_${nodeKey}`, data);
+    }
+
+    // --- WebSocket Telemetry Receiver ---
+    let ws;
+    function connectWs() {
       const proto = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
       ws = new WebSocket(`${proto}//${window.location.host}/ws`);
 
       ws.onopen = () => {
         ws.send(JSON.stringify({ action: "subscribe_dashboard" }));
-        console.log("[HUD] WebSocket Telemetry Stream Attached");
+        console.log("[HUD] Attached to telemetry stream");
       };
 
       ws.onmessage = (event) => {
         try {
           const msg = JSON.parse(event.data);
-          handleEvent(msg);
-        } catch {}
+          handleWsEvent(msg);
+        } catch (e) {
+          console.error(e);
+        }
       };
 
       ws.onclose = () => {
-        setTimeout(connectTelemetry, 2000);
+        setTimeout(connectWs, 2000);
       };
     }
-    connectTelemetry();
+    connectWs();
 
-    function handleEvent(msg) {
-      if (msg.event === "telemetry:heartbeat") {
+    let lastSelectedTrace = null;
+
+    function handleWsEvent(msg) {
+      if (msg.event === 'telemetry:heartbeat') {
         updateHeartbeat(msg.data);
-      } else if (msg.event === "telemetry:db_txn") {
-        renderDbWaterfall(msg.data);
-      } else if (msg.event === "telemetry:threat_detected") {
-        renderThreatEvent(msg.data);
+      } else if (msg.event === 'telemetry:trace_batch') {
+        handleTraceBatch(msg.data);
+      } else if (msg.event === 'telemetry:cluster_alert') {
+        handleClusterAlert(msg.data);
+      } else if (msg.event === 'telemetry:threat_detected') {
+        handleThreatAlert(msg.data);
+      } else if (msg.event === 'telemetry:cluster_state') {
+        updateClusterState(msg.data);
+      } else if (msg.event === 'audience:joined') {
+        AudioEngine.play('audience');
+        const term = document.getElementById('terminal-stream');
+        const row = document.createElement('div');
+        row.className = 'flex items-center justify-between text-brand-gold bg-brand-amber/15 px-2.5 py-1.5 rounded-lg border border-brand-amber/40 font-bold';
+        row.innerHTML = `
+          <span>🎉 [AUDIENCE DEVICE CONNECTED] ${msg.data.clientName}</span>
+          <span class="text-[10px] font-mono text-brand-gold">ID: ${msg.data.clientId}</span>
+        `;
+        term.prepend(row);
+        const clientCoords = getNodeCoords('client');
+        addShockwave(clientCoords.x, clientCoords.y, '#F59E0B');
       }
     }
 
     function updateHeartbeat(data) {
-      document.getElementById('stat-ws').innerText = data.activeWsClients;
-      document.getElementById('stat-uptime').innerText = formatUptime(data.uptimeSeconds);
-      document.getElementById('stat-memory').innerText = `${data.memoryRssMb} MB`;
-      document.getElementById('stat-requests').innerText = data.totalRequests.toLocaleString();
+      document.getElementById('stat-rps').innerText = (data.rps || 0).toLocaleString();
+      document.getElementById('stat-ws').innerText = `${data.activeWsClients} Device(s)`;
 
-      const rps = data.rps || 0;
-      document.getElementById('current-rps').innerText = rps.toLocaleString();
-
-      if (rps > peakRps) {
-        peakRps = rps;
-        document.getElementById('peak-rps').innerText = peakRps.toLocaleString();
-      }
-
-      chartHistory.shift();
-      chartHistory.push(rps);
-
-      if (data.rowCounts) {
-        document.getElementById('count-products').innerText = data.rowCounts.productsCount;
-        document.getElementById('count-orders').innerText = data.rowCounts.ordersCount;
-        document.getElementById('count-items').innerText = data.rowCounts.itemsCount;
+      if (data.cluster) {
+        updateClusterState(data.cluster);
       }
     }
 
-    function formatUptime(seconds) {
-      const h = Math.floor(seconds / 3600).toString().padStart(2, '0');
-      const m = Math.floor((seconds % 3600) / 60).toString().padStart(2, '0');
-      const s = (seconds % 60).toString().padStart(2, '0');
-      return `${h}:${m}:${s}`;
+    function updateClusterState(state) {
+      nodes.worker_1.active = state.worker1;
+      nodes.worker_2.active = state.worker2;
+      nodes.cache.active = state.cacheEnabled;
+
+      // Update Kill Worker 1 Button State
+      const btnKill = document.getElementById('btn-kill-worker');
+      const badgeKill = document.getElementById('btn-kill-badge');
+      const textKill = document.getElementById('btn-kill-text');
+
+      if (!state.worker1) {
+        badgeKill.innerText = 'OFFLINE';
+        badgeKill.className = 'px-1.5 py-0.5 rounded text-[9px] font-mono bg-telemetry-rose/20 text-telemetry-rose border border-telemetry-rose/40 animate-pulse';
+        textKill.innerText = 'بازیابی سلامت Worker-1';
+      } else {
+        badgeKill.innerText = 'ONLINE';
+        badgeKill.className = 'px-1.5 py-0.5 rounded text-[9px] font-mono bg-telemetry-emerald/10 text-telemetry-emerald border border-telemetry-emerald/20';
+        textKill.innerText = 'از دسترس خارج کردن Worker-1';
+      }
+
+      // Update Cache Button State
+      const badgeCache = document.getElementById('btn-cache-badge');
+      const statCache = document.getElementById('stat-cache-badge');
+      if (state.cacheEnabled) {
+        badgeCache.innerText = 'ACTIVE';
+        badgeCache.className = 'px-1.5 py-0.5 rounded text-[9px] font-mono bg-telemetry-emerald/10 text-telemetry-emerald border border-telemetry-emerald/20';
+        statCache.innerHTML = '<span class="w-1.5 h-1.5 rounded-full bg-telemetry-emerald"></span> ACTIVE';
+      } else {
+        badgeCache.innerText = 'BYPASSED';
+        badgeCache.className = 'px-1.5 py-0.5 rounded text-[9px] font-mono bg-telemetry-amber/20 text-telemetry-amber border border-telemetry-amber/40';
+        statCache.innerHTML = '<span class="w-1.5 h-1.5 rounded-full bg-telemetry-amber"></span> BYPASSED';
+      }
+
+      // p95 latency
+      if (state.p95LatencyUs !== undefined) {
+        document.getElementById('stat-p95').innerText = `${state.p95LatencyUs.toLocaleString()} µs`;
+      }
     }
 
-    // Render Database Trace Waterfall Card
-    function renderDbWaterfall(txn) {
-      document.getElementById('last-txn-id').innerText = `${txn.txnId} (${(txn.totalUs / 1000).toFixed(2)} ms)`;
-      const container = document.getElementById('trace-stream');
+    function handleTraceBatch(data) {
+      if (data.clusterState) {
+        updateClusterState(data.clusterState);
+      }
 
-      const card = document.createElement('div');
-      card.className = "p-4 bg-obsidian rounded-xl border border-telemetry-emerald/40 glow-border-emerald transition-all";
+      const traces = data.traces || [];
+      for (const trace of traces) {
+        spawnParticleFromTrace(trace);
+        appendTerminalRow(trace);
+      }
+    }
 
-      let stepsHtml = '';
-      txn.steps.forEach((step, idx) => {
-        const pct = Math.min(Math.max(Math.round((step.durationUs / txn.totalUs) * 100), 8), 100);
-        stepsHtml += `
-          <div>
-            <div class="flex justify-between text-slate-300 mb-0.5">
-              <span>${idx + 1}. ${step.name} <span class="text-slate-400 font-sans">(${step.details || ''})</span></span>
-              <span class="text-telemetry-emerald tabular-nums font-bold">${step.durationUs} µs</span>
-            </div>
-            <div class="w-full bg-surface-raised rounded-full h-1.5 overflow-hidden">
-              <div class="bg-telemetry-emerald h-full rounded-full" style="width: ${pct}%"></div>
-            </div>
-          </div>
-        `;
-      });
+    function handleClusterAlert(data) {
+      AudioEngine.play('kill_server');
+      const bar = document.getElementById('failover-alert-bar');
+      const dot = document.getElementById('failover-dot');
+      const msg = document.getElementById('failover-message');
 
-      card.innerHTML = `
-        <div class="flex items-center justify-between text-slate-400 pb-2 mb-3 border-b border-surface-border/60">
-          <span class="font-bold text-brand-amber">${txn.orderId} • ${txn.tableNumber}</span>
-          <span class="text-telemetry-emerald font-bold">${(txn.totalUs / 1000).toFixed(2)} ms</span>
+      if (data.type === 'NODE_KILLED') {
+        dot.className = 'w-2 h-2 rounded-full bg-telemetry-rose animate-ping';
+        msg.innerHTML = `<strong class="text-telemetry-rose">هشدار کلاستر:</strong> نود ${data.node} قطع شد! ترافیک آنی به ${data.survivingNode} هدایت شد.`;
+        container.classList.add('node-shake');
+        setTimeout(() => container.classList.remove('node-shake'), 600);
+      } else {
+        dot.className = 'w-2 h-2 rounded-full bg-telemetry-emerald';
+        msg.innerHTML = `<strong class="text-telemetry-emerald">بازیابی:</strong> نود ${data.node} مجدداً آنلاین شد.`;
+      }
+      document.getElementById('failover-time').innerText = new Date().toLocaleTimeString('fa-IR');
+    }
+
+    function handleThreatAlert(data) {
+      AudioEngine.play('waf_blocked');
+      const term = document.getElementById('terminal-stream');
+      const row = document.createElement('div');
+      row.className = 'flex items-center justify-between text-telemetry-rose bg-telemetry-rose/10 px-2.5 py-1 rounded border border-telemetry-rose/30 font-bold';
+      row.innerHTML = `
+        <span>[WAF SHIELD] ${data.type} • Origin: ${data.originIp}</span>
+        <span>${data.reason}</span>
+      `;
+      term.prepend(row);
+    }
+
+    // Terminal Stream Logger
+    function appendTerminalRow(trace) {
+      const term = document.getElementById('terminal-stream');
+      const row = document.createElement('div');
+      row.className = 'flex items-center justify-between text-slate-300 hover:bg-surface-raised/70 p-1 rounded cursor-pointer transition-colors';
+      row.onclick = () => displayJsonInspect(trace.id, trace);
+
+      const time = new Date(trace.timestamp).toLocaleTimeString('fa-IR');
+      let outcomeBadge = '<span class="text-telemetry-cyan font-bold">[DB]</span>';
+      if (trace.outcome === 'cache_hit') outcomeBadge = '<span class="text-telemetry-emerald font-bold">[CACHE]</span>';
+      if (trace.outcome === 'waf_blocked') outcomeBadge = '<span class="text-telemetry-rose font-bold">[WAF]</span>';
+
+      const audienceTag = trace.isAudience ? `<span class="text-brand-amber font-semibold">⚡ ${trace.clientLabel}</span>` : `<span class="text-slate-400">${trace.clientLabel}</span>`;
+
+      row.innerHTML = `
+        <div class="flex items-center gap-2">
+          <span class="text-slate-400 text-[10px]">${time}</span>
+          ${outcomeBadge}
+          <span class="text-slate-200">${trace.id}</span>
+          <span>•</span>
+          ${audienceTag}
         </div>
-        <div class="space-y-2 text-[11px]">
-          ${stepsHtml}
+        <div class="flex items-center gap-3">
+          <span class="text-slate-400 truncate max-w-[140px] text-[10px]">${trace.endpoint}</span>
+          <span class="text-slate-200 font-bold tabular-nums text-[11px]">${trace.totalDurationUs} µs</span>
         </div>
       `;
 
-      container.prepend(card);
-      if (container.children.length > 4) {
-        container.removeChild(container.lastChild);
+      term.prepend(row);
+      while (term.children.length > 40) {
+        term.removeChild(term.lastChild);
       }
     }
 
-    // Render Threat Incident Card (SOC Radar)
-    function renderThreatEvent(threat) {
-      totalThreats++;
-      playThreatAlert();
+    // JSON Inspector Viewer
+    function displayJsonInspect(id, json) {
+      lastSelectedTrace = json;
+      document.getElementById('inspect-trace-id').innerText = '#' + id;
+      document.getElementById('inspect-json').innerText = JSON.stringify(json, null, 2);
+    }
 
-      const badge = document.getElementById('threat-badge');
-      badge.innerText = `${totalThreats} INCIDENTS DETECTED`;
-      badge.className = "px-2 py-0.5 rounded text-[10px] font-mono bg-telemetry-rose/20 text-telemetry-rose font-bold border border-telemetry-rose/40 animate-pulse";
-
-      const socIndicator = document.getElementById('soc-indicator');
-      socIndicator.className = "w-2.5 h-2.5 rounded-full bg-telemetry-rose animate-ping";
-      setTimeout(() => {
-        socIndicator.className = "w-2.5 h-2.5 rounded-full bg-telemetry-emerald";
-      }, 3500);
-
-      const socCard = document.getElementById('soc-card');
-      socCard.classList.add('glow-border-rose');
-      setTimeout(() => socCard.classList.remove('glow-border-rose'), 3500);
-
-      const container = document.getElementById('threat-stream');
-      const card = document.createElement('div');
-      card.className = "p-3.5 bg-telemetry-rose/10 border border-telemetry-rose/40 rounded-xl text-xs font-mono";
-
-      card.innerHTML = `
-        <div class="flex items-center justify-between text-telemetry-rose font-bold mb-1">
-          <span>⚠️ ${threat.type}</span>
-          <span class="px-1.5 py-0.5 bg-telemetry-rose/20 rounded text-[10px]">HTTP ${threat.status}</span>
-        </div>
-        <div class="text-[11px] text-slate-300 space-y-0.5">
-          <div>Attacker Origin: <span class="text-amber-300">${threat.originIp}</span> ➔ ${threat.endpoint || '/api/v1'}</div>
-          <div>Audit Reason: <span class="text-slate-200">${threat.reason}</span></div>
-          ${threat.enforcedAction ? `<div class="text-telemetry-emerald mt-1 font-sans">Shield Defense: ${threat.enforcedAction}</div>` : ''}
-          <div class="text-[10px] text-slate-400 mt-1">${new Date(threat.timestamp).toLocaleTimeString()}</div>
-        </div>
-      `;
-
-      // Clear empty placeholder if first threat
-      if (container.innerText.includes("Zero active intrusions")) {
-        container.innerHTML = '';
-      }
-
-      container.prepend(card);
-      if (container.children.length > 5) {
-        container.removeChild(container.lastChild);
+    function copyCurrentTrace() {
+      if (lastSelectedTrace) {
+        navigator.clipboard.writeText(JSON.stringify(lastSelectedTrace, null, 2));
+        alert('امضای تریس در کلیپ‌بورد کپی شد.');
       }
     }
 
-    // 60FPS Time-Series Canvas Chart Renderer
-    const chartCanvas = document.getElementById('traffic-chart');
-    const ctx = chartCanvas.getContext('2d');
+    // --- Interactive Stage Controls API Calls ---
 
-    function resizeChart() {
-      chartCanvas.width = chartCanvas.offsetWidth * window.devicePixelRatio;
-      chartCanvas.height = chartCanvas.offsetHeight * window.devicePixelRatio;
-    }
-    window.addEventListener('resize', resizeChart);
-    resizeChart();
-
-    function drawChart() {
-      const w = chartCanvas.width;
-      const h = chartCanvas.height;
-      ctx.clearRect(0, 0, w, h);
-
-      // Draw subtle grid lines
-      ctx.strokeStyle = 'rgba(255, 255, 255, 0.04)';
-      ctx.lineWidth = 1;
-      for (let y = 0; y < h; y += h / 4) {
-        ctx.beginPath();
-        ctx.moveTo(0, y);
-        ctx.lineTo(w, y);
-        ctx.stroke();
+    // 1. Kill/Restore Worker 1
+    async function toggleWorker1() {
+      const isAlive = nodes.worker_1.active;
+      const endpoint = isAlive ? '/api/v1/cluster/worker/kill?worker=worker_1' : '/api/v1/cluster/worker/restore?worker=worker_1';
+      try {
+        const res = await fetch(endpoint, { method: 'POST' });
+        const data = await res.json();
+        updateClusterState(data.state);
+      } catch (e) {
+        console.error(e);
       }
+    }
 
-      // Max scale calculation
-      const maxVal = Math.max(...chartHistory, 20);
-      const stepX = w / (chartHistory.length - 1);
+    // 2. Toggle L1 Cache
+    async function toggleCacheMode() {
+      try {
+        const res = await fetch('/api/v1/cluster/cache/toggle', { method: 'POST' });
+        const data = await res.json();
+        nodes.cache.active = data.cacheEnabled;
+      } catch (e) {
+        console.error(e);
+      }
+    }
 
-      // Draw Area Fill
-      ctx.beginPath();
-      ctx.moveTo(0, h);
-      chartHistory.forEach((val, idx) => {
-        const x = idx * stepX;
-        const y = h - (val / maxVal) * (h * 0.8) - 10;
-        ctx.lineTo(x, y);
+    // 3. Fire Simulated Attack
+    async function fireSimulatedAttack() {
+      try {
+        await fetch('/api/v1/products?sqli=1&filter=\' OR 1=1--', {
+          headers: { 'X-Audience-Name': 'نفوذگر آزمایشی (Stage Demo)' }
+        });
+      } catch (e) {}
+    }
+
+    // 4. Traffic Burst (50 requests)
+    async function fireTrafficBurst() {
+      for (let i = 0; i < 50; i++) {
+        fetch(`/api/v1/products?category=coffee&burst=${i+1}`, {
+          headers: {
+            'X-Audience-Name': `BurstWorker #${(i % 5) + 1}`,
+            'X-Burst-Index': String(i + 1)
+          }
+        }).catch(() => {});
+        if (i % 5 === 0) await new Promise(r => setTimeout(r, 20));
+      }
+    }
+
+    // --- Dynamic QR Code Generator with Auto LAN IP & Custom URL ---
+    let qrInstance = null;
+
+    function renderQr(targetUrl) {
+      document.getElementById('qr-url-text').innerText = targetUrl;
+      document.getElementById('custom-qr-input').value = targetUrl;
+
+      const box = document.getElementById("qrcode");
+      box.innerHTML = "";
+      qrInstance = new QRCode(box, {
+        text: targetUrl,
+        width: 130,
+        height: 130,
+        colorDark: "#07090E",
+        colorLight: "#FFFFFF",
+        correctLevel: QRCode.CorrectLevel.M
       });
-      ctx.lineTo(w, h);
-      ctx.closePath();
-
-      const grad = ctx.createLinearGradient(0, 0, 0, h);
-      grad.addColorStop(0, 'rgba(16, 185, 129, 0.25)');
-      grad.addColorStop(1, 'rgba(16, 185, 129, 0.0)');
-      ctx.fillStyle = grad;
-      ctx.fill();
-
-      // Draw Line
-      ctx.beginPath();
-      chartHistory.forEach((val, idx) => {
-        const x = idx * stepX;
-        const y = h - (val / maxVal) * (h * 0.8) - 10;
-        if (idx === 0) ctx.moveTo(x, y);
-        else ctx.lineTo(x, y);
-      });
-      ctx.strokeStyle = '#10B981';
-      ctx.lineWidth = 2.5 * window.devicePixelRatio;
-      ctx.stroke();
-
-      requestAnimationFrame(drawChart);
     }
-    requestAnimationFrame(drawChart);
+
+    function applyCustomQrUrl() {
+      const input = document.getElementById('custom-qr-input').value.trim();
+      if (input) {
+        renderQr(input);
+      }
+    }
+
+    window.addEventListener('DOMContentLoaded', async () => {
+      let host = window.location.hostname;
+      const port = window.location.port || '4000';
+      let joinUrl = `http://${host}:${port}/join`;
+
+      // If opened on localhost / 127.0.0.1, ask server for actual LAN IP so phones on WiFi can open it!
+      if (host === 'localhost' || host === '127.0.0.1') {
+        try {
+          const res = await fetch('/api/v1/health');
+          const data = await res.json();
+          if (data.localIp && data.localIp !== 'localhost') {
+            joinUrl = `http://${data.localIp}:${port}/join`;
+          }
+        } catch (e) {}
+      }
+
+      renderQr(joinUrl);
+    });
   </script>
+
 </body>
 </html>
