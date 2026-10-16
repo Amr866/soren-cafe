@@ -395,8 +395,16 @@
           this.ctx.resume();
         }
       },
+      lastPlayTime: 0,
       play(type) {
         if (!this.enabled) return;
+        const now = performance.now();
+        // Throttle normal blips so Web Audio never clips or freezes browser main thread
+        if (type !== 'kill_server' && type !== 'waf_blocked' && type !== 'audience') {
+          if (now - this.lastPlayTime < 65) return;
+        }
+        this.lastPlayTime = now;
+
         this.init();
         const t = this.ctx.currentTime;
         const osc = this.ctx.createOscillator();
@@ -537,10 +545,16 @@
       };
     }
 
+    const MAX_ACTIVE_PARTICLES = 120;
+
     // Spawn Particle from Trace
     function spawnParticleFromTrace(trace) {
-      totalTracesCount++;
-      document.getElementById('canvas-total-traces').innerText = totalTracesCount.toLocaleString();
+      // Buffer safety check: prevent frame drops by bounding active particles
+      if (particles.length >= MAX_ACTIVE_PARTICLES) {
+        if (!trace.isAudience) return;
+        const cullIndex = particles.findIndex(p => !p.isAudience);
+        if (cullIndex !== -1) particles.splice(cullIndex, 1);
+      }
 
       // Determine segments based on steps
       const pathSegments = [];
@@ -729,29 +743,32 @@
         p.t += p.speed;
         const pos = getCurvePoint(p0, p1, Math.min(1, p.t));
 
-        // Save trail
+        // Save trail (adaptive length to maintain 60 FPS)
         p.trail.unshift({ x: pos.x, y: pos.y });
-        if (p.trail.length > 8) p.trail.pop();
+        const maxTrail = particles.length > 50 ? 4 : 7;
+        if (p.trail.length > maxTrail) p.trail.pop();
 
         // Draw trail
         for (let j = 0; j < p.trail.length; j++) {
           const pt = p.trail[j];
           const alpha = (1 - j / p.trail.length) * 0.45;
           ctx.beginPath();
-          ctx.arc(pt.x, pt.y, Math.max(1, 3.5 - j * 0.4), 0, Math.PI * 2);
+          ctx.arc(pt.x, pt.y, Math.max(1, 3.2 - j * 0.4), 0, Math.PI * 2);
           ctx.fillStyle = p.color;
           ctx.globalAlpha = alpha;
           ctx.fill();
         }
         ctx.globalAlpha = 1.0;
 
-        // Draw head
+        // Draw head (apply expensive shadowBlur only to audience or under low density)
         ctx.save();
         ctx.beginPath();
-        ctx.arc(pos.x, pos.y, p.isAudience ? 5.5 : 4, 0, Math.PI * 2);
+        ctx.arc(pos.x, pos.y, p.isAudience ? 5.5 : 3.5, 0, Math.PI * 2);
         ctx.fillStyle = p.color;
-        ctx.shadowColor = p.color;
-        ctx.shadowBlur = p.isAudience ? 18 : 10;
+        if (p.isAudience || particles.length < 35) {
+          ctx.shadowColor = p.color;
+          ctx.shadowBlur = p.isAudience ? 18 : 8;
+        }
         ctx.fill();
 
         // Audience floating name pill
@@ -919,10 +936,21 @@
         updateClusterState(data.clusterState);
       }
 
+      if (typeof data.count === 'number') {
+        totalTracesCount += data.count;
+        document.getElementById('canvas-total-traces').innerText = totalTracesCount.toLocaleString();
+      }
+
       const traces = data.traces || [];
-      for (const trace of traces) {
-        spawnParticleFromTrace(trace);
-        appendTerminalRow(trace);
+      const particleLimit = Math.min(traces.length, 25);
+      for (let i = 0; i < particleLimit; i++) {
+        spawnParticleFromTrace(traces[i]);
+      }
+
+      // Add to terminal stream with a max of 3 items per batch to prevent DOM layout thrashing
+      const terminalLimit = Math.min(traces.length, 3);
+      for (let i = 0; i < terminalLimit; i++) {
+        appendTerminalRow(traces[i]);
       }
     }
 

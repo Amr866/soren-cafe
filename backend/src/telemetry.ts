@@ -262,13 +262,38 @@ class TelemetryEngine {
   private flushBatch() {
     if (this.pendingBatch.length === 0 || !this.broadcaster) return;
 
-    const tracesToSend = [...this.pendingBatch];
-    this.pendingBatch = [];
+    const totalBatchCount = this.pendingBatch.length;
+    let tracesToSend: TraceRecord[];
 
+    // Under normal traffic (<30 traces/50ms), send everything.
+    // Under heavy load (10k request burst), adaptively sample visual traces to keep WebSocket bandwidth lightweight and browser at 60 FPS
+    if (totalBatchCount <= 30) {
+      tracesToSend = this.pendingBatch;
+    } else {
+      // Priority 1: Never drop audience or security events
+      const priorityTraces = this.pendingBatch.filter(
+        (t) => t.isAudience || t.outcome === "waf_blocked" || t.status >= 400
+      );
+      // Priority 2: Evenly sample normal high-speed requests
+      const normalTraces = this.pendingBatch.filter(
+        (t) => !t.isAudience && t.outcome !== "waf_blocked" && t.status < 400
+      );
+
+      const remainingSlots = Math.max(5, 30 - priorityTraces.length);
+      const step = Math.max(1, Math.floor(normalTraces.length / remainingSlots));
+      const sampledNormal: TraceRecord[] = [];
+      for (let i = 0; i < normalTraces.length && sampledNormal.length < remainingSlots; i += step) {
+        sampledNormal.push(normalTraces[i]);
+      }
+
+      tracesToSend = [...priorityTraces, ...sampledNormal];
+    }
+
+    this.pendingBatch = [];
     const clusterState = this.getClusterState();
 
     this.broadcaster("telemetry:trace_batch", {
-      count: tracesToSend.length,
+      count: totalBatchCount,
       traces: tracesToSend,
       clusterState,
     });
