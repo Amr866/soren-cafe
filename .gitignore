@@ -16,3 +16,9 @@ bun.lockb
 *.log
 .DS_Store
 Thumbs.db
+
+# Knowledge Graph & Assistant artifacts (Graphify & Ponytail)
+graphify-out/
+.graphify*
+.ponytail*
+
