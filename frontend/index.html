@@ -179,7 +179,7 @@
             type="button"
             aria-label="باز و بسته کردن منو"
             aria-expanded="false"
-            aria-controls="mobile-panel"
+            aria-controls="soren-offcanvas-drawer"
           >
             <svg
               viewBox="0 0 24 24"
@@ -230,6 +230,57 @@
         </div>
       </div>
     </header>
+
+    <!-- کشوی ناوبری ثانویه و اطلاعات کافه (Mobile Off-Canvas Drawer) -->
+    <div class="soren-drawer-backdrop" id="soren-drawer-backdrop" aria-hidden="true"></div>
+    <aside class="soren-offcanvas-drawer" id="soren-offcanvas-drawer" aria-label="منوی اطلاعات کافه" aria-hidden="true">
+      <div class="drawer-header">
+        <div class="drawer-brand">
+          <span class="drawer-title">کافه سورن</span>
+          <span class="drawer-subtitle">برشته‌کاری تخصصی و بیکری</span>
+        </div>
+        <button type="button" class="drawer-close-btn" id="drawer-close-btn" aria-label="بستن منو">
+          ✕
+        </button>
+      </div>
+
+      <div class="drawer-body">
+        <!-- وضعیت زنده باریستا -->
+        <div class="drawer-barista-status">
+          <span class="status-pulse-dot"></span>
+          <span class="status-text" id="drawer-barista-text">باریستا: آماده پذیرش سفارش حضوری و بیرون‌بر ☕</span>
+        </div>
+
+        <!-- ناوبری ثانویه -->
+        <nav class="drawer-nav" aria-label="لینک‌های کافه">
+          <a href="#about-soren" class="drawer-nav-item">
+            <span class="nav-item-icon">☕</span>
+            <span>داستان و فلسفه سورن</span>
+          </a>
+          <a href="./pages/about.html" class="drawer-nav-item">
+            <span class="nav-item-icon">✦</span>
+            <span>درباره ما و تیم برشته‌کاری</span>
+          </a>
+          <a href="#menu" class="drawer-nav-item">
+            <span class="nav-item-icon">📋</span>
+            <span>مشاهده کاتالوگ محصولات</span>
+          </a>
+        </nav>
+
+        <!-- ساعات کاری و تماس -->
+        <div class="drawer-info-block">
+          <h4 class="drawer-info-title">ساعات پذیرایی حضوری</h4>
+          <p class="drawer-info-text">همه‌روزه از ساعت ۸:۰۰ صبح الی ۲۳:۳۰ شب</p>
+          <p class="drawer-info-text">سفارش بیرون‌بر و اسنپ‌باکس فعال است</p>
+        </div>
+
+        <div class="drawer-info-block">
+          <h4 class="drawer-info-title">تماس و شبکه‌های اجتماعی</h4>
+          <a href="tel:02188888888" class="drawer-contact-link">📞 تماس با کافه</a>
+          <a href="https://instagram.com" target="_blank" rel="noopener noreferrer" class="drawer-contact-link">📸 اینستاگرام سورن</a>
+        </div>
+      </div>
+    </aside>
 
     <main>
       <!-- ==================== Hero ==================== -->

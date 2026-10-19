@@ -456,40 +456,182 @@ if (typeof window !== "undefined") {
 })();
 
 /* ========================================
-   2. منوی موبایل
+   2. کشوی ناوبری ثانویه و منوی موبایل (Off-Canvas Drawer)
    ======================================== */
-(function initMobileMenu() {
-  const panel = document.getElementById("mobile-panel");
+(function initOffcanvasDrawer() {
+  const drawer = document.getElementById("soren-offcanvas-drawer");
+  const backdrop = document.getElementById("soren-drawer-backdrop");
   const menuBtn = document.querySelector(".mobile-menu-button");
+  const closeBtn = document.getElementById("drawer-close-btn");
+  const drawerBaristaText = document.getElementById("drawer-barista-text");
   const searchBtn = document.querySelector(".mobile-search");
+  const panel = document.getElementById("mobile-panel");
   const searchForm = document.querySelector(".mobile-search-form");
   const searchInput = document.getElementById("mobile-search-input");
 
-  if (!panel || !menuBtn) return;
-
-  function setOpen(isOpen) {
-    panel.classList.toggle("open", isOpen);
-    menuBtn.setAttribute("aria-expanded", String(isOpen));
+  function openDrawer() {
+    if (!drawer || !backdrop) return;
+    drawer.classList.add("is-open");
+    backdrop.classList.add("is-open");
+    drawer.setAttribute("aria-hidden", "false");
+    backdrop.setAttribute("aria-hidden", "false");
+    if (menuBtn) menuBtn.setAttribute("aria-expanded", "true");
+    document.body.style.overflow = "hidden";
   }
 
-  menuBtn.addEventListener("click", () => {
-    setOpen(!panel.classList.contains("open"));
-  });
+  function closeDrawer() {
+    if (!drawer || !backdrop) return;
+    drawer.classList.remove("is-open");
+    backdrop.classList.remove("is-open");
+    drawer.setAttribute("aria-hidden", "true");
+    backdrop.setAttribute("aria-hidden", "true");
+    if (menuBtn) menuBtn.setAttribute("aria-expanded", "false");
+    document.body.style.overflow = "";
+  }
 
-  if (searchBtn && searchInput) {
-    searchBtn.addEventListener("click", () => {
-      setOpen(true);
-      searchInput.focus({ preventScroll: true });
+  function toggleDrawer() {
+    if (!drawer) return;
+    if (drawer.classList.contains("is-open")) {
+      closeDrawer();
+    } else {
+      openDrawer();
+    }
+  }
+
+  if (menuBtn) {
+    menuBtn.addEventListener("click", (e) => {
+      e.preventDefault();
+      if (drawer) {
+        toggleDrawer();
+      } else if (panel) {
+        // Fallback for subpages with legacy panel
+        const isOpen = panel.classList.toggle("open");
+        menuBtn.setAttribute("aria-expanded", String(isOpen));
+      }
     });
   }
 
-  panel.addEventListener("click", (e) => {
-    if (e.target.closest("a")) setOpen(false);
+  if (closeBtn) {
+    closeBtn.addEventListener("click", (e) => {
+      e.preventDefault();
+      closeDrawer();
+    });
+  }
+
+  if (backdrop) {
+    backdrop.addEventListener("click", () => {
+      closeDrawer();
+    });
+  }
+
+  if (drawer) {
+    drawer.addEventListener("click", (e) => {
+      if (e.target.closest("a")) {
+        closeDrawer();
+      }
+    });
+
+    // بستن کشو با کشیدن به سمت راست در نمایشگرهای لمسی (Swipe to Dismiss)
+    let touchStartX = 0;
+    let touchStartY = 0;
+    drawer.addEventListener(
+      "touchstart",
+      (e) => {
+        touchStartX = e.changedTouches[0].clientX;
+        touchStartY = e.changedTouches[0].clientY;
+      },
+      { passive: true }
+    );
+
+    drawer.addEventListener(
+      "touchend",
+      (e) => {
+        const deltaX = e.changedTouches[0].clientX - touchStartX;
+        const deltaY = Math.abs(e.changedTouches[0].clientY - touchStartY);
+        // حرکت افقی به راست حداقل ۵۰ پیکسل با انحراف عمودی کمتر از ۴۰ پیکسل
+        if (deltaX > 50 && deltaY < 40) {
+          closeDrawer();
+        }
+      },
+      { passive: true }
+    );
+  }
+
+  // بستن با کلید Escape
+  document.addEventListener("keydown", (e) => {
+    if (e.key === "Escape") {
+      if (drawer && drawer.classList.contains("is-open")) {
+        closeDrawer();
+      } else if (panel && panel.classList.contains("open")) {
+        panel.classList.remove("open");
+        if (menuBtn) menuBtn.setAttribute("aria-expanded", "false");
+      }
+    }
   });
 
-  document.addEventListener("keydown", (e) => {
-    if (e.key === "Escape") setOpen(false);
-  });
+  // بستن خودکار در صورت تغییر اندازه پنجره به ابعاد دسکتاپ (>= 768px)
+  window.addEventListener(
+    "resize",
+    () => {
+      if (window.innerWidth >= 768 && drawer && drawer.classList.contains("is-open")) {
+        closeDrawer();
+      }
+    },
+    { passive: true }
+  );
+
+  // دکمه جست‌وجوی سریع موبایل در هدر
+  if (searchBtn) {
+    searchBtn.addEventListener("click", (e) => {
+      e.preventDefault();
+      const menuSection = document.getElementById("menu");
+      if (menuSection) {
+        menuSection.scrollIntoView({ behavior: "smooth" });
+        const filterInput =
+          document.getElementById("menu-quick-search") ||
+          document.querySelector(".menu-search input") ||
+          searchInput;
+        if (filterInput) {
+          setTimeout(() => {
+            try {
+              filterInput.focus({ preventScroll: true });
+            } catch (err) {}
+          }, 350);
+        }
+      } else if (panel && searchInput) {
+        panel.classList.add("open");
+        if (menuBtn) menuBtn.setAttribute("aria-expanded", "true");
+        searchInput.focus({ preventScroll: true });
+      }
+    });
+  }
+
+  // مدیریت وضعیت زنده باریستا از طریق وب‌سوکت
+  if (typeof SorenWS !== "undefined" && drawerBaristaText) {
+    SorenWS.on("connection:open", () => {
+      drawerBaristaText.textContent = "باریستا: آماده پذیرش سفارش حضوری و بیرون‌بر ☕";
+    });
+
+    SorenWS.on("connection:close", () => {
+      drawerBaristaText.textContent = "باریستا: ثبت آفلاین و همگام‌سازی ☕";
+    });
+
+    SorenWS.on("barista:status", (data) => {
+      if (data && data.text) {
+        drawerBaristaText.textContent = data.text;
+      }
+    });
+  }
+
+  // پشتیبانی از فرم جست‌وجوی منوی قدیم در صورت وجود
+  if (panel) {
+    panel.addEventListener("click", (e) => {
+      if (e.target.closest("a")) {
+        panel.classList.remove("open");
+        if (menuBtn) menuBtn.setAttribute("aria-expanded", "false");
+      }
+    });
+  }
 
   if (searchForm && searchInput) {
     searchForm.addEventListener("submit", (e) => {
@@ -502,7 +644,8 @@ if (typeof window !== "undefined") {
           const title = card.querySelector(".product-title")?.textContent.toLowerCase() || "";
           card.hidden = !title.includes(query);
         });
-        setOpen(false);
+        if (panel) panel.classList.remove("open");
+        if (menuBtn) menuBtn.setAttribute("aria-expanded", "false");
       }
     });
   }
