@@ -435,7 +435,7 @@
       <!-- ==================== Product Categories ==================== -->
       <section
         class="categories-section"
-        id="menu"
+        id="categories-overview"
         aria-labelledby="categories-heading"
       >
         <header class="categories-heading">
@@ -518,20 +518,54 @@
         </div>
       </section>
 
-      <!-- ==================== Featured Products ==================== -->
+      <!-- ==================== Single-Surface Menu Catalog ==================== -->
       <section
-        class="featured-products"
-        id="featured-products"
+        class="featured-products menu-catalog-section"
+        id="menu"
         aria-labelledby="featured-heading"
       >
+        <span id="featured-products" class="scroll-anchor" aria-hidden="true"></span>
         <header class="featured-heading">
           <span class="featured-eyebrow">پیشنهادهای ویژه سورن</span>
-          <h2 id="featured-heading">منتخب‌های <span>سورن</span></h2>
-          <p>طعم‌هایی که ارزش امتحان کردن دارن.</p>
+          <h2 id="featured-heading">منوی کاتالوگ <span>سورن</span></h2>
+          <p>طعم‌هایی که ارزش امتحان کردن دارن؛ دسته‌بندی دلخواه خود را فیلتر کنید.</p>
         </header>
 
-        <div class="featured-grid">
-          <article class="featured-card">
+        <!-- نوار تراشه‌های چسبان دسته‌بندی منو (Sticky Category Chips) -->
+        <nav class="category-chips-bar" id="category-chips" aria-label="دسته‌بندی‌های منوی سورن">
+          <div class="chips-scroll-track">
+            <button type="button" class="category-chip active" data-category="all" aria-pressed="true">
+              <span class="chip-icon">✦</span>
+              <span class="chip-name">همه آیتم‌ها</span>
+              <span class="chip-count">۱۸</span>
+            </button>
+            <button type="button" class="category-chip" data-category="coffee" aria-pressed="false">
+              <span class="chip-icon">☕</span>
+              <span class="chip-name">قهوه‌های تخصصی</span>
+              <span class="chip-count">۶</span>
+            </button>
+            <button type="button" class="category-chip" data-category="shakes" aria-pressed="false">
+              <span class="chip-icon">🥤</span>
+              <span class="chip-name">بار سرد و شیک‌ها</span>
+              <span class="chip-count">۶</span>
+            </button>
+            <button type="button" class="category-chip" data-category="cake" aria-pressed="false">
+              <span class="chip-icon">🍰</span>
+              <span class="chip-name">کیک و دسر روز</span>
+              <span class="chip-count">۶</span>
+            </button>
+          </div>
+        </nav>
+
+        <div class="featured-grid" id="catalog-products-grid">
+          <!-- 1. اسپرسو دبل -->
+          <article
+            class="featured-card"
+            data-id="prd_espresso_double"
+            data-name="اسپرسو دبل"
+            data-price="95000"
+            data-category="coffee"
+          >
             <img
               class="featured-image"
               src="./images/products/coffee/double-espresso.png"
@@ -554,28 +588,39 @@
                   <del>۱۲۰٬۰۰۰ تومان</del>
                   <strong>۹۵٬۰۰۰ <small>تومان</small></strong>
                 </div>
-                <button
-                  class="featured-order"
-                  type="button"
-                  data-product="اسپرسو دبل"
-                >
-                  <svg
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    stroke-width="1.8"
-                    aria-hidden="true"
+                <div class="card-action-box">
+                  <button
+                    class="featured-order card-add-btn"
+                    type="button"
+                    data-product="اسپرسو دبل"
+                    data-id="prd_espresso_double"
+                    aria-label="افزودن اسپرسو دبل به سبد"
                   >
-                    <path d="M5 8h14l1 12H4L5 8Z" stroke-linejoin="round" />
-                    <path d="M9 9V6a3 3 0 0 1 6 0v3" stroke-linecap="round" />
-                  </svg>
-                  افزودن به سبد
-                </button>
+                    <svg
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      stroke-width="1.8"
+                      aria-hidden="true"
+                    >
+                      <path d="M5 8h14l1 12H4L5 8Z" stroke-linejoin="round" />
+                      <path d="M9 9V6a3 3 0 0 1 6 0v3" stroke-linecap="round" />
+                    </svg>
+                    <span>افزودن به سبد</span>
+                  </button>
+                </div>
               </div>
             </div>
           </article>
 
-          <article class="featured-card">
+          <!-- 2. کاپوچینو -->
+          <article
+            class="featured-card"
+            data-id="prd_cappuccino"
+            data-name="کاپوچینو"
+            data-price="110000"
+            data-category="coffee"
+          >
             <img
               class="featured-image"
               src="./images/products/coffee/cappuccino.png"
@@ -597,32 +642,255 @@
                   <del>۱۳۰٬۰۰۰ تومان</del>
                   <strong>۱۱۰٬۰۰۰ <small>تومان</small></strong>
                 </div>
-                <button
-                  class="featured-order"
-                  type="button"
-                  data-product="کاپوچینو"
-                >
-                  <svg
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    stroke-width="1.8"
-                    aria-hidden="true"
+                <div class="card-action-box">
+                  <button
+                    class="featured-order card-add-btn"
+                    type="button"
+                    data-product="کاپوچینو"
+                    data-id="prd_cappuccino"
+                    aria-label="افزودن کاپوچینو به سبد"
                   >
-                    <path d="M5 8h14l1 12H4L5 8Z" stroke-linejoin="round" />
-                    <path d="M9 9V6a3 3 0 0 1 6 0v3" stroke-linecap="round" />
-                  </svg>
-                  افزودن به سبد
-                </button>
+                    <svg
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      stroke-width="1.8"
+                      aria-hidden="true"
+                    >
+                      <path d="M5 8h14l1 12H4L5 8Z" stroke-linejoin="round" />
+                      <path d="M9 9V6a3 3 0 0 1 6 0v3" stroke-linecap="round" />
+                    </svg>
+                    <span>افزودن به سبد</span>
+                  </button>
+                </div>
               </div>
             </div>
           </article>
 
-          <article class="featured-card">
+          <!-- 3. لاته -->
+          <article
+            class="featured-card"
+            data-id="prd_latte"
+            data-name="لاته"
+            data-price="150000"
+            data-category="coffee"
+          >
+            <img
+              class="featured-image"
+              src="./images/products/coffee/latte.png"
+              alt="لاته آرت تخصصی سورن"
+              loading="lazy"
+            />
+            <div class="featured-overlay"></div>
+
+            <div class="featured-top">
+              <span class="featured-popular">★ محبوب‌ترین</span>
+            </div>
+
+            <div class="featured-content">
+              <span class="featured-category">اسپرسو بار</span>
+              <h3>لاته</h3>
+              <p>اسپرسو با شیر بخارداده‌شده ابریشمی و لته‌آرت اختصاصی</p>
+              <div class="featured-footer">
+                <div class="featured-prices">
+                  <strong>۱۵۰٬۰۰۰ <small>تومان</small></strong>
+                </div>
+                <div class="card-action-box">
+                  <button
+                    class="featured-order card-add-btn"
+                    type="button"
+                    data-product="لاته"
+                    data-id="prd_latte"
+                    aria-label="افزودن لاته به سبد"
+                  >
+                    <svg
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      stroke-width="1.8"
+                      aria-hidden="true"
+                    >
+                      <path d="M5 8h14l1 12H4L5 8Z" stroke-linejoin="round" />
+                      <path d="M9 9V6a3 3 0 0 1 6 0v3" stroke-linecap="round" />
+                    </svg>
+                    <span>افزودن به سبد</span>
+                  </button>
+                </div>
+              </div>
+            </div>
+          </article>
+
+          <!-- 4. اسپرسو -->
+          <article
+            class="featured-card"
+            data-id="prd_espresso"
+            data-name="اسپرسو"
+            data-price="90000"
+            data-category="coffee"
+          >
+            <img
+              class="featured-image"
+              src="./images/products/coffee/espresso.png"
+              alt="شات عصاره خالص اسپرسو"
+              loading="lazy"
+            />
+            <div class="featured-overlay"></div>
+
+            <div class="featured-top">
+              <span class="featured-popular">عصاره خالص</span>
+            </div>
+
+            <div class="featured-content">
+              <span class="featured-category">تک‌خاستگاه</span>
+              <h3>اسپرسو</h3>
+              <p>شات عصاره‌گیری خالص با کرمای غلیظ طلایی، غنی و پرانرژی</p>
+              <div class="featured-footer">
+                <div class="featured-prices">
+                  <strong>۹۰٬۰۰۰ <small>تومان</small></strong>
+                </div>
+                <div class="card-action-box">
+                  <button
+                    class="featured-order card-add-btn"
+                    type="button"
+                    data-product="اسپرسو"
+                    data-id="prd_espresso"
+                    aria-label="افزودن اسپرسو به سبد"
+                  >
+                    <svg
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      stroke-width="1.8"
+                      aria-hidden="true"
+                    >
+                      <path d="M5 8h14l1 12H4L5 8Z" stroke-linejoin="round" />
+                      <path d="M9 9V6a3 3 0 0 1 6 0v3" stroke-linecap="round" />
+                    </svg>
+                    <span>افزودن به سبد</span>
+                  </button>
+                </div>
+              </div>
+            </div>
+          </article>
+
+          <!-- 5. آمریکانو -->
+          <article
+            class="featured-card"
+            data-id="prd_americano"
+            data-name="آمریکانو"
+            data-price="110000"
+            data-category="coffee"
+          >
+            <img
+              class="featured-image"
+              src="./images/products/coffee/americano.png"
+              alt="آمریکانو کافه سورن"
+              loading="lazy"
+            />
+            <div class="featured-overlay"></div>
+
+            <div class="featured-top">
+              <span class="featured-popular">قهوه تمیز</span>
+            </div>
+
+            <div class="featured-content">
+              <span class="featured-category">اسپرسو بار</span>
+              <h3>آمریکانو</h3>
+              <p>اسپرسو غنی ترکیب‌شده با آب جوش تصفیه‌شده، طعمی تمیز و شفاف</p>
+              <div class="featured-footer">
+                <div class="featured-prices">
+                  <strong>۱۱۰٬۰۰۰ <small>تومان</small></strong>
+                </div>
+                <div class="card-action-box">
+                  <button
+                    class="featured-order card-add-btn"
+                    type="button"
+                    data-product="آمریکانو"
+                    data-id="prd_americano"
+                    aria-label="افزودن آمریکانو به سبد"
+                  >
+                    <svg
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      stroke-width="1.8"
+                      aria-hidden="true"
+                    >
+                      <path d="M5 8h14l1 12H4L5 8Z" stroke-linejoin="round" />
+                      <path d="M9 9V6a3 3 0 0 1 6 0v3" stroke-linecap="round" />
+                    </svg>
+                    <span>افزودن به سبد</span>
+                  </button>
+                </div>
+              </div>
+            </div>
+          </article>
+
+          <!-- 6. موکا -->
+          <article
+            class="featured-card"
+            data-id="prd_mocha"
+            data-name="موکا"
+            data-price="160000"
+            data-category="coffee"
+          >
+            <img
+              class="featured-image"
+              src="./images/products/coffee/mocha.png"
+              alt="کافه موکا شکلاتی"
+              loading="lazy"
+            />
+            <div class="featured-overlay"></div>
+
+            <div class="featured-top">
+              <span class="featured-popular">شکلاتی و غنی</span>
+            </div>
+
+            <div class="featured-content">
+              <span class="featured-category">تخصصی ترکیبی</span>
+              <h3>موکا</h3>
+              <p>ترکیب لایه‌ای شکلات تلخ دست‌ساز، اسپرسو تک‌خاستگاه و شیر ابریشمی</p>
+              <div class="featured-footer">
+                <div class="featured-prices">
+                  <strong>۱۶۰٬۰۰۰ <small>تومان</small></strong>
+                </div>
+                <div class="card-action-box">
+                  <button
+                    class="featured-order card-add-btn"
+                    type="button"
+                    data-product="موکا"
+                    data-id="prd_mocha"
+                    aria-label="افزودن موکا به سبد"
+                  >
+                    <svg
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      stroke-width="1.8"
+                      aria-hidden="true"
+                    >
+                      <path d="M5 8h14l1 12H4L5 8Z" stroke-linejoin="round" />
+                      <path d="M9 9V6a3 3 0 0 1 6 0v3" stroke-linecap="round" />
+                    </svg>
+                    <span>افزودن به سبد</span>
+                  </button>
+                </div>
+              </div>
+            </div>
+          </article>
+
+          <!-- 7. شیک شکلات -->
+          <article
+            class="featured-card"
+            data-id="prd_shake_choc"
+            data-name="شیک شکلات"
+            data-price="145000"
+            data-category="shakes"
+          >
             <img
               class="featured-image"
               src="./images/products/shakes/chocolate-shake.png"
-              alt="شیک شکلات"
+              alt="شیک شکلات غلیظ"
               loading="lazy"
             />
             <div class="featured-overlay"></div>
@@ -640,32 +908,43 @@
                   <del>۱۷۰٬۰۰۰ تومان</del>
                   <strong>۱۴۵٬۰۰۰ <small>تومان</small></strong>
                 </div>
-                <button
-                  class="featured-order"
-                  type="button"
-                  data-product="شیک شکلات"
-                >
-                  <svg
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    stroke-width="1.8"
-                    aria-hidden="true"
+                <div class="card-action-box">
+                  <button
+                    class="featured-order card-add-btn"
+                    type="button"
+                    data-product="شیک شکلات"
+                    data-id="prd_shake_choc"
+                    aria-label="افزودن شیک شکلات به سبد"
                   >
-                    <path d="M5 8h14l1 12H4L5 8Z" stroke-linejoin="round" />
-                    <path d="M9 9V6a3 3 0 0 1 6 0v3" stroke-linecap="round" />
-                  </svg>
-                  افزودن به سبد
-                </button>
+                    <svg
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      stroke-width="1.8"
+                      aria-hidden="true"
+                    >
+                      <path d="M5 8h14l1 12H4L5 8Z" stroke-linejoin="round" />
+                      <path d="M9 9V6a3 3 0 0 1 6 0v3" stroke-linecap="round" />
+                    </svg>
+                    <span>افزودن به سبد</span>
+                  </button>
+                </div>
               </div>
             </div>
           </article>
 
-          <article class="featured-card">
+          <!-- 8. شیک توت‌فرنگی -->
+          <article
+            class="featured-card"
+            data-id="prd_shake_strawberry"
+            data-name="شیک توت‌فرنگی"
+            data-price="135000"
+            data-category="shakes"
+          >
             <img
               class="featured-image"
               src="./images/products/shakes/strawberry-shake.png"
-              alt="شیک توت‌فرنگی"
+              alt="شیک توت‌فرنگی با میوه طبیعی"
               loading="lazy"
             />
             <div class="featured-overlay"></div>
@@ -683,32 +962,255 @@
                   <del>۱۵۰٬۰۰۰ تومان</del>
                   <strong>۱۳۵٬۰۰۰ <small>تومان</small></strong>
                 </div>
-                <button
-                  class="featured-order"
-                  type="button"
-                  data-product="شیک توت‌فرنگی"
-                >
-                  <svg
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    stroke-width="1.8"
-                    aria-hidden="true"
+                <div class="card-action-box">
+                  <button
+                    class="featured-order card-add-btn"
+                    type="button"
+                    data-product="شیک توت‌فرنگی"
+                    data-id="prd_shake_strawberry"
+                    aria-label="افزودن شیک توت‌فرنگی به سبد"
                   >
-                    <path d="M5 8h14l1 12H4L5 8Z" stroke-linejoin="round" />
-                    <path d="M9 9V6a3 3 0 0 1 6 0v3" stroke-linecap="round" />
-                  </svg>
-                  افزودن به سبد
-                </button>
+                    <svg
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      stroke-width="1.8"
+                      aria-hidden="true"
+                    >
+                      <path d="M5 8h14l1 12H4L5 8Z" stroke-linejoin="round" />
+                      <path d="M9 9V6a3 3 0 0 1 6 0v3" stroke-linecap="round" />
+                    </svg>
+                    <span>افزودن به سبد</span>
+                  </button>
+                </div>
               </div>
             </div>
           </article>
 
-          <article class="featured-card">
+          <!-- 9. شیک وانیل -->
+          <article
+            class="featured-card"
+            data-id="prd_shake_vanilla"
+            data-name="شیک وانیل"
+            data-price="160000"
+            data-category="shakes"
+          >
+            <img
+              class="featured-image"
+              src="./images/products/shakes/vanilla-shake.png"
+              alt="شیک وانیل طبیعی"
+              loading="lazy"
+            />
+            <div class="featured-overlay"></div>
+
+            <div class="featured-top">
+              <span class="featured-popular">وانیل ماداگاسکار</span>
+            </div>
+
+            <div class="featured-content">
+              <span class="featured-category">بار سرد</span>
+              <h3>شیک وانیل</h3>
+              <p>وانیل ماداگاسکار با بستنی دست‌ساز و بافت لطیف</p>
+              <div class="featured-footer">
+                <div class="featured-prices">
+                  <strong>۱۶۰٬۰۰۰ <small>تومان</small></strong>
+                </div>
+                <div class="card-action-box">
+                  <button
+                    class="featured-order card-add-btn"
+                    type="button"
+                    data-product="شیک وانیل"
+                    data-id="prd_shake_vanilla"
+                    aria-label="افزودن شیک وانیل به سبد"
+                  >
+                    <svg
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      stroke-width="1.8"
+                      aria-hidden="true"
+                    >
+                      <path d="M5 8h14l1 12H4L5 8Z" stroke-linejoin="round" />
+                      <path d="M9 9V6a3 3 0 0 1 6 0v3" stroke-linecap="round" />
+                    </svg>
+                    <span>افزودن به سبد</span>
+                  </button>
+                </div>
+              </div>
+            </div>
+          </article>
+
+          <!-- 10. شیک اورئو -->
+          <article
+            class="featured-card"
+            data-id="prd_shake_oreo"
+            data-name="شیک اورئو"
+            data-price="190000"
+            data-category="shakes"
+          >
+            <img
+              class="featured-image"
+              src="./images/products/shakes/oreo-shake.png"
+              alt="شیک اورئو بیسکویتی"
+              loading="lazy"
+            />
+            <div class="featured-overlay"></div>
+
+            <div class="featured-top">
+              <span class="featured-popular">★ پرطرفدار</span>
+            </div>
+
+            <div class="featured-content">
+              <span class="featured-category">بار سرد</span>
+              <h3>شیک اورئو</h3>
+              <p>بیسکویت اورئو با بستنی کره‌ای و سس شکلات هلندی</p>
+              <div class="featured-footer">
+                <div class="featured-prices">
+                  <strong>۱۹۰٬۰۰۰ <small>تومان</small></strong>
+                </div>
+                <div class="card-action-box">
+                  <button
+                    class="featured-order card-add-btn"
+                    type="button"
+                    data-product="شیک اورئو"
+                    data-id="prd_shake_oreo"
+                    aria-label="افزودن شیک اورئو به سبد"
+                  >
+                    <svg
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      stroke-width="1.8"
+                      aria-hidden="true"
+                    >
+                      <path d="M5 8h14l1 12H4L5 8Z" stroke-linejoin="round" />
+                      <path d="M9 9V6a3 3 0 0 1 6 0v3" stroke-linecap="round" />
+                    </svg>
+                    <span>افزودن به سبد</span>
+                  </button>
+                </div>
+              </div>
+            </div>
+          </article>
+
+          <!-- 11. شیک موز -->
+          <article
+            class="featured-card"
+            data-id="prd_shake_banana"
+            data-name="شیک موز"
+            data-price="170000"
+            data-category="shakes"
+          >
+            <img
+              class="featured-image"
+              src="./images/products/shakes/banana-shake.png"
+              alt="شیک موز و پسته"
+              loading="lazy"
+            />
+            <div class="featured-overlay"></div>
+
+            <div class="featured-top">
+              <span class="featured-popular">موز و خلال پسته</span>
+            </div>
+
+            <div class="featured-content">
+              <span class="featured-category">میوه طبیعی</span>
+              <h3>شیک موز</h3>
+              <p>موز طبیعی همراه با خلال پسته و بافت غلیظ خامه‌ای</p>
+              <div class="featured-footer">
+                <div class="featured-prices">
+                  <strong>۱۷۰٬۰۰۰ <small>تومان</small></strong>
+                </div>
+                <div class="card-action-box">
+                  <button
+                    class="featured-order card-add-btn"
+                    type="button"
+                    data-product="شیک موز"
+                    data-id="prd_shake_banana"
+                    aria-label="افزودن شیک موز به سبد"
+                  >
+                    <svg
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      stroke-width="1.8"
+                      aria-hidden="true"
+                    >
+                      <path d="M5 8h14l1 12H4L5 8Z" stroke-linejoin="round" />
+                      <path d="M9 9V6a3 3 0 0 1 6 0v3" stroke-linecap="round" />
+                    </svg>
+                    <span>افزودن به سبد</span>
+                  </button>
+                </div>
+              </div>
+            </div>
+          </article>
+
+          <!-- 12. شیک کارامل -->
+          <article
+            class="featured-card"
+            data-id="prd_shake_caramel"
+            data-name="شیک کارامل"
+            data-price="185000"
+            data-category="shakes"
+          >
+            <img
+              class="featured-image"
+              src="./images/products/shakes/caramel-shake.png"
+              alt="شیک کارامل نمکی"
+              loading="lazy"
+            />
+            <div class="featured-overlay"></div>
+
+            <div class="featured-top">
+              <span class="featured-popular">کارامل نمکی</span>
+            </div>
+
+            <div class="featured-content">
+              <span class="featured-category">بار سرد</span>
+              <h3>شیک کارامل</h3>
+              <p>کارامل نمکی دولچه دلچه با بستنی خامه‌ای دست‌ساز</p>
+              <div class="featured-footer">
+                <div class="featured-prices">
+                  <strong>۱۸۵٬۰۰۰ <small>تومان</small></strong>
+                </div>
+                <div class="card-action-box">
+                  <button
+                    class="featured-order card-add-btn"
+                    type="button"
+                    data-product="شیک کارامل"
+                    data-id="prd_shake_caramel"
+                    aria-label="افزودن شیک کارامل به سبد"
+                  >
+                    <svg
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      stroke-width="1.8"
+                      aria-hidden="true"
+                    >
+                      <path d="M5 8h14l1 12H4L5 8Z" stroke-linejoin="round" />
+                      <path d="M9 9V6a3 3 0 0 1 6 0v3" stroke-linecap="round" />
+                    </svg>
+                    <span>افزودن به سبد</span>
+                  </button>
+                </div>
+              </div>
+            </div>
+          </article>
+
+          <!-- 13. کیک شکلاتی -->
+          <article
+            class="featured-card"
+            data-id="prd_choc_cake"
+            data-name="کیک شکلاتی"
+            data-price="125000"
+            data-category="cake"
+          >
             <img
               class="featured-image"
               src="./images/products/cake/chocolate-cake.png"
-              alt="کیک شکلاتی"
+              alt="کیک شکلاتی نرم"
               loading="lazy"
             />
             <div class="featured-overlay"></div>
@@ -726,32 +1228,43 @@
                   <del>۱۵۰٬۰۰۰ تومان</del>
                   <strong>۱۲۵٬۰۰۰ <small>تومان</small></strong>
                 </div>
-                <button
-                  class="featured-order"
-                  type="button"
-                  data-product="کیک شکلاتی"
-                >
-                  <svg
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    stroke-width="1.8"
-                    aria-hidden="true"
+                <div class="card-action-box">
+                  <button
+                    class="featured-order card-add-btn"
+                    type="button"
+                    data-product="کیک شکلاتی"
+                    data-id="prd_choc_cake"
+                    aria-label="افزودن کیک شکلاتی به سبد"
                   >
-                    <path d="M5 8h14l1 12H4L5 8Z" stroke-linejoin="round" />
-                    <path d="M9 9V6a3 3 0 0 1 6 0v3" stroke-linecap="round" />
-                  </svg>
-                  افزودن به سبد
-                </button>
+                    <svg
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      stroke-width="1.8"
+                      aria-hidden="true"
+                    >
+                      <path d="M5 8h14l1 12H4L5 8Z" stroke-linejoin="round" />
+                      <path d="M9 9V6a3 3 0 0 1 6 0v3" stroke-linecap="round" />
+                    </svg>
+                    <span>افزودن به سبد</span>
+                  </button>
+                </div>
               </div>
             </div>
           </article>
 
-          <article class="featured-card">
+          <!-- 14. چیزکیک -->
+          <article
+            class="featured-card"
+            data-id="prd_cheesecake"
+            data-name="چیزکیک"
+            data-price="150000"
+            data-category="cake"
+          >
             <img
               class="featured-image"
               src="./images/products/cake/cheesecake.png"
-              alt="چیزکیک"
+              alt="چیزکیک نیویورکی"
               loading="lazy"
             />
             <div class="featured-overlay"></div>
@@ -769,23 +1282,239 @@
                   <del>۱۷۰٬۰۰۰ تومان</del>
                   <strong>۱۵۰٬۰۰۰ <small>تومان</small></strong>
                 </div>
-                <button
-                  class="featured-order"
-                  type="button"
-                  data-product="چیزکیک"
-                >
-                  <svg
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    stroke-width="1.8"
-                    aria-hidden="true"
+                <div class="card-action-box">
+                  <button
+                    class="featured-order card-add-btn"
+                    type="button"
+                    data-product="چیزکیک"
+                    data-id="prd_cheesecake"
+                    aria-label="افزودن چیزکیک به سبد"
                   >
-                    <path d="M5 8h14l1 12H4L5 8Z" stroke-linejoin="round" />
-                    <path d="M9 9V6a3 3 0 0 1 6 0v3" stroke-linecap="round" />
-                  </svg>
-                  افزودن به سبد
-                </button>
+                    <svg
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      stroke-width="1.8"
+                      aria-hidden="true"
+                    >
+                      <path d="M5 8h14l1 12H4L5 8Z" stroke-linejoin="round" />
+                      <path d="M9 9V6a3 3 0 0 1 6 0v3" stroke-linecap="round" />
+                    </svg>
+                    <span>افزودن به سبد</span>
+                  </button>
+                </div>
+              </div>
+            </div>
+          </article>
+
+          <!-- 15. براونی شکلاتی فاج -->
+          <article
+            class="featured-card"
+            data-id="prd_brownie"
+            data-name="براونی شکلاتی فاج"
+            data-price="130000"
+            data-category="cake"
+          >
+            <img
+              class="featured-image"
+              src="./images/products/cake/chocolate-fudge-brownie.png"
+              alt="براونی فاج شکلاتی"
+              loading="lazy"
+            />
+            <div class="featured-overlay"></div>
+
+            <div class="featured-top">
+              <span class="featured-popular">شکلات مذاب</span>
+            </div>
+
+            <div class="featured-content">
+              <span class="featured-category">پخت روزانه</span>
+              <h3>براونی شکلاتی فاج</h3>
+              <p>براونی غلیظ و گرم با مغز شکلات مذاب بلژیکی</p>
+              <div class="featured-footer">
+                <div class="featured-prices">
+                  <strong>۱۳۰٬۰۰۰ <small>تومان</small></strong>
+                </div>
+                <div class="card-action-box">
+                  <button
+                    class="featured-order card-add-btn"
+                    type="button"
+                    data-product="براونی شکلاتی فاج"
+                    data-id="prd_brownie"
+                    aria-label="افزودن براونی شکلاتی فاج به سبد"
+                  >
+                    <svg
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      stroke-width="1.8"
+                      aria-hidden="true"
+                    >
+                      <path d="M5 8h14l1 12H4L5 8Z" stroke-linejoin="round" />
+                      <path d="M9 9V6a3 3 0 0 1 6 0v3" stroke-linecap="round" />
+                    </svg>
+                    <span>افزودن به سبد</span>
+                  </button>
+                </div>
+              </div>
+            </div>
+          </article>
+
+          <!-- 16. تیرامیسو -->
+          <article
+            class="featured-card"
+            data-id="prd_tiramisu"
+            data-name="تیرامیسو"
+            data-price="170000"
+            data-category="cake"
+          >
+            <img
+              class="featured-image"
+              src="./images/products/cake/tiramisu.png"
+              alt="تیرامیسو کلاسیک"
+              loading="lazy"
+            />
+            <div class="featured-overlay"></div>
+
+            <div class="featured-top">
+              <span class="featured-popular">دسر کلاسیک</span>
+            </div>
+
+            <div class="featured-content">
+              <span class="featured-category">دسر اصیل</span>
+              <h3>تیرامیسو</h3>
+              <p>لیدی‌فینگر آغشته به اسپرسو با کرم ماسکارپونه دست‌ساز</p>
+              <div class="featured-footer">
+                <div class="featured-prices">
+                  <strong>۱۷۰٬۰۰۰ <small>تومان</small></strong>
+                </div>
+                <div class="card-action-box">
+                  <button
+                    class="featured-order card-add-btn"
+                    type="button"
+                    data-product="تیرامیسو"
+                    data-id="prd_tiramisu"
+                    aria-label="افزودن تیرامیسو به سبد"
+                  >
+                    <svg
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      stroke-width="1.8"
+                      aria-hidden="true"
+                    >
+                      <path d="M5 8h14l1 12H4L5 8Z" stroke-linejoin="round" />
+                      <path d="M9 9V6a3 3 0 0 1 6 0v3" stroke-linecap="round" />
+                    </svg>
+                    <span>افزودن به سبد</span>
+                  </button>
+                </div>
+              </div>
+            </div>
+          </article>
+
+          <!-- 17. کیک هویج و گردو -->
+          <article
+            class="featured-card"
+            data-id="prd_carrot_cake"
+            data-name="کیک هویج و گردو"
+            data-price="140000"
+            data-category="cake"
+          >
+            <img
+              class="featured-image"
+              src="./images/products/cake/carrot-walnut-cake.png"
+              alt="کیک هویج و گردو با دارچین"
+              loading="lazy"
+            />
+            <div class="featured-overlay"></div>
+
+            <div class="featured-top">
+              <span class="featured-popular">معطر دارچینی</span>
+            </div>
+
+            <div class="featured-content">
+              <span class="featured-category">پخت روزانه</span>
+              <h3>کیک هویج و گردو</h3>
+              <p>اسفنج دارچینی معطر همراه با کرم‌پنیر و گردوی تازه</p>
+              <div class="featured-footer">
+                <div class="featured-prices">
+                  <strong>۱۴۰٬۰۰۰ <small>تومان</small></strong>
+                </div>
+                <div class="card-action-box">
+                  <button
+                    class="featured-order card-add-btn"
+                    type="button"
+                    data-product="کیک هویج و گردو"
+                    data-id="prd_carrot_cake"
+                    aria-label="افزودن کیک هویج و گردو به سبد"
+                  >
+                    <svg
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      stroke-width="1.8"
+                      aria-hidden="true"
+                    >
+                      <path d="M5 8h14l1 12H4L5 8Z" stroke-linejoin="round" />
+                      <path d="M9 9V6a3 3 0 0 1 6 0v3" stroke-linecap="round" />
+                    </svg>
+                    <span>افزودن به سبد</span>
+                  </button>
+                </div>
+              </div>
+            </div>
+          </article>
+
+          <!-- 18. کوکی چاکلت چانک -->
+          <article
+            class="featured-card"
+            data-id="prd_cookie"
+            data-name="کوکی چاکلت چانک"
+            data-price="80000"
+            data-category="cake"
+          >
+            <img
+              class="featured-image"
+              src="./images/products/cake/chocolate-chunk-cookie.png"
+              alt="کوکی چاکلت چانک"
+              loading="lazy"
+            />
+            <div class="featured-overlay"></div>
+
+            <div class="featured-top">
+              <span class="featured-popular">بیکری تازه</span>
+            </div>
+
+            <div class="featured-content">
+              <span class="featured-category">بیکری</span>
+              <h3>کوکی چاکلت چانک</h3>
+              <p>کوکی نرم نیویورکی با تکه‌های بزرگ شکلات تلخ ۷۰٪</p>
+              <div class="featured-footer">
+                <div class="featured-prices">
+                  <strong>۸۰٬۰۰۰ <small>تومان</small></strong>
+                </div>
+                <div class="card-action-box">
+                  <button
+                    class="featured-order card-add-btn"
+                    type="button"
+                    data-product="کوکی چاکلت چانک"
+                    data-id="prd_cookie"
+                    aria-label="افزودن کوکی چاکلت چانک به سبد"
+                  >
+                    <svg
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      stroke-width="1.8"
+                      aria-hidden="true"
+                    >
+                      <path d="M5 8h14l1 12H4L5 8Z" stroke-linejoin="round" />
+                      <path d="M9 9V6a3 3 0 0 1 6 0v3" stroke-linecap="round" />
+                    </svg>
+                    <span>افزودن به سبد</span>
+                  </button>
+                </div>
               </div>
             </div>
           </article>

@@ -1,4 +1,4 @@
-﻿import { db } from "./db.ts";
+import { db } from "./db.ts";
 
 export const initialProducts = [
   // --- دسته اول: قهوه‌ها (Coffees — ۶ محصول) ---
@@ -218,6 +218,16 @@ export const initialProducts = [
     tags: "گرم, اصیل",
     is_available: 1,
     image_url: "/images/products/coffee/espresso.png",
+  },
+  {
+    id: "prd_espresso_double",
+    name: "اسپرسو دبل (Double Espresso)",
+    category: "coffee",
+    price: 95000,
+    description: "شات دوبل تخصصی با کرمای غلیظ و عصاره‌گیری استاندارد ۹ بار",
+    tags: "گرم, پرطرفدار",
+    is_available: 1,
+    image_url: "/images/products/coffee/double-espresso.png",
   },
   {
     id: "prd_americano",

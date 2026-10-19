@@ -810,6 +810,164 @@ if (typeof window !== "undefined") {
   }
 })();
 
+/* ========================================================
+   2.2 کاتالوگ یکپارچه و تراشه‌های چسبان دسته‌بندی منو
+   (Single-Surface Catalog with Sticky Category Chips & Touch Steppers)
+   ======================================================== */
+function initSingleSurfaceCatalog() {
+  const chipsBar = document.getElementById("category-chips");
+  const chips = chipsBar ? Array.from(chipsBar.querySelectorAll(".category-chip")) : [];
+
+  function triggerHaptic() {
+    if (typeof navigator !== "undefined" && navigator.vibrate) {
+      try {
+        navigator.vibrate(10);
+      } catch (e) {}
+    }
+  }
+
+  function toFaDigits(num) {
+    const fa = ["۰", "۱", "۲", "۳", "۴", "۵", "۶", "۷", "۸", "۹"];
+    return String(num).replace(/[0-9]/g, (d) => fa[d]);
+  }
+
+  // ۱. فیلتر کلاینت‌ساید آنی دسته‌بندی با انیمیشن Fade ملایم
+  function setCategory(cat, shouldPushState = true) {
+    if (!cat) cat = "all";
+
+    // به‌روزرسانی وضعیت تراشه‌ها
+    chips.forEach((chip) => {
+      const match = chip.dataset.category === cat;
+      chip.classList.toggle("active", match);
+      chip.setAttribute("aria-pressed", String(match));
+      if (match) {
+        try {
+          chip.scrollIntoView({ behavior: "smooth", block: "nearest", inline: "center" });
+        } catch (e) {}
+      }
+    });
+
+    // فیلتر کارت‌های کاتالوگ
+    const cards = document.querySelectorAll("#catalog-products-grid .featured-card, .featured-grid .featured-card");
+    cards.forEach((card) => {
+      const cardCat = card.dataset.category;
+      const isMatch = cat === "all" || cardCat === cat;
+      if (isMatch) {
+        card.classList.remove("is-filtered-out");
+        card.style.opacity = "0";
+        card.style.transform = "translateY(8px)";
+        requestAnimationFrame(() => {
+          card.style.transition = "opacity 0.25s ease, transform 0.25s ease";
+          card.style.opacity = "1";
+          card.style.transform = "translateY(0)";
+        });
+      } else {
+        card.classList.add("is-filtered-out");
+      }
+    });
+
+    // همگام‌سازی تاریخچه مرورگر بدون بارگذاری مجدد
+    if (shouldPushState && typeof history !== "undefined" && history.pushState) {
+      const newHash = cat === "all" ? "#menu" : `#menu?cat=${cat}`;
+      history.pushState({ category: cat }, "", newHash);
+    }
+  }
+
+  // کلیک روی هر یک از تراشه‌ها
+  chips.forEach((chip) => {
+    chip.addEventListener("click", () => {
+      triggerHaptic();
+      const cat = chip.dataset.category || "all";
+      setCategory(cat, true);
+    });
+  });
+
+  // خواندن اولیه دسته‌بندی از روی URL و شنیدن تغییرات تاریخچه (Popstate / Hashchange)
+  function checkUrlCategory(shouldPushState = false) {
+    if (typeof window === "undefined") return;
+    const hash = window.location.hash || "";
+    const match = hash.match(/cat=([a-z]+)/);
+    if (match && match[1]) {
+      setCategory(match[1], shouldPushState);
+    } else if (hash.includes("#menu")) {
+      setCategory("all", shouldPushState);
+    }
+  }
+
+  window.addEventListener("popstate", () => checkUrlCategory(false));
+  window.addEventListener("hashchange", () => checkUrlCategory(false));
+  checkUrlCategory(false);
+
+  // ۲. همگام‌سازی استپرهای تعاملی لمسی کارت‌ها (+ / تعداد / -) با SorenCartStore
+  function syncCardSteppers() {
+    if (typeof SorenCartStore === "undefined") return;
+    const cards = document.querySelectorAll(".featured-card[data-id], .product-card[data-id]");
+
+    cards.forEach((card) => {
+      const id = card.dataset.id || card.dataset.productId;
+      if (!id) return;
+
+      const name = card.dataset.name || card.querySelector("h3, .product-title")?.textContent.trim() || "";
+      let actionBox = card.querySelector(".card-action-box");
+      if (!actionBox) {
+        const footer = card.querySelector(".featured-footer, .product-footer");
+        if (footer) {
+          actionBox = document.createElement("div");
+          actionBox.className = "card-action-box";
+          footer.appendChild(actionBox);
+        }
+      }
+      if (!actionBox) return;
+
+      const qty = SorenCartStore.getItemQuantity(id);
+
+      if (qty > 0) {
+        actionBox.innerHTML = `
+          <div class="card-stepper" data-id="${id}" aria-label="تنظیم تعداد ${name}">
+            <button type="button" class="stepper-btn stepper-minus" data-id="${id}" aria-label="کاهش تعداد ${name}">−</button>
+            <span class="stepper-count" aria-live="polite">${toFaDigits(qty)}</span>
+            <button type="button" class="stepper-btn stepper-plus" data-id="${id}" aria-label="افزایش تعداد ${name}">+</button>
+          </div>
+        `;
+      } else {
+        actionBox.innerHTML = `
+          <button
+            class="featured-order card-add-btn"
+            type="button"
+            data-product="${name}"
+            data-id="${id}"
+            aria-label="افزودن ${name} به سبد"
+          >
+            <svg
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="1.8"
+              aria-hidden="true"
+            >
+              <path d="M5 8h14l1 12H4L5 8Z" stroke-linejoin="round" />
+              <path d="M9 9V6a3 3 0 0 1 6 0v3" stroke-linecap="round" />
+            </svg>
+            <span>افزودن به سبد</span>
+          </button>
+        `;
+      }
+    });
+  }
+
+  // گوش دادن به تغییرات سبد خرید جهت بازنشانی آنی استپرها
+  window.addEventListener("soren:cart-changed", () => {
+    syncCardSteppers();
+  });
+
+  // اجرای اولیه
+  syncCardSteppers();
+
+  // قرار دادن توابع روی شیء window برای دسترسی همگانی
+  window.syncCardSteppers = syncCardSteppers;
+  window.setMenuCategory = setCategory;
+}
+
 /* ========================================
    3. اسکرول نرم به بخش‌های صفحه
    ======================================== */
@@ -1594,21 +1752,37 @@ if (typeof window !== "undefined") {
     toastTimer = setTimeout(() => toast.classList.remove("is-visible"), 3000);
   }
 
-  // رویداد افزودن به سبد خرید (پشتیبانی همزمان از دکمه‌های منو و کارت‌های منتخب صفحه اصلی)
-  const addButtons = document.querySelectorAll(".btn-add, .featured-order");
-  addButtons.forEach((button) => {
-    button.addEventListener("click", () => {
+  // رویداد افزودن به سبد خرید و تعامل با استپرها (Event Delegation لمسی سراسری با لرزش هپتیک)
+  document.addEventListener("click", (e) => {
+    const addBtn = e.target.closest(".btn-add, .featured-order, .card-add-btn");
+    const plusBtn = e.target.closest(".stepper-plus");
+    const minusBtn = e.target.closest(".stepper-minus");
+
+    if (addBtn || plusBtn) {
+      const button = addBtn || plusBtn;
       const card = button.closest(".product-card, .featured-card");
+      if (!card) return;
+
+      // لرزش هپتیک ۱۰ میلی‌ثانیه برای فیدبک فیزیکی
+      if (typeof navigator !== "undefined" && navigator.vibrate) {
+        try { navigator.vibrate(10); } catch (err) {}
+      }
+
+      const id = card.dataset.id || card.dataset.productId || button.dataset.id;
       const productName =
+        card.dataset.name ||
         button.dataset.product ||
-        card?.querySelector(".product-title, h3")?.textContent.trim() ||
+        card.querySelector(".product-title, h3")?.textContent.trim() ||
         "";
-      const price = Number(card?.dataset.price || 0);
-      const imgEl = card?.querySelector(".product-image, .featured-image");
+      const price = Number(card.dataset.price || 0);
+      const imgEl = card.querySelector(".product-image, .featured-image, img");
       const imgSrc = imgEl?.getAttribute("src") || "";
 
       // استخراج هوشمند یا تطبیقی محصول بر اساس کاتالوگ معتبر دیتابیس
       let catalogItem = PRODUCT_CATALOG[productName];
+      if (!catalogItem && id) {
+        catalogItem = Object.values(PRODUCT_CATALOG).find((it) => it.id === id);
+      }
       if (!catalogItem) {
         const cleanName = productName.replace(/[()]/g, "").trim();
         const matchedKey = Object.keys(PRODUCT_CATALOG).find(
@@ -1618,32 +1792,44 @@ if (typeof window !== "undefined") {
       }
 
       const product = catalogItem || {
-        id: "prd_espresso",
+        id: id || "prd_espresso",
         name: productName || "محصول کافه سورن",
         price: price || 95000,
         image: imgSrc || "../images/products/coffee/espresso.png",
-        category: card?.dataset.category || "coffee",
-        desc: card?.querySelector(".product-desc, p")?.textContent.trim() || "",
+        category: card.dataset.category || "coffee",
+        desc: card.querySelector(".product-desc, p")?.textContent.trim() || "",
       };
 
       SorenCart.addItem(product);
 
-      // اجرای میکرو-انیمیشن پرواز آیتم به سمت سبد خرید (Animation Lab Flex)
-      animateFlyToCart(button);
+      // اجرای میکرو-انیمیشن پرواز آیتم به سمت سبد خرید (تنها هنگام افزودن اولیه)
+      if (addBtn) {
+        animateFlyToCart(addBtn);
 
-      // فیدبک بصری دکمه
-      const label = button.querySelector(".btn-add-label");
-      const defaultText = label ? label.textContent : "";
-      if (label) label.textContent = "افزوده شد";
-      button.classList.add("is-added");
+        const label = addBtn.querySelector(".btn-add-label");
+        const defaultText = label ? label.textContent : "";
+        if (label) label.textContent = "افزوده شد";
+        addBtn.classList.add("is-added");
 
-      showToast(`«${product.name}» به سبد خرید شما اضافه شد.`);
+        showToast(`«${product.name}» به سبد خرید شما اضافه شد.`);
 
-      setTimeout(() => {
-        if (label) label.textContent = defaultText;
-        button.classList.remove("is-added");
-      }, 1800);
-    });
+        setTimeout(() => {
+          if (label) label.textContent = defaultText;
+          addBtn.classList.remove("is-added");
+        }, 1800);
+      }
+    } else if (minusBtn) {
+      // لرزش هپتیک ۱۰ میلی‌ثانیه برای کاهش تعداد
+      if (typeof navigator !== "undefined" && navigator.vibrate) {
+        try { navigator.vibrate(10); } catch (err) {}
+      }
+
+      const card = minusBtn.closest(".product-card, .featured-card");
+      const id = minusBtn.dataset.id || card?.dataset.id || card?.dataset.productId;
+      if (id) {
+        SorenCartStore.updateQuantity(id, -1);
+      }
+    }
   });
 })();
 
@@ -1944,6 +2130,10 @@ const SorenCatalog = {
         }
       }
     });
+
+    if (typeof window.syncCardSteppers === "function") {
+      window.syncCardSteppers();
+    }
   },
 };
 
@@ -2100,6 +2290,9 @@ document.addEventListener("DOMContentLoaded", () => {
   }
   SorenCart.syncBadges();
   SorenCatalog.init();
+  if (typeof initSingleSurfaceCatalog === "function") {
+    initSingleSurfaceCatalog();
+  }
   initHero3DMotion();
   initScrollChoreography();
   initSorenLogoExperience();
