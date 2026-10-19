@@ -916,6 +916,46 @@
       </div>
     </footer>
 
+    <!-- ========================================================
+         نوار ناوبری پایین صفحه (Mobile Bottom Navigation - Thumb Zone)
+         ======================================================== -->
+    <nav class="mobile-bottom-nav" id="mobile-bottom-nav" aria-label="ناوبری اصلی موبایل">
+      <div class="bottom-nav-inner">
+        <a href="#home" class="bottom-nav-item active" id="bottom-nav-home" aria-label="خانه">
+          <svg class="bottom-nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">
+            <path d="M3 10.5 12 3l9 7.5V20a1 1 0 0 1-1 1h-5v-6h-6v6H4a1 1 0 0 1-1-1v-9.5Z" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+          <span class="bottom-nav-label">خانه</span>
+        </a>
+
+        <a href="#menu" class="bottom-nav-item" id="bottom-nav-menu" aria-label="منوی کافه">
+          <svg class="bottom-nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">
+            <path d="M18 8h1a4 4 0 0 1 0 8h-1M2 8h16v9a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4V8ZM6 2v3M10 2v3M14 2v3" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+          <span class="bottom-nav-label">منو</span>
+        </a>
+
+        <button type="button" class="bottom-nav-item bottom-nav-cart" id="bottom-nav-cart" aria-label="سبد خرید">
+          <div class="cart-icon-wrapper">
+            <svg class="bottom-nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">
+              <path d="M5 8h14l1 12H4L5 8Z" stroke-linejoin="round" />
+              <path d="M9 9V6a3 3 0 0 1 6 0v3" stroke-linecap="round" />
+            </svg>
+            <span class="bottom-nav-badge cart-badge" id="bottom-cart-badge" aria-live="polite"></span>
+          </div>
+          <span class="bottom-nav-label">سبد خرید</span>
+        </button>
+
+        <a href="./pages/login.html" class="bottom-nav-item" id="bottom-nav-account" aria-label="حساب کاربری">
+          <svg class="bottom-nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">
+            <circle cx="12" cy="8" r="3.5" />
+            <path d="M4.5 20c.6-4 3.2-6 7.5-6s6.9 2 7.5 6" stroke-linecap="round" />
+          </svg>
+          <span class="bottom-nav-label">حساب</span>
+        </a>
+      </div>
+    </nav>
+
     <script src="./main.js" defer></script>
   </body>
 </html>

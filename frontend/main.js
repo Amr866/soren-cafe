@@ -363,6 +363,13 @@ const SorenCart = {
       }
       badge.textContent = count > 0 ? String(count) : "";
       badge.dataset.count = String(count);
+      if (count > 0) {
+        badge.classList.remove("badge-pop");
+        void badge.offsetWidth;
+        badge.classList.add("badge-pop");
+      } else {
+        badge.classList.remove("badge-pop");
+      }
     });
   },
 };
@@ -648,6 +655,158 @@ if (typeof window !== "undefined") {
         if (menuBtn) menuBtn.setAttribute("aria-expanded", "false");
       }
     });
+  }
+})();
+
+/* ========================================================
+   2.1 نوار ناوبری پایین صفحه موبایل (Mobile Bottom Navigation & Smart Auto-Hide)
+   ======================================================== */
+(function initMobileBottomNav() {
+  const bottomNav = document.getElementById("mobile-bottom-nav");
+  if (!bottomNav) return;
+
+  const homeItem = document.getElementById("bottom-nav-home");
+  const menuItem = document.getElementById("bottom-nav-menu");
+  const cartItem = document.getElementById("bottom-nav-cart");
+  const accountItem = document.getElementById("bottom-nav-account");
+  const bottomBadge = document.getElementById("bottom-cart-badge");
+  const navItems = bottomNav.querySelectorAll(".bottom-nav-item");
+
+  function setActiveTab(activeItem) {
+    if (!activeItem) return;
+    navItems.forEach((item) => {
+      if (item === activeItem) {
+        item.classList.add("active");
+        item.setAttribute("aria-current", "page");
+      } else {
+        item.classList.remove("active");
+        item.removeAttribute("aria-current");
+      }
+    });
+  }
+
+  // ۱. کنترل اسکرول هوشمند هدروم (Headroom Auto-Hide)
+  let lastScrollY = typeof window !== "undefined" ? (window.scrollY || window.pageYOffset || 0) : 0;
+  let scrollTicking = false;
+
+  window.addEventListener(
+    "scroll",
+    () => {
+      if (!scrollTicking) {
+        window.requestAnimationFrame(() => {
+          const curr = Math.max(0, window.scrollY || window.pageYOffset || 0);
+          if (curr > lastScrollY && curr > 80 && curr - lastScrollY > 12) {
+            bottomNav.classList.add("nav-hidden");
+          } else if (curr < lastScrollY || curr <= 40) {
+            bottomNav.classList.remove("nav-hidden");
+          }
+          lastScrollY = curr;
+          scrollTicking = false;
+        });
+        scrollTicking = true;
+      }
+    },
+    { passive: true }
+  );
+
+  // ۲. مدیریت کلیک روی تب‌ها
+  if (homeItem) {
+    homeItem.addEventListener("click", (e) => {
+      setActiveTab(homeItem);
+      const homeSection = document.getElementById("home");
+      if (homeSection) {
+        e.preventDefault();
+        homeSection.scrollIntoView({ behavior: "smooth" });
+        if (history.pushState) history.pushState(null, "", "#home");
+      }
+    });
+  }
+
+  if (menuItem) {
+    menuItem.addEventListener("click", (e) => {
+      setActiveTab(menuItem);
+      const menuSection = document.getElementById("menu");
+      if (menuSection) {
+        e.preventDefault();
+        menuSection.scrollIntoView({ behavior: "smooth" });
+        if (history.pushState) history.pushState(null, "", "#menu");
+      }
+    });
+  }
+
+  if (cartItem) {
+    cartItem.addEventListener("click", (e) => {
+      e.preventDefault();
+      const cartSheet = document.getElementById("cart-bottom-sheet");
+      if (cartSheet && typeof window.openCartBottomSheet === "function") {
+        window.openCartBottomSheet();
+      } else if (cartSheet && typeof window.openCartSheet === "function") {
+        window.openCartSheet();
+      } else {
+        window.location.href = "./pages/cart.html";
+      }
+    });
+  }
+
+  // ۳. پایش اسکرول برای تغییر وضعیت تب فعال (Scroll Spy)
+  if ("IntersectionObserver" in window) {
+    const homeEl = document.getElementById("home");
+    const menuEl = document.getElementById("menu");
+    const observed = [
+      { el: homeEl, tab: homeItem },
+      { el: menuEl, tab: menuItem },
+    ].filter((s) => s.el && s.tab);
+
+    if (observed.length > 0) {
+      const navObserver = new IntersectionObserver(
+        (entries) => {
+          entries.forEach((entry) => {
+            if (entry.isIntersecting && entry.intersectionRatio >= 0.2) {
+              const match = observed.find((s) => s.el === entry.target);
+              if (match) {
+                setActiveTab(match.tab);
+              }
+            }
+          });
+        },
+        { threshold: [0.2, 0.4] }
+      );
+      observed.forEach((s) => navObserver.observe(s.el));
+    }
+  }
+
+  // ۴. همگام‌سازی نشانگر سبد خرید با انیمیشن جهش (Badge Pop)
+  function updateCartBadge(count) {
+    if (!bottomBadge) return;
+    const num = typeof count === "number" ? count : (window.SorenCartStore ? window.SorenCartStore.getTotalCount() : 0);
+    if (num > 0) {
+      bottomBadge.textContent = String(num);
+      bottomBadge.dataset.count = String(num);
+      bottomBadge.classList.remove("badge-pop");
+      void bottomBadge.offsetWidth; // ریفلو برای اجرای مجدد انیمیشن
+      bottomBadge.classList.add("badge-pop");
+    } else {
+      bottomBadge.textContent = "";
+      bottomBadge.dataset.count = "0";
+      bottomBadge.classList.remove("badge-pop");
+    }
+  }
+
+  if (bottomBadge) {
+    bottomBadge.addEventListener("animationend", () => {
+      bottomBadge.classList.remove("badge-pop");
+    });
+  }
+
+  // گوش دادن به تغییرات سبد خرید
+  window.addEventListener("soren:cart-changed", (e) => {
+    const count = e.detail && typeof e.detail.totalCount === "number" ? e.detail.totalCount : 0;
+    updateCartBadge(count);
+  });
+
+  // مقداردهی اولیه نشانگر
+  if (typeof SorenCartStore !== "undefined") {
+    updateCartBadge(SorenCartStore.getTotalCount());
   }
 })();
 
