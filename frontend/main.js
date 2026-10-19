@@ -968,6 +968,385 @@ function initSingleSurfaceCatalog() {
   window.setMenuCategory = setCategory;
 }
 
+/* ========================================================
+   2.3 نوار شناور سفارش جاری و دراور برگه کشویی سبد خرید موبایل
+   (Floating Order Bar & Interactive Cart Bottom Sheet Drawer)
+   ======================================================== */
+let isCartBottomSheetInitialized = false;
+
+function initCartBottomSheetAndFloatingBar() {
+  const floatingBar = document.getElementById("floating-order-bar");
+  const orderBarOpenBtn = document.getElementById("order-bar-open-btn");
+  const orderBarCount = document.getElementById("order-bar-count");
+  const orderBarPrice = document.getElementById("order-bar-price");
+
+  const sheet = document.getElementById("cart-bottom-sheet");
+  const backdrop = document.getElementById("cart-sheet-backdrop");
+
+  if (isCartBottomSheetInitialized) {
+    if (typeof window.syncFloatingOrderBar === "function") {
+      window.syncFloatingOrderBar();
+    }
+    return;
+  }
+  isCartBottomSheetInitialized = true;
+  const dragZone = document.getElementById("sheet-drag-zone");
+  const closeBtn = document.getElementById("sheet-close-btn");
+  const itemsList = document.getElementById("sheet-items-list");
+  const itemsCount = document.getElementById("sheet-items-count");
+  const subtotalEl = document.getElementById("sheet-subtotal-price");
+  const discountEl = document.getElementById("sheet-discount-price");
+  const finalPriceEl = document.getElementById("sheet-final-price");
+  const checkoutBtn = document.getElementById("sheet-checkout-btn");
+  const noteInput = document.getElementById("sheet-order-note");
+  const bottomNavCart = document.getElementById("bottom-nav-cart");
+
+  // تابع کمکی تبدیل ارقام به فارسی
+  function toFaDigits(num) {
+    const fa = ["۰", "۱", "۲", "۳", "۴", "۵", "۶", "۷", "۸", "۹"];
+    return String(num).replace(/[0-9]/g, (d) => fa[d]);
+  }
+
+  // تابع کمکی قالب‌بندی قیمت به تومان با ارقام فارسی
+  function formatPriceFa(num) {
+    const formatted = new Intl.NumberFormat("fa-IR").format(Number(num) || 0);
+    return toFaDigits(formatted) + " تومان";
+  }
+
+  // تصحیح مسیر نسبی تصاویر برای کارکرد یکدست در ریشه و پوشه pages
+  function resolveItemImage(img) {
+    if (!img) return "./images/brand/favicon.svg";
+    const isPagesDir = typeof window !== "undefined" && window.location.pathname.includes("/pages/");
+    if (isPagesDir && !img.startsWith("..") && !img.startsWith("/")) {
+      return "../" + img;
+    } else if (!isPagesDir && img.startsWith("../")) {
+      return img.replace(/^\.\.\//, "./");
+    }
+    return img;
+  }
+
+  // باز کردن برگه کشویی سبد خرید
+  function openCartBottomSheet() {
+    if (!sheet || !backdrop) return;
+    sheet.classList.add("is-open");
+    sheet.setAttribute("aria-hidden", "false");
+    backdrop.classList.add("is-open");
+    backdrop.setAttribute("aria-hidden", "false");
+
+    document.body.style.overflow = "hidden";
+
+    if (window.SorenCartStore) {
+      renderCartBottomSheet(window.SorenCartStore.getItems());
+    }
+
+    if (typeof navigator !== "undefined" && navigator.vibrate) {
+      try {
+        navigator.vibrate(12);
+      } catch (err) {}
+    }
+  }
+
+  // بستن برگه کشویی سبد خرید
+  function closeCartBottomSheet() {
+    if (!sheet || !backdrop) return;
+    sheet.classList.remove("is-open");
+    sheet.setAttribute("aria-hidden", "true");
+    backdrop.classList.remove("is-open");
+    backdrop.setAttribute("aria-hidden", "true");
+
+    sheet.style.transform = "";
+    sheet.style.transition = "";
+    sheet.style.bottom = "";
+    backdrop.style.opacity = "";
+
+    document.body.style.overflow = "";
+  }
+
+  // رندر اقلام زنده در سبد خرید کشویی
+  function renderCartBottomSheet(items) {
+    if (!itemsList) return;
+
+    const validItems = Array.isArray(items) ? items : [];
+    const totalCount = window.SorenCartStore
+      ? window.SorenCartStore.getTotalCount()
+      : validItems.reduce((s, it) => s + (it.qty || it.quantity || 1), 0);
+    const totalPrice = window.SorenCartStore
+      ? window.SorenCartStore.getTotalPrice()
+      : validItems.reduce((s, it) => s + ((it.price || 0) * (it.qty || it.quantity || 1)), 0);
+
+    if (itemsCount) itemsCount.textContent = `${toFaDigits(totalCount)} آیتم`;
+    if (subtotalEl) subtotalEl.textContent = formatPriceFa(totalPrice);
+    if (discountEl) discountEl.textContent = "۰ تومان";
+    if (finalPriceEl) finalPriceEl.textContent = formatPriceFa(totalPrice);
+
+    if (validItems.length === 0) {
+      itemsList.innerHTML = `
+        <div class="sheet-empty-state">
+          <span class="sheet-empty-icon" aria-hidden="true">☕</span>
+          <p class="sheet-empty-text">سبد خرید شما در حال حاضر خالی است</p>
+          <p class="sheet-empty-subtext">می‌توانید از منوی متنوع سورن آیتم‌های دلخواهتان را اضافه کنید.</p>
+        </div>
+      `;
+      if (checkoutBtn) checkoutBtn.disabled = true;
+      return;
+    }
+
+    if (checkoutBtn) checkoutBtn.disabled = false;
+
+    itemsList.innerHTML = validItems
+      .map((item) => {
+        const q = Number(item.quantity != null ? item.quantity : item.qty) || 1;
+        const unitPrice = Number(item.price) || 0;
+        const lineTotal = unitPrice * q;
+        const imgSrc = resolveItemImage(item.image);
+        const name = item.name || "محصول کافه سورن";
+        const id = item.id;
+
+        return `
+          <article class="sheet-item-row" data-id="${id}">
+            <img src="${imgSrc}" alt="${name}" class="sheet-item-img" loading="lazy" />
+            <div class="sheet-item-info">
+              <h4 class="sheet-item-name">${name}</h4>
+              <span class="sheet-item-unit-price">${formatPriceFa(unitPrice)} واحد</span>
+              <span class="sheet-item-total-price">${formatPriceFa(lineTotal)}</span>
+            </div>
+            <div class="sheet-item-controls">
+              <div class="sheet-stepper" data-id="${id}" aria-label="تنظیم تعداد ${name}">
+                <button type="button" class="sheet-stepper-btn sheet-minus-btn" data-id="${id}" aria-label="کاهش تعداد ${name}">−</button>
+                <span class="sheet-stepper-count" aria-live="polite">${toFaDigits(q)}</span>
+                <button type="button" class="sheet-stepper-btn sheet-plus-btn" data-id="${id}" aria-label="افزایش تعداد ${name}">+</button>
+              </div>
+              <button type="button" class="sheet-delete-btn" data-id="${id}" aria-label="حذف ${name} از سبد">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                  <path d="M3 6h18M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
+                </svg>
+              </button>
+            </div>
+          </article>
+        `;
+      })
+      .join("");
+  }
+
+  // همگام‌سازی نوار شناور سفارش جاری
+  function syncFloatingOrderBar() {
+    if (!floatingBar) return;
+    const count = window.SorenCartStore ? window.SorenCartStore.getTotalCount() : 0;
+    const price = window.SorenCartStore ? window.SorenCartStore.getTotalPrice() : 0;
+
+    if (count > 0) {
+      floatingBar.classList.add("is-visible");
+      floatingBar.setAttribute("aria-hidden", "false");
+      if (orderBarCount) orderBarCount.textContent = `${toFaDigits(count)} آیتم`;
+      if (orderBarPrice) orderBarPrice.textContent = formatPriceFa(price);
+    } else {
+      floatingBar.classList.remove("is-visible");
+      floatingBar.setAttribute("aria-hidden", "true");
+    }
+
+    if (sheet && sheet.classList.contains("is-open") && window.SorenCartStore) {
+      renderCartBottomSheet(window.SorenCartStore.getItems());
+    }
+  }
+
+  // پایش تغییرات تعداد و حذف در لیست اقلام برگه کشویی (Event Delegation)
+  if (itemsList) {
+    itemsList.addEventListener("click", (e) => {
+      const plusBtn = e.target.closest(".sheet-plus-btn");
+      const minusBtn = e.target.closest(".sheet-minus-btn");
+      const delBtn = e.target.closest(".sheet-delete-btn");
+
+      if (!plusBtn && !minusBtn && !delBtn) return;
+      if (!window.SorenCartStore) return;
+
+      if (typeof navigator !== "undefined" && navigator.vibrate) {
+        try {
+          navigator.vibrate(10);
+        } catch (err) {}
+      }
+
+      if (plusBtn) {
+        const id = plusBtn.dataset.id;
+        const item = window.SorenCartStore.getItems().find((i) => i.id === id);
+        if (item) {
+          window.SorenCartStore.addItem(item);
+        }
+      } else if (minusBtn) {
+        const id = minusBtn.dataset.id;
+        window.SorenCartStore.updateQuantity(id, -1);
+      } else if (delBtn) {
+        const id = delBtn.dataset.id;
+        window.SorenCartStore.removeItem(id);
+      }
+    });
+  }
+
+  // رویدادهای باز و بسته کردن دراور
+  if (orderBarOpenBtn) {
+    orderBarOpenBtn.addEventListener("click", (e) => {
+      e.preventDefault();
+      openCartBottomSheet();
+    });
+  }
+
+  if (bottomNavCart) {
+    bottomNavCart.addEventListener("click", (e) => {
+      e.preventDefault();
+      openCartBottomSheet();
+    });
+  }
+
+  if (closeBtn) {
+    closeBtn.addEventListener("click", (e) => {
+      e.preventDefault();
+      closeCartBottomSheet();
+    });
+  }
+
+  if (backdrop) {
+    backdrop.addEventListener("click", () => {
+      closeCartBottomSheet();
+    });
+  }
+
+  document.addEventListener("keydown", (e) => {
+    if (e.key === "Escape") {
+      if (sheet && sheet.classList.contains("is-open")) {
+        closeCartBottomSheet();
+      }
+    }
+  });
+
+  // ژست لمسی بستن کشویی با کشیدن به پایین (Swipe-to-Dismiss Gesture)
+  function attachDragGesture(element) {
+    if (!element || !sheet) return;
+    let startY = 0;
+    let currentDelta = 0;
+    let isDragging = false;
+
+    element.addEventListener(
+      "touchstart",
+      (e) => {
+        if (e.touches.length !== 1) return;
+        if (e.target.closest("button")) return;
+        startY = e.touches[0].clientY;
+        currentDelta = 0;
+        isDragging = true;
+        sheet.style.transition = "none";
+      },
+      { passive: true }
+    );
+
+    element.addEventListener(
+      "touchmove",
+      (e) => {
+        if (!isDragging) return;
+        const dy = e.touches[0].clientY - startY;
+        if (dy > 0) {
+          if (e.cancelable) e.preventDefault();
+          currentDelta = dy;
+          sheet.style.transform = `translateY(${dy}px)`;
+          const dim = Math.min(dy / 300, 0.6);
+          if (backdrop) backdrop.style.opacity = `${1 - dim}`;
+        } else {
+          currentDelta = 0;
+          sheet.style.transform = "";
+        }
+      },
+      { passive: false }
+    );
+
+    const endDrag = () => {
+      if (!isDragging) return;
+      isDragging = false;
+      sheet.style.transition = "";
+      if (backdrop) backdrop.style.opacity = "";
+
+      if (currentDelta > 60) {
+        closeCartBottomSheet();
+      } else {
+        sheet.style.transform = "";
+      }
+      currentDelta = 0;
+    };
+
+    element.addEventListener("touchend", endDrag, { passive: true });
+    element.addEventListener("touchcancel", endDrag, { passive: true });
+  }
+
+  if (dragZone) attachDragGesture(dragZone);
+  const sheetHeader = sheet ? sheet.querySelector(".sheet-header") : null;
+  if (sheetHeader) attachDragGesture(sheetHeader);
+
+  // یادداشت اختیاری برای باریستا
+  if (noteInput) {
+    try {
+      const savedNote = localStorage.getItem("soren_barista_note");
+      if (savedNote) noteInput.value = savedNote;
+    } catch (err) {}
+
+    noteInput.addEventListener("input", (e) => {
+      try {
+        localStorage.setItem("soren_barista_note", e.target.value);
+      } catch (err) {}
+    });
+  }
+
+  // دکمه تکمیل سفارش و هدایت به تسویه
+  if (checkoutBtn) {
+    checkoutBtn.addEventListener("click", () => {
+      const totalCount = window.SorenCartStore ? window.SorenCartStore.getTotalCount() : 0;
+      if (totalCount === 0) return;
+
+      if (noteInput && noteInput.value.trim()) {
+        try {
+          localStorage.setItem("soren_barista_note", noteInput.value.trim());
+        } catch (err) {}
+      }
+
+      if (typeof showToast === "function") {
+        showToast("در حال انتقال به صفحه پرداخت و تکمیل سفارش...");
+      }
+
+      setTimeout(() => {
+        const isPagesDir = typeof window !== "undefined" && window.location.pathname.includes("/pages/");
+        window.location.href = isPagesDir ? "./cart.html" : "./pages/cart.html";
+      }, 300);
+    });
+  }
+
+  // هماهنگی با کیبورد مجازی در نمایشگرهای لمسی (Visual Viewport Handling)
+  if (typeof window !== "undefined" && window.visualViewport) {
+    const handleViewportChange = () => {
+      if (!sheet || !sheet.classList.contains("is-open")) return;
+      const offset = Math.max(0, window.innerHeight - window.visualViewport.height);
+      sheet.style.bottom = offset > 0 ? `${offset}px` : "";
+    };
+    window.visualViewport.addEventListener("resize", handleViewportChange);
+    window.visualViewport.addEventListener("scroll", handleViewportChange);
+  }
+
+  // اشتراک روی رویداد سراسری تغییرات سبد خرید
+  window.addEventListener("soren:cart-changed", () => {
+    syncFloatingOrderBar();
+  });
+
+  // توابع در دسترس همگانی
+  window.openCartBottomSheet = openCartBottomSheet;
+  window.closeCartBottomSheet = closeCartBottomSheet;
+  window.renderCartBottomSheet = renderCartBottomSheet;
+  window.syncFloatingOrderBar = syncFloatingOrderBar;
+
+  // اجرای اولیه همگام‌سازی نوار شناور
+  syncFloatingOrderBar();
+}
+
+if (document.readyState === "loading") {
+  document.addEventListener("DOMContentLoaded", initCartBottomSheetAndFloatingBar);
+} else {
+  initCartBottomSheetAndFloatingBar();
+}
+
 /* ========================================
    3. اسکرول نرم به بخش‌های صفحه
    ======================================== */
@@ -2292,6 +2671,9 @@ document.addEventListener("DOMContentLoaded", () => {
   SorenCatalog.init();
   if (typeof initSingleSurfaceCatalog === "function") {
     initSingleSurfaceCatalog();
+  }
+  if (typeof initCartBottomSheetAndFloatingBar === "function") {
+    initCartBottomSheetAndFloatingBar();
   }
   initHero3DMotion();
   initScrollChoreography();

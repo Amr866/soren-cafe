@@ -1685,6 +1685,78 @@
       </div>
     </nav>
 
+    <!-- ========================================================
+         نوار شناور سفارش جاری در موبایل (Floating Order Bar)
+         ======================================================== -->
+    <aside class="floating-order-bar" id="floating-order-bar" aria-label="خلاصه سفارش جاری" aria-hidden="true">
+      <div class="order-bar-inner">
+        <div class="order-bar-summary">
+          <span class="order-bar-count" id="order-bar-count">۰ آیتم</span>
+          <span class="order-bar-dot">✦</span>
+          <span class="order-bar-price" id="order-bar-price">۰ تومان</span>
+        </div>
+        <button type="button" class="order-bar-btn" id="order-bar-open-btn" aria-label="مشاهده فاکتور و پرداخت">
+          <span>مشاهده فاکتور و ثبت</span>
+          <span class="order-bar-arrow" aria-hidden="true">←</span>
+        </button>
+      </div>
+    </aside>
+
+    <!-- ========================================================
+         برگه کشویی سبد خرید موبایل (Cart Bottom Sheet Drawer)
+         ======================================================== -->
+    <div class="cart-sheet-backdrop" id="cart-sheet-backdrop" aria-hidden="true"></div>
+    <aside class="cart-bottom-sheet" id="cart-bottom-sheet" aria-label="سبد خرید و تسویه" aria-hidden="true">
+      <div class="sheet-drag-handle-zone" id="sheet-drag-zone" aria-label="بستن سبد با کشیدن به پایین">
+        <span class="sheet-drag-handle"></span>
+      </div>
+
+      <div class="sheet-header">
+        <div class="sheet-title-box">
+          <h3 class="sheet-title">سبد خرید شما</h3>
+          <span class="sheet-items-count" id="sheet-items-count">۰ آیتم</span>
+        </div>
+        <button type="button" class="sheet-close-btn" id="sheet-close-btn" aria-label="بستن سبد خرید">✕</button>
+      </div>
+
+      <div class="sheet-body">
+        <!-- لیست اقلام سبد خرید -->
+        <div class="sheet-items-list" id="sheet-items-list">
+          <!-- محتوا به صورت پویا با جاوااسکریپت پر می‌شود -->
+        </div>
+
+        <!-- یادداشت به باریستا -->
+        <div class="sheet-note-box">
+          <label for="sheet-order-note" class="sheet-note-label">یادداشت برای باریستا (اختیاری):</label>
+          <input type="text" id="sheet-order-note" class="sheet-note-input" placeholder="مثلاً: شیر کم‌چرب، بدون شکر، دمای سرو ملایم..." />
+        </div>
+
+        <!-- خلاصه فاکتور -->
+        <div class="sheet-summary-box">
+          <div class="summary-line">
+            <span>مجموع اقلام</span>
+            <strong id="sheet-subtotal-price">۰ تومان</strong>
+          </div>
+          <div class="summary-line discount-line">
+            <span>تخفیف ویژه سورن</span>
+            <strong id="sheet-discount-price">۰ تومان</strong>
+          </div>
+          <div class="summary-line total-line">
+            <span>مبلغ نهایی قابل پرداخت</span>
+            <strong id="sheet-final-price">۰ تومان</strong>
+          </div>
+        </div>
+      </div>
+
+      <div class="sheet-footer">
+        <button type="button" class="sheet-checkout-btn" id="sheet-checkout-btn">
+          <span>تکمیل سفارش و پرداخت آنلاین</span>
+          <span class="checkout-btn-arrow" aria-hidden="true">←</span>
+        </button>
+        <a href="./pages/cart.html" class="sheet-full-cart-link">مشاهده صفحه کامل سبد خرید</a>
+      </div>
+    </aside>
+
     <script src="./main.js" defer></script>
   </body>
 </html>

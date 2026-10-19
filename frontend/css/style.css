@@ -6699,6 +6699,585 @@ main {
   display: none !important;
 }
 
+/* ========================================================
+   نوار شناور سفارش جاری در موبایل (Floating Order Bar)
+   ======================================================== */
+.floating-order-bar {
+  position: fixed;
+  bottom: calc(var(--bottom-nav-height, 64px) + var(--safe-bottom, 12px) + 8px);
+  right: var(--page-gutter, 16px);
+  left: var(--page-gutter, 16px);
+  z-index: 44;
+  background: var(--charcoal, #261F1A);
+  color: #ffffff;
+  padding: 10px 16px;
+  border-radius: 16px;
+  box-shadow: 0 10px 30px rgba(38, 31, 26, 0.35);
+  transform: translateY(160%);
+  opacity: 0;
+  pointer-events: none;
+  transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.3s ease, bottom 0.25s ease;
+  will-change: transform, opacity;
+}
+
+.mobile-bottom-nav.nav-hidden ~ .floating-order-bar {
+  bottom: calc(var(--safe-bottom, 12px) + 8px);
+}
+
+.floating-order-bar.is-visible {
+  transform: translateY(0);
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.order-bar-inner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.order-bar-summary {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13.5px;
+  font-weight: 600;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.order-bar-count {
+  color: rgba(255, 255, 255, 0.88);
+  font-feature-settings: "tnum";
+}
+
+.order-bar-dot {
+  color: #d4af37;
+  font-size: 10px;
+}
+
+.order-bar-price {
+  font-weight: 700;
+  color: #ffffff;
+  font-feature-settings: "tnum";
+}
+
+.order-bar-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: var(--coffee, #795239);
+  color: #ffffff;
+  border: none;
+  border-radius: 12px;
+  padding: 8px 14px;
+  font-family: inherit;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  min-height: 44px;
+  flex-shrink: 0;
+  touch-action: manipulation;
+  transition: background 0.2s ease, transform 0.15s ease;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.order-bar-btn:hover {
+  background: #62402b;
+}
+
+.order-bar-btn:active {
+  transform: scale(0.95);
+}
+
+.order-bar-arrow {
+  font-size: 15px;
+  line-height: 1;
+  transition: transform 0.2s ease;
+}
+
+[dir="rtl"] .order-bar-btn:hover .order-bar-arrow {
+  transform: translateX(-3px);
+}
+
+/* ========================================================
+   برگه کشویی سبد خرید موبایل (Cart Bottom Sheet Drawer)
+   ======================================================== */
+.cart-sheet-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(26, 22, 20, 0.55);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  z-index: 998;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.cart-sheet-backdrop.is-open {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.cart-bottom-sheet {
+  position: fixed;
+  right: 0;
+  left: 0;
+  bottom: 0;
+  max-height: 85dvh;
+  max-height: 85vh;
+  background: var(--ivory, #F7F4EE);
+  z-index: 999;
+  border-radius: 24px 24px 0 0;
+  transform: translateY(105%);
+  transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+  box-shadow: 0 -12px 40px rgba(0, 0, 0, 0.2);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  padding-bottom: calc(14px + var(--safe-bottom, 12px));
+  will-change: transform;
+}
+
+.cart-bottom-sheet.is-open {
+  transform: translateY(0);
+}
+
+.sheet-drag-handle-zone {
+  width: 100%;
+  padding: 10px 0 4px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  cursor: grab;
+  touch-action: none;
+  user-select: none;
+  -webkit-user-select: none;
+  flex-shrink: 0;
+}
+
+.sheet-drag-handle-zone:active {
+  cursor: grabbing;
+}
+
+.sheet-drag-handle {
+  width: 44px;
+  height: 5px;
+  background: rgba(140, 94, 60, 0.35);
+  border-radius: 999px;
+  margin: 4px auto;
+  transition: background 0.2s ease;
+}
+
+.sheet-drag-handle-zone:hover .sheet-drag-handle {
+  background: rgba(140, 94, 60, 0.55);
+}
+
+.sheet-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 20px 14px;
+  border-bottom: 1px solid rgba(140, 94, 60, 0.12);
+  flex-shrink: 0;
+}
+
+.sheet-title-box {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.sheet-title {
+  margin: 0;
+  font-size: 17px;
+  font-weight: 700;
+  color: var(--charcoal, #261F1A);
+}
+
+.sheet-items-count {
+  font-size: 12px;
+  color: var(--coffee, #795239);
+  background: rgba(121, 82, 57, 0.1);
+  padding: 2px 9px;
+  border-radius: 999px;
+  font-weight: 600;
+  font-feature-settings: "tnum";
+}
+
+.sheet-close-btn {
+  width: 44px;
+  height: 44px;
+  min-width: 44px;
+  min-height: 44px;
+  border-radius: 50%;
+  border: none;
+  background: rgba(140, 94, 60, 0.08);
+  color: var(--charcoal, #261F1A);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s ease, transform 0.15s ease;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.sheet-close-btn:hover {
+  background: rgba(140, 94, 60, 0.16);
+}
+
+.sheet-close-btn:active {
+  transform: scale(0.92);
+}
+
+.sheet-body {
+  flex: 1 1 auto;
+  overflow-y: auto;
+  padding: 14px 20px 18px;
+  -webkit-overflow-scrolling: touch;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.sheet-items-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.sheet-item-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: #ffffff;
+  border: 1px solid rgba(140, 94, 60, 0.12);
+  border-radius: 14px;
+  padding: 10px 12px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.03);
+  transition: border-color 0.2s ease;
+}
+
+.sheet-item-row:hover {
+  border-color: rgba(140, 94, 60, 0.22);
+}
+
+.sheet-item-img {
+  width: 48px;
+  height: 48px;
+  object-fit: cover;
+  border-radius: 10px;
+  flex-shrink: 0;
+  background: rgba(140, 94, 60, 0.06);
+}
+
+.sheet-item-info {
+  flex: 1 1 auto;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.sheet-item-name {
+  font-size: 13.5px;
+  font-weight: 700;
+  color: var(--charcoal, #261F1A);
+  margin: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.sheet-item-unit-price {
+  font-size: 11.5px;
+  color: rgba(38, 31, 26, 0.65);
+  font-feature-settings: "tnum";
+}
+
+.sheet-item-total-price {
+  font-size: 12.5px;
+  font-weight: 700;
+  color: var(--coffee, #795239);
+  font-feature-settings: "tnum";
+}
+
+.sheet-item-controls {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-shrink: 0;
+}
+
+.sheet-stepper {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: rgba(121, 82, 57, 0.08);
+  border: 1px solid rgba(121, 82, 57, 0.18);
+  border-radius: 999px;
+  padding: 2px 4px;
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+.sheet-stepper-btn {
+  width: 34px;
+  height: 34px;
+  min-width: 34px;
+  min-height: 34px;
+  border-radius: 50%;
+  border: none;
+  background: var(--coffee, #795239);
+  color: #ffffff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 16px;
+  font-weight: 700;
+  cursor: pointer;
+  padding: 0;
+  line-height: 1;
+  touch-action: manipulation;
+  transition: transform 0.15s ease, background 0.15s ease;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.sheet-stepper-btn:hover {
+  background: #62402b;
+}
+
+.sheet-stepper-btn:active {
+  transform: scale(0.92);
+}
+
+.sheet-stepper-count {
+  min-width: 20px;
+  text-align: center;
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--charcoal, #261F1A);
+  font-feature-settings: "tnum";
+}
+
+.sheet-delete-btn {
+  width: 36px;
+  height: 36px;
+  min-width: 36px;
+  min-height: 36px;
+  border-radius: 10px;
+  border: none;
+  background: rgba(220, 53, 69, 0.08);
+  color: #c0392b;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+  cursor: pointer;
+  touch-action: manipulation;
+  transition: background 0.2s ease, transform 0.15s ease;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.sheet-delete-btn:hover {
+  background: rgba(220, 53, 69, 0.16);
+}
+
+.sheet-delete-btn:active {
+  transform: scale(0.92);
+}
+
+.sheet-empty-state {
+  text-align: center;
+  padding: 32px 16px;
+  color: rgba(38, 31, 26, 0.65);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+}
+
+.sheet-empty-icon {
+  font-size: 36px;
+  line-height: 1;
+}
+
+.sheet-empty-text {
+  font-size: 14.5px;
+  font-weight: 600;
+  color: var(--charcoal, #261F1A);
+  margin: 0;
+}
+
+.sheet-empty-subtext {
+  font-size: 12px;
+  color: rgba(38, 31, 26, 0.6);
+  margin: 0;
+}
+
+.sheet-note-box {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  background: #ffffff;
+  border: 1px solid rgba(140, 94, 60, 0.12);
+  border-radius: 14px;
+  padding: 12px 14px;
+}
+
+.sheet-note-label {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--charcoal, #261F1A);
+}
+
+.sheet-note-input {
+  width: 100%;
+  border: 1px solid rgba(140, 94, 60, 0.2);
+  border-radius: 10px;
+  padding: 10px 12px;
+  font-family: inherit;
+  font-size: 12.5px;
+  color: var(--charcoal, #261F1A);
+  background: var(--ivory, #F7F4EE);
+  outline: none;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
+  box-sizing: border-box;
+}
+
+.sheet-note-input:focus {
+  border-color: var(--coffee, #795239);
+  box-shadow: 0 0 0 3px rgba(121, 82, 57, 0.12);
+  background: #ffffff;
+}
+
+.sheet-summary-box {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  background: #ffffff;
+  border: 1px solid rgba(140, 94, 60, 0.12);
+  border-radius: 14px;
+  padding: 12px 14px;
+}
+
+.summary-line {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 12.5px;
+  color: rgba(38, 31, 26, 0.75);
+}
+
+.summary-line strong {
+  font-weight: 700;
+  color: var(--charcoal, #261F1A);
+  font-feature-settings: "tnum";
+}
+
+.summary-line.discount-line {
+  color: #27ae60;
+}
+
+.summary-line.discount-line strong {
+  color: #27ae60;
+}
+
+.summary-line.total-line {
+  border-top: 1px dashed rgba(140, 94, 60, 0.2);
+  padding-top: 8px;
+  margin-top: 2px;
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--charcoal, #261F1A);
+}
+
+.summary-line.total-line strong {
+  font-size: 15px;
+  color: var(--coffee, #795239);
+}
+
+.sheet-footer {
+  padding: 12px 20px 0;
+  border-top: 1px solid rgba(140, 94, 60, 0.12);
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+.sheet-checkout-btn {
+  height: 50px;
+  min-height: 48px;
+  background: var(--coffee, #795239);
+  color: #ffffff;
+  border-radius: 14px;
+  font-family: inherit;
+  font-weight: 700;
+  font-size: 14.5px;
+  border: none;
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  cursor: pointer;
+  transition: background 0.2s ease, transform 0.15s ease, opacity 0.2s ease;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.sheet-checkout-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.sheet-checkout-btn:not(:disabled):hover {
+  background: #62402b;
+}
+
+.sheet-checkout-btn:not(:disabled):active {
+  transform: scale(0.97);
+}
+
+.checkout-btn-arrow {
+  font-size: 17px;
+  transition: transform 0.2s ease;
+}
+
+[dir="rtl"] .sheet-checkout-btn:not(:disabled):hover .checkout-btn-arrow {
+  transform: translateX(-4px);
+}
+
+.sheet-full-cart-link {
+  text-align: center;
+  font-size: 12px;
+  color: var(--coffee, #795239);
+  text-decoration: none;
+  padding: 4px;
+  font-weight: 600;
+}
+
+.sheet-full-cart-link:hover {
+  text-decoration: underline;
+}
+
+/* صراحت کامل برای پنهان بودن در نمایشگرهای تبلت و دسکتاپ */
+@media (min-width: 768px) {
+  .floating-order-bar,
+  .cart-bottom-sheet,
+  .cart-sheet-backdrop {
+    display: none !important;
+  }
+}
+
+
 
 
 
