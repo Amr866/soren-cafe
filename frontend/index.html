@@ -11,11 +11,11 @@
     <link rel="manifest" href="./manifest.json" />
     <link rel="icon" type="image/svg+xml" href="./images/brand/favicon.svg" />
     <link rel="apple-touch-icon" href="./images/brand/favicon.svg" />
-    <!-- فونت -->
+    <!-- فونت‌های اختصاصی لوکس: وزیرمتن و پلاس جاکارتا سانس -->
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
-      href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@300;400;500;600;700;800;900&display=swap"
+      href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Vazirmatn:wght@300;400;500;600;700;800;900&display=swap"
       rel="stylesheet"
     />
 
@@ -131,6 +131,27 @@
             >
               <circle cx="10.8" cy="10.8" r="6.8" />
               <path d="m16 16 4.5 4.5" stroke-linecap="round" />
+            </svg>
+          </button>
+
+          <!-- دکمه تنظیمات صدای تعاملی (Acoustic Haptics) -->
+          <button
+            class="icon-button sound-button"
+            id="soren-sound-toggle"
+            type="button"
+            aria-label="تنظیم افکت صوتی تعاملی"
+            title="افکت صوتی تعاملی سورن"
+          >
+            <svg
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="1.8"
+              aria-hidden="true"
+            >
+              <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5" stroke-linecap="round" stroke-linejoin="round" />
+              <path d="M15.54 8.46a5 5 0 0 1 0 7.07" stroke-linecap="round" />
+              <path d="M19.07 4.93a10 10 0 0 1 0 14.14" stroke-linecap="round" />
             </svg>
           </button>
 
@@ -307,12 +328,14 @@
 
             <div class="hero-buttons">
               <a href="#menu" class="hero-btn hero-btn-primary">
-                مشاهده منو
-                <span class="hero-arrow" aria-hidden="true">←</span>
+                <span>مشاهده منو</span>
+                <span class="hero-arrow-capsule" aria-hidden="true">
+                  <span class="hero-arrow">←</span>
+                </span>
               </a>
 
               <a href="#about-soren" class="hero-btn hero-btn-secondary">
-                درباره سورن
+                <span>درباره سورن</span>
               </a>
             </div>
 
@@ -429,6 +452,127 @@
               />
             </div>
           </div>
+        </div>
+      </section>
+
+      <!-- ==================== Artisanal Craft Bento Grid (Awwwards-Tier) ==================== -->
+      <section class="craft-bento-section" id="craft-bento" aria-labelledby="craft-bento-heading">
+        <header class="craft-bento-header">
+          <div class="bento-badge">
+            <span class="badge-dot pulse-amber"></span>
+            <span>استانداردهای مهندسی طعم و برشته‌کاری</span>
+          </div>
+          <h2 id="craft-bento-heading" class="craft-bento-title">
+            تلاقی علم دم‌آوری، اصالت دانه و
+            <span class="highlight-serif">هنر دست باریستا</span>
+          </h2>
+          <p class="craft-bento-sub">
+            در سورن، هر فنجان قهوه حاصل کالیبراسیون دقیق دما، فشار، برشته‌کاری دسته‌کوچک و تعهد بی‌پایان به کمال است.
+          </p>
+        </header>
+
+        <div class="craft-bento-grid">
+          <!-- Bento Card 1: دم‌آوری تخصصی موج سوم (Wide Card) -->
+          <article class="bento-card bento-pour-over">
+            <div class="bento-card-inner">
+              <div class="bento-card-header">
+                <span class="bento-tag">✦ دم‌آوری دستی تخصصی</span>
+                <span class="bento-metric font-latin">93.5°C · 1:16 Ratio</span>
+              </div>
+              <div class="bento-card-body">
+                <h3>بار دمی V60 و کمکس با دانه‌های تک‌خاستگاه</h3>
+                <p>عصاره‌گیری قطره‌ای کنترل‌شده با آب فیلترشده معدنی، حفظ پیچیدگی نت‌های گلی یاس، هلوی سفید و ترنج آفریقایی.</p>
+                <div class="bento-specs">
+                  <div class="spec-pill">
+                    <span class="spec-label">خاستگاه:</span>
+                    <strong>اتیوپی یرگاچف</strong>
+                  </div>
+                  <div class="spec-pill">
+                    <span class="spec-label">فشار پمپ:</span>
+                    <strong class="font-latin">9.2 BAR</strong>
+                  </div>
+                  <div class="spec-pill">
+                    <span class="spec-label">عصاره (TDS):</span>
+                    <strong class="font-latin">1.35%</strong>
+                  </div>
+                </div>
+              </div>
+              <div class="bento-card-glow" aria-hidden="true"></div>
+            </div>
+          </article>
+
+          <!-- Bento Card 2: برشته‌کاری در کارگاه میکرولات -->
+          <article class="bento-card bento-roastery">
+            <div class="bento-card-inner">
+              <div class="bento-card-header">
+                <span class="bento-tag">🔥 برشته‌کاری دسته‌کوچک</span>
+                <span class="bento-metric font-latin">Batch #084</span>
+              </div>
+              <div class="bento-card-body">
+                <h3>پروفایل برشته‌کاری مدیم-لایت کارگاهی</h3>
+                <p>برشته‌کاری روزانه در بشکه‌های کوچک برای حفظ حداکثر آرومای فرار دانه‌های عربیکا ۱۰۰٪ دست‌چین.</p>
+                <div class="bento-roast-progress">
+                  <div class="progress-labels">
+                    <span>سبک (Light)</span>
+                    <span class="active">مدیم (City+)</span>
+                    <span>تیره (Dark)</span>
+                  </div>
+                  <div class="roast-bar-track">
+                    <div class="roast-bar-fill"></div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </article>
+
+          <!-- Bento Card 3: بیکری و شیرینی‌پزی ارگانیک -->
+          <article class="bento-card bento-bakehouse">
+            <div class="bento-card-inner">
+              <div class="bento-card-header">
+                <span class="bento-tag">🥐 بیکری و شیرینی‌پزی دست‌ساز</span>
+                <span class="bento-metric font-latin">72h Ferment</span>
+              </div>
+              <div class="bento-card-body">
+                <h3>کره بلژیکی، لایه‌بندی دست‌ساز و پخت روزانه</h3>
+                <p>کروسان‌های کره‌ای با بهارنارنج شیراز و چیزکیک سن‌سباستین پسته؛ هر صبح تازه از تنور بیرون می‌آیند.</p>
+                <div class="bake-schedule">
+                  <span class="bake-dot"></span>
+                  <span>پخت نوبت صبح: ۸:۳۰ | نوبت عصر: ۱۶:۰۰</span>
+                </div>
+              </div>
+            </div>
+          </article>
+
+          <!-- Bento Card 4: وضعیت زنده تله‌متری بار کافه (Synced to WS) -->
+          <article class="bento-card bento-telemetry" id="bento-telemetry-card">
+            <div class="bento-card-inner">
+              <div class="bento-card-header">
+                <span class="bento-tag pulse-tag">
+                  <span class="status-pulse-dot"></span>
+                  پایش زنده بار باریستا
+                </span>
+                <span class="bento-metric font-latin" id="bento-queue-time">~6 Min Queue</span>
+              </div>
+              <div class="bento-card-body">
+                <h3>ارتباط بلادرنگ با سفارشات بار</h3>
+                <p>موتور وب‌سوکت داخلی سفارشات، وضعیت دستگاه‌ها و زمان تقریبی آماده‌سازی را به صورت زنده نمایش می‌دهد.</p>
+                <div class="telemetry-live-stats">
+                  <div class="telemetry-stat-item">
+                    <span class="stat-num font-latin" id="bento-active-orders">۳</span>
+                    <span class="stat-desc">سفارش در جریان</span>
+                  </div>
+                  <div class="telemetry-stat-item">
+                    <span class="stat-num font-latin">100%</span>
+                    <span class="stat-desc">سلامت پمپ عصاره</span>
+                  </div>
+                  <div class="telemetry-stat-item">
+                    <span class="stat-num font-latin">۹۳.۵°</span>
+                    <span class="stat-desc">دمای بویلر</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </article>
         </div>
       </section>
 

@@ -2676,6 +2676,135 @@ if (typeof window !== "undefined") {
   window.initSorenLogoExperience = initSorenLogoExperience;
 }
 
+/* ========================================================
+   موتور سنتز صدای ارگانیک و بازخورد لمسی (Soren Acoustic & Haptic Engine)
+   ======================================================== */
+const SorenAudio = {
+  ctx: null,
+  enabled: true,
+
+  init() {
+    try {
+      const saved = localStorage.getItem("soren_sound_enabled");
+      if (saved !== null) {
+        this.enabled = saved === "true";
+      }
+    } catch (e) {}
+
+    const toggleBtn = document.getElementById("soren-sound-toggle");
+    if (toggleBtn) {
+      this.updateToggleButton(toggleBtn);
+      toggleBtn.addEventListener("click", () => {
+        this.enabled = !this.enabled;
+        try {
+          localStorage.setItem("soren_sound_enabled", String(this.enabled));
+        } catch (e) {}
+        this.updateToggleButton(toggleBtn);
+        if (this.enabled) {
+          this.playWarmTap();
+        }
+      });
+    }
+
+    // بازخورد صوتی و لرزشی روی دکمه‌های کلیدی تعاملی
+    document.addEventListener("click", (e) => {
+      const target = e.target.closest(
+        ".card-add-btn, .category-chip, .hero-btn-primary, .sheet-checkout-btn, .order-bar-btn"
+      );
+      if (target) {
+        this.playWarmTap();
+        if (typeof navigator !== "undefined" && navigator.vibrate) {
+          try {
+            navigator.vibrate(10);
+          } catch (err) {}
+        }
+      }
+    });
+  },
+
+  updateToggleButton(btn) {
+    if (this.enabled) {
+      btn.classList.remove("sound-muted");
+      btn.setAttribute("title", "صدای تعاملی فعال است (کلیک برای قطع)");
+      btn.setAttribute("aria-label", "صدای تعاملی فعال است");
+    } else {
+      btn.classList.add("sound-muted");
+      btn.setAttribute("title", "صدای تعاملی غیرفعال است (کلیک برای وصل)");
+      btn.setAttribute("aria-label", "صدای تعاملی غیرفعال است");
+    }
+  },
+
+  getContext() {
+    if (!this.ctx && typeof window !== "undefined") {
+      const AudioCtx = window.AudioContext || window.webkitAudioContext;
+      if (AudioCtx) {
+        this.ctx = new AudioCtx();
+      }
+    }
+    if (this.ctx && this.ctx.state === "suspended") {
+      this.ctx.resume().catch(() => {});
+    }
+    return this.ctx;
+  },
+
+  playWarmTap() {
+    if (!this.enabled) return;
+    try {
+      const ctx = this.getContext();
+      if (!ctx) return;
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+
+      osc.type = "sine";
+      const now = ctx.currentTime;
+      // فرکانس گرم و صمیمی مانند کلیک دانه قهوه
+      osc.frequency.setValueAtTime(420, now);
+      osc.frequency.exponentialRampToValueAtTime(160, now + 0.07);
+
+      gain.gain.setValueAtTime(0.045, now);
+      gain.gain.exponentialRampToValueAtTime(0.0001, now + 0.07);
+
+      osc.connect(gain);
+      gain.connect(ctx.destination);
+
+      osc.start(now);
+      osc.stop(now + 0.075);
+    } catch (e) {}
+  },
+};
+
+/* ========================================================
+   همگام‌سازی زنده تله‌متری با بنتو گرید (Bento Telemetry Bridge)
+   ======================================================== */
+function initBentoTelemetrySync() {
+  const activeOrdersEl = document.getElementById("bento-active-orders");
+  const queueTimeEl = document.getElementById("bento-queue-time");
+
+  function updateTelemetryUI(count) {
+    if (activeOrdersEl) {
+      activeOrdersEl.textContent = String(count);
+    }
+    if (queueTimeEl) {
+      const mins = Math.max(3, count * 2);
+      queueTimeEl.textContent = `~${mins} Min Queue`;
+    }
+  }
+
+  if (typeof SorenWS !== "undefined" && SorenWS.on) {
+    SorenWS.on("order:new", () => {
+      const current = parseInt(activeOrdersEl?.textContent || "3", 10);
+      updateTelemetryUI(current + 1);
+    });
+
+    SorenWS.on("order:status", (data) => {
+      if (data && data.status === "completed") {
+        const current = parseInt(activeOrdersEl?.textContent || "3", 10);
+        updateTelemetryUI(Math.max(1, current - 1));
+      }
+    });
+  }
+}
+
 // راه‌اندازی اولیه در زمان لود صفحه
 document.addEventListener("DOMContentLoaded", () => {
   if (typeof SorenCartStore !== "undefined") {
@@ -2692,6 +2821,8 @@ document.addEventListener("DOMContentLoaded", () => {
   initHero3DMotion();
   initScrollChoreography();
   initSorenLogoExperience();
+  SorenAudio.init();
+  initBentoTelemetrySync();
 });
 
 
