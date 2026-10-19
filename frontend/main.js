@@ -1652,8 +1652,11 @@ if (document.readyState === "loading") {
     couponMessage.hidden = false;
   }
 
-  // اجرای رندر اولیه
+  // اجرای رندر اولیه و اتصال به تغییرات سبد
   renderCart();
+  window.addEventListener("soren:cart-changed", () => {
+    renderCart();
+  });
 
   // چک کردن سفارش فعال از قبل
   checkActiveOrder();
@@ -2234,6 +2237,7 @@ function animateFlyToCart(button) {
 
   const cartButton = document.querySelector(".cart-button");
   if (!cartButton) return;
+  if (typeof gsap === "undefined") return;
 
   const btnRect = button.getBoundingClientRect();
   const cartRect = cartButton.getBoundingClientRect();

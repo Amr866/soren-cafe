@@ -2,10 +2,15 @@
 <html lang="fa" dir="rtl">
   <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
     <meta name="theme-color" content="#F7F4EE" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+    <meta name="apple-mobile-web-app-title" content="کافه سورن" />
     <title>سبد خرید | کافه سورن</title>
+    <link rel="manifest" href="../manifest.json" />
     <link rel="icon" type="image/svg+xml" href="../images/brand/favicon.svg" />
+    <link rel="apple-touch-icon" href="../images/brand/favicon.svg" />
 
     <!-- فونت -->
     <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -17,7 +22,6 @@
 
     <!-- استایل -->
     <link rel="stylesheet" href="../css/style.css" />
-    <link rel="stylesheet" href="../css/cart.css" />
   </head>
 
   <body>
@@ -736,6 +740,8 @@
       </div>
     </footer>
 
+    <script src="../vendor/gsap.min.js"></script>
+    <script src="../vendor/ScrollTrigger.min.js"></script>
     <script src="../main.js" defer></script>
   </body>
 </html>
