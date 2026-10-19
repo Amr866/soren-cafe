@@ -15,9 +15,5 @@
     "test:load": "bun --filter soren-cafe-backend test:load",
     "test:security": "bun --filter soren-cafe-backend test:security",
     "test:responsive": "node scripts/verify-responsive.mjs"
-  },
-  "dependencies": {
-    "gsap": "^3.15.0",
-    "three": "^0.186.1"
   }
 }
