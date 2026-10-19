@@ -7028,6 +7028,7 @@ main {
 }
 
 .sheet-stepper-btn {
+  position: relative;
   width: 34px;
   height: 34px;
   min-width: 34px;
@@ -7049,6 +7050,12 @@ main {
   -webkit-tap-highlight-color: transparent;
 }
 
+.sheet-stepper-btn::after {
+  content: "";
+  position: absolute;
+  inset: -6px;
+}
+
 .sheet-stepper-btn:hover {
   background: #62402b;
 }
@@ -7067,6 +7074,7 @@ main {
 }
 
 .sheet-delete-btn {
+  position: relative;
   width: 36px;
   height: 36px;
   min-width: 36px;
@@ -7083,6 +7091,12 @@ main {
   touch-action: manipulation;
   transition: background 0.2s ease, transform 0.15s ease;
   -webkit-tap-highlight-color: transparent;
+}
+
+.sheet-delete-btn::after {
+  content: "";
+  position: absolute;
+  inset: -5px;
 }
 
 .sheet-delete-btn:hover {
@@ -7256,12 +7270,20 @@ main {
 }
 
 .sheet-full-cart-link {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 44px;
   text-align: center;
-  font-size: 12px;
+  font-size: 13px;
   color: var(--coffee, #795239);
   text-decoration: none;
-  padding: 4px;
+  padding: 8px 12px;
   font-weight: 600;
+  margin: 0 auto;
+  border-radius: 8px;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
 }
 
 .sheet-full-cart-link:hover {

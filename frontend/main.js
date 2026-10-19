@@ -1331,6 +1331,16 @@ function initCartBottomSheetAndFloatingBar() {
     syncFloatingOrderBar();
   });
 
+  // بستن خودکار برگه در صورت چرخش یا تغییر اندازه صفحه به دسکتاپ (رفع قفل اسکرول)
+  if (typeof window !== "undefined" && window.matchMedia) {
+    const desktopQuery = window.matchMedia("(min-width: 768px)");
+    desktopQuery.addEventListener("change", (e) => {
+      if (e.matches && sheet && sheet.classList.contains("is-open")) {
+        closeCartBottomSheet();
+      }
+    });
+  }
+
   // توابع در دسترس همگانی
   window.openCartBottomSheet = openCartBottomSheet;
   window.closeCartBottomSheet = closeCartBottomSheet;
