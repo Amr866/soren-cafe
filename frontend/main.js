@@ -4,6 +4,20 @@
    SOREN CAFÉ — Unified Interactive Client & Backend Bridge
    ======================================================== */
 
+// بررسی سریع و فوری وضعیت مشاهده پری‌لودر در سشن جاری (Zero Flash)
+(function checkEarlyPreloaderSeen() {
+  if (typeof window === "undefined" || typeof document === "undefined") return;
+  try {
+    if (sessionStorage.getItem("soren_intro_seen") === "true") {
+      const el = document.getElementById("soren-preloader");
+      if (el) {
+        el.classList.add("preloader-bypassed");
+        el.setAttribute("aria-hidden", "true");
+      }
+    }
+  } catch (e) {}
+})();
+
 const origin = typeof window !== "undefined" ? window.location.origin : "http://localhost:4000";
 const API_BASE = origin.startsWith("http")
   ? `${origin}/api/v1`
@@ -13,16 +27,131 @@ const WS_BASE = origin.startsWith("http")
   ? `${origin.replace(/^http/, "ws")}/ws`
   : "ws://localhost:4000/ws";
 
-// کاتالوگ تطبیقی ۱۸ محصول اصلی فرانت‌اند و شناسه دیتابیس بک‌اند
+/* ========================================================
+   موتور بی‌درنگ وب‌سوکت کافه سورن (SorenWS PubSub Engine)
+   ======================================================== */
+const SorenWS = {
+  socket: null,
+  reconnectTimer: null,
+  reconnectAttempts: 0,
+  maxReconnectAttempts: 12,
+  reconnectDelay: 1500,
+  listeners: new Map(),
+
+  init() {
+    if (typeof WebSocket === "undefined") return;
+    if (
+      this.socket &&
+      (this.socket.readyState === WebSocket.OPEN ||
+        this.socket.readyState === WebSocket.CONNECTING)
+    ) {
+      return;
+    }
+
+    try {
+      this.socket = new WebSocket(WS_BASE);
+
+      this.socket.onopen = () => {
+        this.reconnectAttempts = 0;
+        this.emit("connection:open", { timestamp: Date.now() });
+        console.log(
+          "%c[SOREN WS] Connected to Real-Time PubSub Engine",
+          "color: #C89D66; font-weight: bold;"
+        );
+      };
+
+      this.socket.onmessage = (event) => {
+        try {
+          const payload = JSON.parse(event.data);
+          if (payload.event) {
+            this.emit(payload.event, payload.data);
+          }
+        } catch (e) {
+          console.warn("[SOREN WS] Parse error:", e);
+        }
+      };
+
+      this.socket.onclose = () => {
+        this.emit("connection:close", { timestamp: Date.now() });
+        this.scheduleReconnect();
+      };
+
+      this.socket.onerror = (err) => {
+        console.warn("[SOREN WS] Socket error:", err);
+      };
+    } catch (e) {
+      console.warn("[SOREN WS] Init error:", e);
+      this.scheduleReconnect();
+    }
+  },
+
+  scheduleReconnect() {
+    if (this.reconnectAttempts >= this.maxReconnectAttempts) return;
+    clearTimeout(this.reconnectTimer);
+    const delay = Math.min(
+      this.reconnectDelay * Math.pow(1.4, this.reconnectAttempts++),
+      12000
+    );
+    this.reconnectTimer = setTimeout(() => this.init(), delay);
+  },
+
+  on(event, handler) {
+    if (!this.listeners.has(event)) {
+      this.listeners.set(event, new Set());
+    }
+    this.listeners.get(event).add(handler);
+    return () => this.off(event, handler);
+  },
+
+  off(event, handler) {
+    if (this.listeners.has(event)) {
+      this.listeners.get(event).delete(handler);
+    }
+  },
+
+  emit(event, data) {
+    if (this.listeners.has(event)) {
+      this.listeners.get(event).forEach((handler) => {
+        try {
+          handler(data);
+        } catch (err) {
+          console.error(err);
+        }
+      });
+    }
+  },
+
+  send(data) {
+    if (this.socket && this.socket.readyState === WebSocket.OPEN) {
+      this.socket.send(typeof data === "string" ? data : JSON.stringify(data));
+    }
+  },
+};
+
+// راه‌اندازی سراسری وب‌سوکت در زمان لود صفحه
+if (typeof window !== "undefined") {
+  SorenWS.init();
+}
+
+// کاتالوگ تطبیقی کامل ۳۷ محصول کافه سورن با شناسه‌های دیتابیس بک‌اند
 const PRODUCT_CATALOG = {
-  // قهوه‌ها
+  // قهوه‌های منوی اصلی
   "لاته": { id: "prd_latte", name: "لاته", price: 150000, image: "../images/products/coffee/latte.png", category: "coffee", desc: "قهوه تخصصی · ۲۵۰ میلی‌لیتر" },
   "کاپوچینو": { id: "prd_cappuccino", name: "کاپوچینو", price: 140000, image: "../images/products/coffee/cappuccino.png", category: "coffee", desc: "نوشیدنی گرم · ۳۰۰ میلی‌لیتر" },
   "اسپرسو": { id: "prd_espresso", name: "اسپرسو", price: 90000, image: "../images/products/coffee/espresso.png", category: "coffee", desc: "شات دوبل اصیل · ۴۰ میلی‌لیتر" },
   "اسپرسو دبل": { id: "prd_espresso_double", name: "اسپرسو دبل", price: 95000, image: "../images/products/coffee/double-espresso.png", category: "coffee", desc: "شات دوبل تخصصی با کرمای غلیظ" },
+  "اسپرسو دوپیو": { id: "prd_doppio", name: "اسپرسو دوپیو سورن", price: 75000, image: "../images/products/coffee/double-espresso.png", category: "coffee", desc: "اتیوپی یرگاچف، نت‌های یاس و مرکبات" },
+  "دوپیو": { id: "prd_doppio", name: "اسپرسو دوپیو سورن", price: 75000, image: "../images/products/coffee/double-espresso.png", category: "coffee", desc: "عصاره‌گیری ۹ بار استاندارد" },
   "آمریکانو": { id: "prd_americano", name: "آمریکانو", price: 110000, image: "../images/products/coffee/americano.png", category: "coffee", desc: "اسپرسو با آب تصفیه · ۲۲۰ میلی‌لیتر" },
   "موکا": { id: "prd_mocha", name: "موکا", price: 160000, image: "../images/products/coffee/mocha.png", category: "coffee", desc: "اسپرسو با شکلات فرانسوی · ۲۸۰ میلی‌لیتر" },
   "آیس لاته": { id: "prd_iced_latte", name: "آیس لاته", price: 170000, image: "../images/products/coffee/iced-latte.png", category: "coffee", desc: "سرو خنک با یخ قالبی · ۳۰۰ میلی‌لیتر" },
+
+  // قهوه‌های تخصصی (Specialty Coffee Bar)
+  "کورتادو": { id: "prd_cortado", name: "کورتادو پارسه", price: 95000, image: "../images/products/coffee/espresso.png", category: "coffee", desc: "اسپرسو با شیر بخارپز مخملی (۱:۱)" },
+  "فلت وایت": { id: "prd_flatwhite", name: "فلت‌وایت عسل و دارچین", price: 115000, image: "../images/products/coffee/latte.png", category: "coffee", desc: "شیر جو دوسر، عسل طبیعی کوهستان" },
+  "پوراوور V60": { id: "prd_geisha_v60", name: "پوراوور V60 کلمبیا", price: 140000, image: "../images/products/coffee/americano.png", category: "coffee", desc: "دم‌آوری دستی چکه‌ای، نت هلو و فینیش شفاف" },
+  "کلد برو": { id: "prd_coldbrew", name: "کلد برو دودی زعفرانی", price: 125000, image: "../images/products/coffee/iced-latte.png", category: "coffee", desc: "۱۸ ساعت دم‌آوری سرد با زعفران قائنات" },
+  "ماچا لاته": { id: "prd_matcha_latte", name: "ماچا لاته تشریفاتی", price: 135000, image: "../images/products/coffee/latte.png", category: "coffee", desc: "ماچای خالص اوجی کیوتو با شیر بادام" },
 
   // کیک و دسرها
   "چیزکیک نیویورکی": { id: "prd_cheesecake", name: "چیزکیک نیویورکی", price: 180000, image: "../images/products/cake/cheesecake.png", category: "cake", desc: "بافت خامه‌ای کاراملیزه دست‌ساز" },
@@ -31,95 +160,201 @@ const PRODUCT_CATALOG = {
   "کیک دبل چاکلت": { id: "prd_choc_cake", name: "کیک دبل چاکلت", price: 150000, image: "../images/products/cake/chocolate-cake.png", category: "cake", desc: "اسفنج شکلات تلخ با گاناش دست‌ساز" },
   "کیک شکلاتی": { id: "prd_choc_cake", name: "کیک دبل چاکلت", price: 150000, image: "../images/products/cake/chocolate-cake.png", category: "cake", desc: "اسفنج شکلات تلخ با گاناش دست‌ساز" },
   "تیرامیسو کلاسیک": { id: "prd_tiramisu", name: "تیرامیسو کلاسیک", price: 170000, image: "../images/products/cake/tiramisu.png", category: "cake", desc: "لیدی فینگر اسپرسو و ماسکارپونه" },
+  "تیرامیسو": { id: "prd_tiramisu", name: "تیرامیسو کلاسیک", price: 170000, image: "../images/products/cake/tiramisu.png", category: "cake", desc: "لیدی فینگر اسپرسو و ماسکارپونه" },
   "کیک هویج و گردو": { id: "prd_carrot_cake", name: "کیک هویج و گردو", price: 140000, image: "../images/products/cake/carrot-walnut-cake.png", category: "cake", desc: "معطر با دارچین و کرم پنیر" },
   "کوکی چاکلت چانک": { id: "prd_cookie", name: "کوکی چاکلت چانک", price: 80000, image: "../images/products/cake/chocolate-chunk-cookie.png", category: "cake", desc: "کوکی نرم با تکه‌های شکلات ۷۰٪" },
+  "چیزکیک سن سباستین": { id: "prd_basque", name: "چیزکیک سن‌سباستین پسته", price: 165000, image: "../images/products/cake/cheesecake.png", category: "cake", desc: "بافت خامه‌ای کاراملیزه با کرم پسته دامغان" },
+  "تارت عسل": { id: "prd_honey_tart", name: "تارت عسل و گردوی باستانی", price: 135000, image: "../images/products/cake/carrot-walnut-cake.png", category: "cake", desc: "خمیر سابله ترد فرانسوی، گردو و عسل" },
+  "تارت لیمو": { id: "prd_lime_meringue", name: "تارت لیمو امانی و مرنگ", price: 120000, image: "../images/products/cake/cheesecake.png", category: "cake", desc: "کرم ترش لیمو امانی با مرنگ برشته" },
+  "کیک خیس": { id: "prd_espresso_fudge", name: "کیک خیس شکلات تلخ و قهوه", price: 145000, image: "../images/products/cake/chocolate-cake.png", category: "cake", desc: "شکلات بلژیکی ۷۰٪ همراه شات اسپرسو" },
+  "کروسان": { id: "prd_croissant", name: "کروسان بادام و بهارنارنج", price: 110000, image: "../images/products/cake/chocolate-chunk-cookie.png", category: "cake", desc: "لایه‌لایه کره‌ای با عطر بهارنارنج شیراز" },
+  "نان موزی": { id: "prd_banana_bread", name: "نان موزی برشته با کره قهوه", price: 95000, image: "../images/products/cake/carrot-walnut-cake.png", category: "cake", desc: "نان موزی گردویی برشته با کره اسپرسو" },
 
-  // شیک‌ها
+  // شیک‌ها و نوشیدنی‌های خنک
   "شیک شکلات": { id: "prd_shake_choc", name: "شیک شکلات", price: 180000, image: "../images/products/shakes/chocolate-shake.png", category: "shake", desc: "بستنی شکلاتی و سس کاکائو هلندی" },
   "شیک وانیل": { id: "prd_shake_vanilla", name: "شیک وانیل", price: 160000, image: "../images/products/shakes/vanilla-shake.png", category: "shake", desc: "وانیل ماداگاسکار و شیر تازه" },
   "شیک توت‌فرنگی": { id: "prd_shake_strawberry", name: "شیک توت‌فرنگی", price: 170000, image: "../images/products/shakes/strawberry-shake.png", category: "shake", desc: "پوره طبیعی توت‌فرنگی تازه" },
   "شیک اورئو": { id: "prd_shake_oreo", name: "شیک اورئو", price: 190000, image: "../images/products/shakes/oreo-shake.png", category: "shake", desc: "بیسکویت اورئو با بستنی کره‌ای" },
   "شیک موز": { id: "prd_shake_banana", name: "شیک موز", price: 170000, image: "../images/products/shakes/banana-shake.png", category: "shake", desc: "موز طبیعی با مغز پسته" },
   "شیک کارامل": { id: "prd_shake_caramel", name: "شیک کارامل", price: 185000, image: "../images/products/shakes/caramel-shake.png", category: "shake", desc: "کارامل نمکی دولچه دلچه" },
+  "شیک پسته": { id: "prd_pistachio_shake", name: "شیک پسته و کارامل نمکی", price: 185000, image: "../images/products/shakes/caramel-shake.png", category: "shake", desc: "بستنی وانیل، کارامل نمکی، خلال پسته" },
+  "شیک موکا فندقی": { id: "prd_hazelnut_mocha", name: "شیک موکا کرانچ فندقی", price: 170000, image: "../images/products/shakes/chocolate-shake.png", category: "shake", desc: "دبل اسپرسو، نوتلا دست‌ساز، پرالین فندق" },
+  "شیک لوتوس": { id: "prd_lotus_shake", name: "شیک لوتوس و اسپرسو", price: 165000, image: "../images/products/shakes/vanilla-shake.png", category: "shake", desc: "کرم بیسکویت لوتوس بلژیکی، اسپرسو" },
+  "شیک زعفران": { id: "prd_saffron_velvet", name: "شیک زعفران و ماسکارپونه", price: 190000, image: "../images/products/shakes/banana-shake.png", category: "shake", desc: "بستنی دست‌ساز، ماسکارپونه، زعفران و هل" },
+  "فراپه نارگیل": { id: "prd_coconut_frappe", name: "فراپه نارگیل و کلد برو", price: 140000, image: "../images/products/shakes/oreo-shake.png", category: "shake", desc: "قهوه سرددم ۱۸ ساعته، شیر نارگیل ارگانیک" },
+  "شیک دارک چاکلت": { id: "prd_berry_dark", name: "شیک دارک چاکلت و تمشک وحشی", price: 175000, image: "../images/products/shakes/chocolate-shake.png", category: "shake", desc: "شکلات تلخ بلژیکی با پوره ملس تمشک جنگلی" },
 };
 
-/* ========================================
-   موتور مشترک سبد خرید (SorenCart Store)
-   ======================================== */
+// انتشار متغیرهای کلیدی روی شیء window برای دسترسی کامل کلاینت
+if (typeof window !== "undefined") {
+  window.PRODUCT_CATALOG = PRODUCT_CATALOG;
+  window.SorenWS = SorenWS;
+}
+
+/* ========================================================
+   موتور واکنشی و متمرکز سبد خرید (SorenCartStore)
+   ======================================================== */
+const SorenCartStore = {
+  items: [],
+
+  init() {
+    try {
+      const stored = typeof localStorage !== "undefined" ? localStorage.getItem("soren_cart_v1") : null;
+      const parsed = stored ? JSON.parse(stored) : [];
+      this.items = Array.isArray(parsed)
+        ? parsed.map((it) => {
+            const q = Number(it.quantity != null ? it.quantity : it.qty) || 1;
+            return {
+              ...it,
+              quantity: q,
+              qty: q,
+            };
+          })
+        : [];
+    } catch (e) {
+      this.items = [];
+    }
+    this.notify(false); // initial state notification
+  },
+
+  save() {
+    try {
+      if (typeof localStorage !== "undefined") {
+        localStorage.setItem("soren_cart_v1", JSON.stringify(this.items));
+      }
+    } catch (e) {
+      console.warn("[SorenCartStore] Save error:", e);
+    }
+  },
+
+  addItem(product) {
+    if (!product || !product.id) return;
+    const existing = this.items.find((it) => it.id === product.id);
+    if (existing) {
+      existing.quantity = (existing.quantity || existing.qty || 1) + 1;
+      existing.qty = existing.quantity;
+    } else {
+      const q = Number(product.quantity != null ? product.quantity : product.qty) || 1;
+      this.items.push({
+        id: product.id,
+        name: product.name || "",
+        price: Number(product.price) || 0,
+        quantity: q,
+        qty: q,
+        category: product.category || "",
+        image: product.image || "",
+        desc: product.desc || "",
+      });
+    }
+    this.save();
+    this.notify(true);
+  },
+
+  removeItem(id) {
+    this.items = this.items.filter((it) => it.id !== id);
+    this.save();
+    this.notify(true);
+  },
+
+  updateQuantity(id, delta) {
+    const item = this.items.find((it) => it.id === id);
+    if (!item) return;
+    item.quantity = (item.quantity || item.qty || 1) + delta;
+    item.qty = item.quantity;
+    if (item.quantity <= 0) {
+      this.removeItem(id);
+      return;
+    }
+    this.save();
+    this.notify(true);
+  },
+
+  getItems() {
+    return [...this.items];
+  },
+
+  getTotalPrice() {
+    return this.items.reduce((sum, it) => sum + (it.price * (it.quantity || it.qty || 0)), 0);
+  },
+
+  getTotalCount() {
+    return this.items.reduce((sum, it) => sum + (it.quantity || it.qty || 1), 0);
+  },
+
+  getItemQuantity(id) {
+    const item = this.items.find((it) => it.id === id);
+    return item ? (item.quantity || item.qty || 0) : 0;
+  },
+
+  clearCart() {
+    this.items = [];
+    this.save();
+    this.notify(true);
+  },
+
+  notify(broadcastWs = true) {
+    const detail = {
+      items: this.getItems(),
+      totalCount: this.getTotalCount(),
+      totalPrice: this.getTotalPrice(),
+    };
+    if (typeof window !== "undefined") {
+      window.dispatchEvent(new CustomEvent("soren:cart-changed", { detail }));
+    }
+    if (broadcastWs && typeof SorenWS !== "undefined" && SorenWS.send) {
+      SorenWS.send({ event: "cart:sync", data: detail });
+    }
+  },
+};
+
+// پل سازگاری رو به عقب برای کدهای پیشین سبد خرید (Backward Compatibility Bridge)
 const SorenCart = {
   KEY: "soren_cart_v1",
 
   getItems() {
-    try {
-      const data = localStorage.getItem(this.KEY);
-      return data ? JSON.parse(data) : [];
-    } catch {
-      return [];
-    }
+    return SorenCartStore.getItems();
   },
 
   save(items) {
-    try {
-      localStorage.setItem(this.KEY, JSON.stringify(items));
-    } catch (e) {
-      console.error("Cart save error:", e);
-    }
+    SorenCartStore.items = Array.isArray(items)
+      ? items.map((it) => {
+          const q = Number(it.quantity != null ? it.quantity : it.qty) || 1;
+          return { ...it, quantity: q, qty: q };
+        })
+      : [];
+    SorenCartStore.save();
+    SorenCartStore.notify(true);
     this.syncBadges();
   },
 
   addItem(product) {
-    const items = this.getItems();
-    const existing = items.find((i) => i.id === product.id);
-    if (existing) {
-      existing.qty = Math.min(existing.qty + 1, 99);
-    } else {
-      items.push({
-        id: product.id,
-        name: product.name,
-        price: product.price,
-        image: product.image,
-        category: product.category,
-        desc: product.desc || "",
-        qty: 1,
-      });
-    }
-    this.save(items);
+    SorenCartStore.addItem(product);
   },
 
   updateQty(productId, delta) {
-    const items = this.getItems();
-    const item = items.find((i) => i.id === productId);
-    if (!item) return;
-
-    item.qty += delta;
-    if (item.qty <= 0) {
-      this.removeItem(productId);
-      return;
-    }
-    item.qty = Math.min(item.qty, 99);
-    this.save(items);
+    SorenCartStore.updateQuantity(productId, delta);
   },
 
   removeItem(productId) {
-    const items = this.getItems().filter((i) => i.id !== productId);
-    this.save(items);
+    SorenCartStore.removeItem(productId);
   },
 
   clear() {
-    this.save([]);
+    SorenCartStore.clearCart();
   },
 
   getTotalCount() {
-    return this.getItems().reduce((sum, item) => sum + item.qty, 0);
+    return SorenCartStore.getTotalCount();
   },
 
   getSubtotal() {
-    return this.getItems().reduce((sum, item) => sum + item.price * item.qty, 0);
+    return SorenCartStore.getTotalPrice();
   },
 
   syncBadges() {
-    const count = this.getTotalCount();
-    document.querySelectorAll(".cart-button").forEach((btn) => {
+    const count = SorenCartStore.getTotalCount();
+    if (typeof document === "undefined") return;
+    document.querySelectorAll(".cart-button, .bottom-nav-cart").forEach((btn) => {
       let badge = btn.querySelector(".cart-badge");
       if (!badge) {
         badge = document.createElement("span");
@@ -131,6 +366,41 @@ const SorenCart = {
     });
   },
 };
+
+// انتشار روی window و گوش‌دادن به رویدادها
+if (typeof window !== "undefined") {
+  window.SorenCartStore = SorenCartStore;
+  window.SorenCart = SorenCart;
+
+  // همگام‌سازی نشانگرها با تغییرات سبد خرید
+  window.addEventListener("soren:cart-changed", () => {
+    SorenCart.syncBadges();
+  });
+
+  // همگام‌سازی بین تب‌های مختلف مرورگر با storage event
+  window.addEventListener("storage", (e) => {
+    if (e.key === "soren_cart_v1") {
+      SorenCartStore.init();
+    }
+  });
+
+  // همگام‌سازی بلادرنگ وب‌سوکت با دیگر نشست‌ها
+  if (typeof SorenWS !== "undefined" && SorenWS.on) {
+    SorenWS.on("cart:sync", (data) => {
+      if (data && Array.isArray(data.items)) {
+        SorenCartStore.items = data.items.map((it) => {
+          const q = Number(it.quantity != null ? it.quantity : it.qty) || 1;
+          return { ...it, quantity: q, qty: q };
+        });
+        SorenCartStore.save();
+        SorenCartStore.notify(false);
+      }
+    });
+  }
+
+  // راه‌اندازی اولیه فروشگاه
+  SorenCartStore.init();
+}
 
 /* ========================================
    1. جست‌وجوی دسکتاپ و فیلتر زنده
@@ -900,21 +1170,49 @@ const SorenCart = {
       });
     }
 
-    // استعلام وضعیت از سرور با پولینگ هر ۴ ثانیه
-    if (stepIndex < 3) {
-      setTimeout(async () => {
-        try {
-          const res = await fetch(`${API_BASE}/orders/${order.id}`);
-          if (res.ok) {
-            const fresh = await res.json();
-            if (fresh.status !== order.status) {
-              order.status = fresh.status;
-              localStorage.setItem("soren_active_order", JSON.stringify(order));
-              checkActiveOrder();
-            }
+    // انیمیشن فنری مرحله فعال در صورت بارگذاری GSAP
+    if (typeof gsap !== "undefined" && !window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+      const activeDot = card.querySelector(".order-step.is-active .order-step-dot");
+      if (activeDot) {
+        gsap.fromTo(
+          activeDot,
+          { scale: 0.6, rotate: -20 },
+          { scale: 1, rotate: 0, duration: 0.5, ease: "back.out(2)" }
+        );
+      }
+    }
+
+    // اتصال بی‌درنگ به وب‌سوکت برای رهگیری لحظه‌ای سفارش بدون پولینگ
+    if (!window._sorenWsOrderSubscribed) {
+      window._sorenWsOrderSubscribed = true;
+      SorenWS.init();
+      SorenWS.on("order:status_updated", (data) => {
+        if (!data || !data.orderId) return;
+        const currentRaw = localStorage.getItem("soren_active_order");
+        if (!currentRaw) return;
+        const currentOrder = JSON.parse(currentRaw);
+        if (currentOrder.id === data.orderId && currentOrder.status !== data.status) {
+          console.log(`%c[SOREN WS] Order ${data.orderId} status changed -> ${data.status}`, "color: #3B7A57; font-weight: bold;");
+          currentOrder.status = data.status;
+          localStorage.setItem("soren_active_order", JSON.stringify(currentOrder));
+          checkActiveOrder();
+        }
+      });
+    }
+
+    // بررسی اولیه یک‌باره فقط هنگام لود صفحه (در صورت تغییر وضعیت حین بسته بودن مرورگر)
+    if (stepIndex < 3 && !window._sorenInitialOrderChecked) {
+      window._sorenInitialOrderChecked = true;
+      fetch(`${API_BASE}/orders/${order.id}`)
+        .then((res) => (res.ok ? res.json() : null))
+        .then((fresh) => {
+          if (fresh && fresh.status && fresh.status !== order.status) {
+            order.status = fresh.status;
+            localStorage.setItem("soren_active_order", JSON.stringify(order));
+            checkActiveOrder();
           }
-        } catch {}
-      }, 4000);
+        })
+        .catch(() => {});
     }
   }
 })();
@@ -1007,18 +1305,29 @@ const SorenCart = {
       const imgEl = card?.querySelector(".product-image, .featured-image");
       const imgSrc = imgEl?.getAttribute("src") || "";
 
-      // استخراج یا تولید محصول تطبیقی
-      const catalogItem = PRODUCT_CATALOG[productName];
+      // استخراج هوشمند یا تطبیقی محصول بر اساس کاتالوگ معتبر دیتابیس
+      let catalogItem = PRODUCT_CATALOG[productName];
+      if (!catalogItem) {
+        const cleanName = productName.replace(/[()]/g, "").trim();
+        const matchedKey = Object.keys(PRODUCT_CATALOG).find(
+          (k) => cleanName.includes(k) || k.includes(cleanName)
+        );
+        if (matchedKey) catalogItem = PRODUCT_CATALOG[matchedKey];
+      }
+
       const product = catalogItem || {
-        id: `prd_${productName.replace(/\s+/g, "_")}`,
-        name: productName,
+        id: "prd_espresso",
+        name: productName || "محصول کافه سورن",
         price: price || 95000,
-        image: imgSrc,
+        image: imgSrc || "../images/products/coffee/espresso.png",
         category: card?.dataset.category || "coffee",
         desc: card?.querySelector(".product-desc, p")?.textContent.trim() || "",
       };
 
       SorenCart.addItem(product);
+
+      // اجرای میکرو-انیمیشن پرواز آیتم به سمت سبد خرید (Animation Lab Flex)
+      animateFlyToCart(button);
 
       // فیدبک بصری دکمه
       const label = button.querySelector(".btn-add-label");
@@ -1036,7 +1345,462 @@ const SorenCart = {
   });
 })();
 
-// همگام‌سازی اولیه نشانگر هدر در تمامی صفحات
+/* ========================================================
+   8. مجموعه انیمیشن و فیزیک حرکتی (Animation Lab Suite)
+   ======================================================== */
+
+// میکرو-انیمیشن پرواز ذره به سمت سبد خرید در هدر با فیزیک شتاب‌دار
+function animateFlyToCart(button) {
+  if (typeof gsap === "undefined") return;
+  const prefersReduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  if (prefersReduced) return;
+
+  const cartButton = document.querySelector(".cart-button");
+  if (!cartButton) return;
+
+  const btnRect = button.getBoundingClientRect();
+  const cartRect = cartButton.getBoundingClientRect();
+
+  const startX = btnRect.left + btnRect.width / 2;
+  const startY = btnRect.top + btnRect.height / 2;
+  const endX = cartRect.left + cartRect.width / 2;
+  const endY = cartRect.top + cartRect.height / 2;
+
+  const particle = document.createElement("div");
+  particle.className = "soren-fly-particle";
+  particle.innerHTML = `<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 8h14l1 12H4L5 8Z"/><path d="M9 9V6a3 3 0 0 1 6 0v3"/></svg>`;
+  document.body.appendChild(particle);
+
+  gsap.set(particle, {
+    x: startX,
+    y: startY,
+    xPercent: -50,
+    yPercent: -50,
+    scale: 0.9,
+    opacity: 1,
+    zIndex: 9999,
+  });
+
+  gsap.to(particle, {
+    x: endX,
+    y: endY,
+    scale: 0.25,
+    opacity: 0.2,
+    duration: 0.65,
+    ease: "power2.in",
+    onComplete: () => {
+      particle.remove();
+      const badges = document.querySelectorAll(".cart-badge");
+      if (badges.length > 0) {
+        gsap.fromTo(
+          badges,
+          { scale: 1.55 },
+          { scale: 1, duration: 0.45, ease: "back.out(3)" }
+        );
+      }
+      gsap.fromTo(
+        cartButton,
+        { scale: 0.9 },
+        { scale: 1, duration: 0.35, ease: "power2.out" }
+      );
+    },
+  });
+}
+
+// انیمیشن سه‌بعدی تعاملی ماوس بر روی هیرو (Hero 3D Perspective Tilt)
+function initHero3DMotion() {
+  if (typeof gsap === "undefined") return;
+  const prefersReduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  if (prefersReduced) return;
+
+  const heroContainer = document.querySelector(".hero-container");
+  const heroFrame = document.querySelector(".hero-image-frame");
+  const heroBadge = document.querySelector(".hero-image-badge");
+  const heroTag = document.querySelector(".hero-image-tag");
+
+  if (!heroContainer || !heroFrame) return;
+
+  heroContainer.addEventListener("mousemove", (e) => {
+    const rect = heroFrame.getBoundingClientRect();
+    const centerX = rect.left + rect.width / 2;
+    const centerY = rect.top + rect.height / 2;
+
+    const normX = (e.clientX - centerX) / (rect.width / 2);
+    const normY = (e.clientY - centerY) / (rect.height / 2);
+
+    const rotateY = Math.max(-12, Math.min(12, normX * 10));
+    const rotateX = Math.max(-12, Math.min(12, -normY * 10));
+
+    gsap.to(heroFrame, {
+      rotateX: rotateX,
+      rotateY: rotateY,
+      transformPerspective: 1200,
+      scale: 1.02,
+      duration: 0.5,
+      ease: "power2.out",
+    });
+
+    if (heroBadge) {
+      gsap.to(heroBadge, {
+        x: -normX * 14,
+        y: -normY * 14,
+        duration: 0.6,
+        ease: "power2.out",
+      });
+    }
+
+    if (heroTag) {
+      gsap.to(heroTag, {
+        x: -normX * 20,
+        y: -normY * 20,
+        duration: 0.7,
+        ease: "power2.out",
+      });
+    }
+  });
+
+  heroContainer.addEventListener("mouseleave", () => {
+    gsap.to(heroFrame, {
+      rotateX: 0,
+      rotateY: 0,
+      scale: 1,
+      duration: 1.1,
+      ease: "elastic.out(1, 0.5)",
+    });
+
+    if (heroBadge) {
+      gsap.to(heroBadge, { x: 0, y: 0, duration: 0.8, ease: "power2.out" });
+    }
+    if (heroTag) {
+      gsap.to(heroTag, { x: 0, y: 0, duration: 0.8, ease: "power2.out" });
+    }
+  });
+}
+
+// رقص محتوایی با اسکرول (ScrollTrigger Choreography & SVG Drawing)
+function initScrollChoreography() {
+  if (typeof gsap === "undefined" || typeof ScrollTrigger === "undefined") return;
+  const prefersReduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  if (prefersReduced) return;
+
+  gsap.registerPlugin(ScrollTrigger);
+
+  // ۱. ترسیم تدریجی خط تأکید SVG داستان سورن (DrawSVG / stroke-dashoffset)
+  const underlineSvg = document.querySelector(".underline-svg path");
+  if (underlineSvg) {
+    const len = underlineSvg.getTotalLength ? underlineSvg.getTotalLength() : 110;
+    gsap.set(underlineSvg, { strokeDasharray: len, strokeDashoffset: len });
+    gsap.to(underlineSvg, {
+      strokeDashoffset: 0,
+      duration: 1.3,
+      ease: "power2.inOut",
+      scrollTrigger: {
+        trigger: ".about-section",
+        start: "top 75%",
+      },
+    });
+  }
+
+  // ۲. استگر کارتهای منتخب سورن (Featured Cards Stagger)
+  const featuredCards = document.querySelectorAll(".featured-card");
+  if (featuredCards.length > 0) {
+    gsap.from(featuredCards, {
+      y: 40,
+      opacity: 0,
+      duration: 0.8,
+      stagger: 0.15,
+      ease: "power3.out",
+      scrollTrigger: {
+        trigger: ".featured-grid",
+        start: "top 85%",
+      },
+    });
+  }
+
+  // ۳. استگر دسته‌بندی‌های صفحه اصلی (Categories Stagger)
+  const categoryCards = document.querySelectorAll(".category-card");
+  if (categoryCards.length > 0) {
+    gsap.from(categoryCards, {
+      y: 35,
+      opacity: 0,
+      duration: 0.75,
+      stagger: 0.12,
+      ease: "power2.out",
+      scrollTrigger: {
+        trigger: ".categories-grid",
+        start: "top 85%",
+      },
+    });
+  }
+
+  // ۴. ورود نرم کارت‌های ویژگی‌های درباره ما (Features Grid)
+  const featureCards = document.querySelectorAll(".feature-card");
+  if (featureCards.length > 0) {
+    gsap.from(featureCards, {
+      scale: 0.9,
+      opacity: 0,
+      duration: 0.6,
+      stagger: 0.1,
+      ease: "back.out(1.5)",
+      scrollTrigger: {
+        trigger: ".features-grid",
+        start: "top 85%",
+      },
+    });
+  }
+}
+
+// شنونده سراسری بروزرسانی موجودی محصولات از طریق وب‌سوکت بک‌اند
+if (typeof SorenWS !== "undefined") {
+  SorenWS.on("product:stock_updated", (data) => {
+    if (!data || !data.productId) return;
+    const cards = document.querySelectorAll(`[data-product-id="${data.productId}"]`);
+    cards.forEach((card) => {
+      card.classList.toggle("is-sold-out", !data.isAvailable);
+      const btn = card.querySelector(".btn-add, .featured-order");
+      if (btn) {
+        btn.disabled = !data.isAvailable;
+        const label = btn.querySelector(".btn-add-label, span");
+        if (label) label.textContent = data.isAvailable ? "افزودن به سبد" : "ناموجود";
+      }
+    });
+  });
+}
+
+/* ========================================================
+   9. هیدراتاسیون پویا و همگام‌سازی زنده کاتالوگ (Dynamic Catalog Hydration)
+   ======================================================== */
+const SorenCatalog = {
+  products: [],
+  isHydrated: false,
+
+  async init() {
+    try {
+      const res = await fetch(`${API_BASE}/products`);
+      if (!res.ok) return;
+      this.products = await res.json();
+      this.isHydrated = true;
+      console.log(
+        `%c[SOREN CATALOG] Hydrated ${this.products.length} live products from database`,
+        "color: #795239; font-weight: bold;"
+      );
+
+      // ۱. همگام‌سازی و غنی‌سازی کاتالوگ
+      this.products.forEach((p) => {
+        PRODUCT_CATALOG[p.name] = {
+          id: p.id,
+          name: p.name,
+          price: p.price,
+          image: p.image_url,
+          category: p.category,
+          desc: p.description,
+          tags: p.tags,
+          isAvailable: Boolean(p.is_available),
+        };
+      });
+
+      // ۲. به‌روزرسانی زنده وضعیت موجودی و شناسه‌ها روی کارت‌های DOM
+      this.syncDOMCards();
+    } catch (e) {
+      console.warn("[SOREN CATALOG] Hydration running in offline fallback mode:", e);
+    }
+  },
+
+  syncDOMCards() {
+    const cards = document.querySelectorAll(".product-card, .featured-card");
+    cards.forEach((card) => {
+      const name = card.querySelector(".product-title, h3")?.textContent.trim();
+      if (!name) return;
+
+      // ۱. تطبیق دقیق
+      let product = this.products.find((p) => p.name === name);
+
+      // ۲. تطبیق از طریق کاتالوگ استاتیک در صورت وجود شناسه یکتا
+      if (!product && PRODUCT_CATALOG[name]) {
+        const catId = PRODUCT_CATALOG[name].id;
+        product = this.products.find((p) => p.id === catId);
+      }
+
+      // ۳. تطبیق دقیق‌تر با واژه‌ها و پیشوند
+      if (!product) {
+        product = this.products.find((p) => p.name.startsWith(name)) ||
+                  this.products.find((p) => p.name === name + " سورن" || name === p.name + " سورن") ||
+                  this.products.find((p) => p.name.includes(name) && !p.name.includes("ماچا") && !p.name.includes("آیس"));
+      }
+
+      if (product) {
+        card.setAttribute("data-product-id", product.id);
+        card.setAttribute("data-price", String(product.price));
+
+        const isAvail = Boolean(product.is_available);
+        card.classList.toggle("is-sold-out", !isAvail);
+        const btn = card.querySelector(".btn-add, .featured-order");
+        if (btn) {
+          btn.disabled = !isAvail;
+          const label = btn.querySelector(".btn-add-label, span");
+          if (label && !isAvail) label.textContent = "ناموجود";
+        }
+      }
+    });
+  },
+};
+
+/* ========================================================
+   تجربه سینمایی لوگوی سیمرغ و ترنزیشن پری‌لودر (Soren Logo Experience)
+   ======================================================== */
+function initSorenLogoExperience() {
+  const preloader = document.getElementById("soren-preloader");
+  const skipBtn = document.getElementById("preloader-skip-btn");
+  const brandContainer = document.getElementById("header-logo-container");
+  const prefersReduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+  // ۱. انیمیشن تعاملی هاور لوگوی هدر
+  const brandLink = document.getElementById("main-brand-logo") || brandContainer;
+  if (brandLink && typeof gsap !== "undefined") {
+    brandLink.addEventListener("mouseenter", () => {
+      if (prefersReduced) return;
+      gsap.to("#header-logo-container .logo-wing-top", { y: -4, rotation: -8, transformOrigin: "bottom right", duration: 0.35, ease: "power2.out" });
+      gsap.to("#header-logo-container .logo-wing-mid", { y: -3, rotation: -5, transformOrigin: "bottom right", duration: 0.35, ease: "power2.out" });
+      gsap.to("#header-logo-container .logo-lotus-flower", { scale: 1.15, transformOrigin: "center center", duration: 0.4, ease: "back.out(2)" });
+      gsap.to(["#header-logo-container .logo-letter-s", "#header-logo-container .logo-letter-r"], { fill: "#c86d51", duration: 0.3 });
+      gsap.to("#header-logo-container .logo-boteh-jegheh", { rotation: 8, transformOrigin: "top left", duration: 0.4, ease: "power2.out" });
+    });
+
+    brandLink.addEventListener("mouseleave", () => {
+      if (prefersReduced) return;
+      gsap.to("#header-logo-container .soren-path", {
+        x: 0,
+        y: 0,
+        rotation: 0,
+        scale: 1,
+        fill: "currentColor",
+        duration: 0.5,
+        ease: "power3.out",
+      });
+    });
+  }
+
+  // ۲. انیمیشن پرده‌برداری سینمایی پری‌لودر با کش سشن و بستن لمسی
+  if (!preloader) return;
+
+  let isIntroSeen = false;
+  try {
+    isIntroSeen = typeof sessionStorage !== "undefined" && sessionStorage.getItem("soren_intro_seen") === "true";
+  } catch (e) {
+    isIntroSeen = false;
+  }
+
+  if (isIntroSeen) {
+    preloader.classList.add("preloader-bypassed");
+    preloader.setAttribute("aria-hidden", "true");
+    try {
+      preloader.remove();
+    } catch {}
+    return;
+  }
+
+  const markIntroSeen = () => {
+    try {
+      if (typeof sessionStorage !== "undefined") {
+        sessionStorage.setItem("soren_intro_seen", "true");
+      }
+    } catch (e) {}
+  };
+
+  const bypassPreloader = () => {
+    markIntroSeen();
+    preloader.classList.add("preloader-bypassed");
+    preloader.classList.add("is-hidden");
+    preloader.setAttribute("aria-hidden", "true");
+    setTimeout(() => {
+      try {
+        preloader.remove();
+      } catch {}
+    }, 100);
+  };
+
+  const closePreloader = () => {
+    markIntroSeen();
+    preloader.classList.add("is-hidden");
+    preloader.setAttribute("aria-hidden", "true");
+    setTimeout(() => {
+      try {
+        preloader.remove();
+      } catch {}
+    }, 700);
+  };
+
+  // بستن لمسی با کلیک یا لمس دکمه رد کردن یا پس‌زمینه
+  if (skipBtn) {
+    skipBtn.addEventListener("click", bypassPreloader);
+    skipBtn.addEventListener("pointerdown", bypassPreloader);
+  }
+
+  const backdrop = preloader.querySelector(".preloader-backdrop");
+  if (backdrop) {
+    backdrop.addEventListener("click", bypassPreloader);
+    backdrop.addEventListener("pointerdown", bypassPreloader);
+  }
+
+  preloader.addEventListener("pointerdown", (e) => {
+    if (e.target === preloader || e.target === backdrop) {
+      bypassPreloader();
+    }
+  });
+
+  if (typeof gsap === "undefined" || prefersReduced) {
+    setTimeout(closePreloader, 600);
+    return;
+  }
+
+  // تایم‌لاین شکوهمند ترسیم اجزای سیمرغ با GSAP
+  const tl = gsap.timeline({
+    onComplete: closePreloader,
+  });
+
+  const paths = preloader.querySelectorAll(".soren-path");
+  gsap.set(paths, { opacity: 0, scale: 0.75, transformOrigin: "center center" });
+  gsap.set(".preloader-brand-box", { opacity: 0, y: 16 });
+  gsap.set(".preloader-bar-fill", { width: "0%" });
+
+  tl.to(".preloader-svg .logo-lotus-flower", { opacity: 1, scale: 1, duration: 0.65, ease: "back.out(2)" })
+    .to(
+      [".preloader-svg .logo-letter-s", ".preloader-svg .logo-letter-r"],
+      { opacity: 1, scale: 1, stagger: 0.12, duration: 0.55, ease: "power3.out" },
+      "-=0.25"
+    )
+    .to(".preloader-svg .logo-bird-body", { opacity: 1, scale: 1, duration: 0.75, ease: "power4.out" }, "-=0.3")
+    .to(
+      [".preloader-svg .logo-wing-top", ".preloader-svg .logo-wing-mid"],
+      { opacity: 1, scale: 1, stagger: 0.1, duration: 0.6, ease: "back.out(1.8)" },
+      "-=0.4"
+    )
+    .to(
+      [".preloader-svg .logo-boteh-jegheh", ".preloader-svg .logo-tail-upper", ".preloader-svg .logo-tail-lower"],
+      { opacity: 1, scale: 1, stagger: 0.08, duration: 0.55, ease: "power2.out" },
+      "-=0.35"
+    )
+    .to(".preloader-brand-box", { opacity: 1, y: 0, duration: 0.6, ease: "power3.out" }, "-=0.25")
+    .to(".preloader-bar-fill", { width: "100%", duration: 0.55, ease: "power1.inOut" }, "-=0.4")
+    .to(".preloader-svg", { scale: 1.05, duration: 0.4, ease: "power2.out" })
+    .to(preloader, { opacity: 0, scale: 1.03, duration: 0.65, ease: "power3.inOut" });
+}
+
+if (typeof window !== "undefined") {
+  window.SorenCatalog = SorenCatalog;
+  window.initSorenLogoExperience = initSorenLogoExperience;
+}
+
+// راه‌اندازی اولیه در زمان لود صفحه
 document.addEventListener("DOMContentLoaded", () => {
+  if (typeof SorenCartStore !== "undefined") {
+    SorenCartStore.init();
+  }
   SorenCart.syncBadges();
+  SorenCatalog.init();
+  initHero3DMotion();
+  initScrollChoreography();
+  initSorenLogoExperience();
 });
+
+

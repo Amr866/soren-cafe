@@ -129,7 +129,13 @@ main {
   gap: 12px;
   min-width: 0;
   border-radius: 10px;
-  outline-offset: 5px;
+  outline: none;
+}
+
+.brand:focus,
+.brand:focus-visible {
+  outline: none;
+  box-shadow: none;
 }
 
 .brand-logo {
@@ -5770,3 +5776,223 @@ main {
   color: var(--coffee);
   font-weight: 700;
 }
+
+/* ========================================================
+   SOREN CAFÉ — Animation Lab & GSAP Physics Enhancements
+   ======================================================== */
+.soren-fly-particle {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: var(--coffee);
+  color: var(--white);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  pointer-events: none;
+  box-shadow: 0 10px 24px rgba(121, 82, 57, 0.45);
+  border: 1.5px solid rgba(255, 255, 255, 0.4);
+}
+
+.hero-image-wrapper {
+  perspective: 1200px;
+}
+
+.hero-image-frame {
+  transform-style: preserve-3d;
+  will-change: transform;
+}
+
+.hero-image-badge,
+.hero-image-tag {
+  will-change: transform;
+}
+
+.product-card.is-sold-out,
+.featured-card.is-sold-out {
+  opacity: 0.6;
+  filter: grayscale(0.7);
+  pointer-events: none;
+}
+
+.product-card.is-sold-out .btn-add,
+.featured-card.is-sold-out .featured-order {
+  background: var(--muted) !important;
+  cursor: not-allowed;
+}
+
+.underline-svg path {
+  stroke: var(--coffee);
+  stroke-width: 3;
+  fill: none;
+}
+
+/* ========================================================
+   SOREN CAFÉ — Cinematic Preloader & Vector Logo System
+   ======================================================== */
+.soren-preloader {
+  position: fixed;
+  inset: 0;
+  z-index: 99999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #fbf9f5;
+  color: var(--charcoal);
+  overflow: hidden;
+  transition: opacity 0.6s cubic-bezier(0.16, 1, 0.3, 1), visibility 0.6s;
+}
+
+.soren-preloader.preloader-bypassed {
+  display: none !important;
+  opacity: 0 !important;
+  visibility: hidden !important;
+  pointer-events: none !important;
+}
+
+.soren-preloader.is-hidden {
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+}
+
+.preloader-backdrop {
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(circle at center, rgba(142, 98, 63, 0.08) 0%, rgba(251, 249, 245, 1) 70%);
+  pointer-events: none;
+}
+
+.preloader-center {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 20px;
+}
+
+.preloader-logo-frame {
+  width: 150px;
+  height: 150px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--charcoal);
+  filter: drop-shadow(0 12px 28px rgba(121, 82, 57, 0.12));
+}
+
+.preloader-svg {
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
+.preloader-brand-box {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+}
+
+.preloader-kicker {
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--terracotta);
+  letter-spacing: 0.12em;
+}
+
+.preloader-title {
+  font-size: 32px;
+  font-weight: 900;
+  color: var(--charcoal);
+  letter-spacing: 0.04em;
+  margin: 0;
+}
+
+.preloader-en {
+  font-size: 11px;
+  font-weight: 800;
+  color: var(--coffee);
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  font-family: inherit;
+}
+
+.preloader-bar {
+  width: 120px;
+  height: 2px;
+  background: rgba(121, 82, 57, 0.15);
+  border-radius: 999px;
+  overflow: hidden;
+  margin-top: 10px;
+}
+
+.preloader-bar-fill {
+  display: block;
+  width: 0%;
+  height: 100%;
+  background: var(--coffee);
+  border-radius: 999px;
+  transition: width 0.1s linear;
+}
+
+.preloader-skip {
+  position: absolute;
+  top: 32px;
+  left: 32px;
+  z-index: 10;
+  background: rgba(255, 255, 255, 0.8);
+  border: 1px solid var(--border);
+  padding: 8px 16px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--muted);
+  cursor: pointer;
+  transition: all 0.25s ease;
+  backdrop-filter: blur(8px);
+}
+
+.preloader-skip:hover {
+  color: var(--charcoal);
+  border-color: var(--charcoal);
+  background: var(--white);
+}
+
+/* هدر و فریم وکتور لوگو */
+.brand-logo-frame {
+  width: 58px;
+  height: 58px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--charcoal);
+  transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1), filter 0.4s ease;
+}
+
+.brand-svg {
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
+.brand:hover .brand-logo-frame {
+  transform: scale(1.08);
+  filter: drop-shadow(0 4px 12px rgba(121, 82, 57, 0.2));
+  color: var(--coffee);
+}
+
+.soren-path {
+  fill: currentColor;
+  transform-box: fill-box;
+  transform-origin: center;
+  transition: fill 0.3s ease, transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+
+
