@@ -2773,38 +2773,6 @@ const SorenAudio = {
   },
 };
 
-/* ========================================================
-   همگام‌سازی زنده تله‌متری با بنتو گرید (Bento Telemetry Bridge)
-   ======================================================== */
-function initBentoTelemetrySync() {
-  const activeOrdersEl = document.getElementById("bento-active-orders");
-  const queueTimeEl = document.getElementById("bento-queue-time");
-
-  function updateTelemetryUI(count) {
-    if (activeOrdersEl) {
-      activeOrdersEl.textContent = String(count);
-    }
-    if (queueTimeEl) {
-      const mins = Math.max(3, count * 2);
-      queueTimeEl.textContent = `~${mins} Min Queue`;
-    }
-  }
-
-  if (typeof SorenWS !== "undefined" && SorenWS.on) {
-    SorenWS.on("order:new", () => {
-      const current = parseInt(activeOrdersEl?.textContent || "3", 10);
-      updateTelemetryUI(current + 1);
-    });
-
-    SorenWS.on("order:status", (data) => {
-      if (data && data.status === "completed") {
-        const current = parseInt(activeOrdersEl?.textContent || "3", 10);
-        updateTelemetryUI(Math.max(1, current - 1));
-      }
-    });
-  }
-}
-
 // راه‌اندازی اولیه در زمان لود صفحه
 document.addEventListener("DOMContentLoaded", () => {
   if (typeof SorenCartStore !== "undefined") {
@@ -2822,7 +2790,6 @@ document.addEventListener("DOMContentLoaded", () => {
   initScrollChoreography();
   initSorenLogoExperience();
   SorenAudio.init();
-  initBentoTelemetrySync();
 });
 
 

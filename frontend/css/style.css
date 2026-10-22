@@ -635,17 +635,29 @@ main {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  transition: transform 0.3s var(--ease-spring), background-color 0.25s ease;
-}
-
-.hero-btn-primary:hover .hero-arrow-capsule {
-  transform: translateX(-3px) scale(1.06);
-  background: rgba(255, 255, 255, 0.28);
+  transition: transform 0.35s var(--ease-spring), background-color 0.25s ease;
 }
 
 .hero-arrow {
+  display: inline-block;
   font-size: 18px;
   line-height: 1;
+  transition: transform 0.35s var(--ease-spring);
+  transform-origin: center center;
+}
+
+/* هنگامی که کاربر روی مشاهده منو هاور می‌کند: فلش به سمت مقصد اسکرول (منوی پایین صفحه) اشاره می‌کند */
+.hero-btn-primary:hover .hero-arrow-capsule {
+  transform: translateY(2px) scale(1.06);
+  background: rgba(255, 255, 255, 0.28);
+}
+
+.hero-btn-primary:hover .hero-arrow {
+  transform: rotate(-90deg) translateY(1px);
+}
+
+.hero-btn-primary:active .hero-arrow {
+  transform: rotate(-90deg) translateY(3px);
 }
 
 .hero-btn-secondary {
@@ -7621,336 +7633,7 @@ main {
   transform: scale(0.92);
 }
 
-/* ----- 2. سکشن بنتو گرید آرتیزان (Artisanal Craft Bento Grid) ----- */
-.craft-bento-section {
-  width: 100%;
-  max-width: 1440px;
-  margin: 0 auto;
-  position: relative;
-}
-
-.craft-bento-header {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  text-align: center;
-  max-width: 820px;
-  margin: 0 auto 48px;
-}
-
-.bento-badge {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  padding: 6px 16px;
-  border-radius: 9999px;
-  background: rgba(255, 255, 255, 0.85);
-  border: 1px solid rgba(140, 94, 60, 0.16);
-  box-shadow: var(--shadow-sm);
-  font-size: 13px;
-  font-weight: 600;
-  color: var(--coffee);
-  margin-bottom: 20px;
-  backdrop-filter: blur(8px);
-}
-
-.badge-dot.pulse-amber {
-  background: #c99752;
-  box-shadow: 0 0 0 0 rgba(201, 151, 82, 0.7);
-  animation: sorenPulseAmber 2.2s infinite;
-}
-
-@keyframes sorenPulseAmber {
-  0% {
-    transform: scale(0.95);
-    box-shadow: 0 0 0 0 rgba(201, 151, 82, 0.7);
-  }
-  70% {
-    transform: scale(1);
-    box-shadow: 0 0 0 7px rgba(201, 151, 82, 0);
-  }
-  100% {
-    transform: scale(0.95);
-    box-shadow: 0 0 0 0 rgba(201, 151, 82, 0);
-  }
-}
-
-.craft-bento-title {
-  margin: 0 0 18px;
-  font-size: clamp(26px, 3.2vw, 44px);
-  line-height: 1.45;
-  font-weight: 800;
-  letter-spacing: -0.8px;
-  color: var(--charcoal);
-  text-wrap: balance;
-}
-
-.highlight-serif {
-  color: var(--coffee);
-  position: relative;
-  display: inline-block;
-}
-
-.craft-bento-sub {
-  margin: 0;
-  font-size: 16px;
-  line-height: 1.9;
-  color: var(--muted);
-  max-width: 680px;
-}
-
-/* شبکه بنتو: ۳ ستونه در دسکتاپ، چیدمان متراکم بدون فضای خالی */
-.craft-bento-grid {
-  display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  grid-auto-flow: dense;
-  gap: 24px;
-  width: 100%;
-}
-
-/* کارت بنتو: معماری دو لایه‌ای سخت‌افزاری (Double-Bezel Architecture) */
-.bento-card {
-  position: relative;
-  min-width: 0;
-  padding: 6px;
-  border-radius: 28px;
-  background: rgba(255, 255, 255, 0.7);
-  border: 1px solid rgba(140, 94, 60, 0.12);
-  box-shadow: var(--shadow-sm);
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
-  transition: transform 0.4s var(--ease-spring), box-shadow 0.4s var(--ease-spring), border-color 0.3s ease;
-}
-
-.bento-card:hover {
-  transform: translateY(-4px);
-  box-shadow: var(--shadow-luxury);
-  border-color: rgba(140, 94, 60, 0.24);
-}
-
-.bento-card-inner {
-  position: relative;
-  height: 100%;
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
-  padding: 28px 24px;
-  border-radius: calc(28px - 6px);
-  background: var(--white);
-  box-shadow: var(--shadow-inner-glow);
-  overflow: hidden;
-}
-
-/* گستره‌های عرضی بنتو */
-.bento-pour-over {
-  grid-column: span 2;
-  background: linear-gradient(135deg, rgba(255, 255, 255, 0.9) 0%, rgba(247, 244, 238, 0.7) 100%);
-}
-
-.bento-roastery {
-  grid-column: span 1;
-}
-
-.bento-bakehouse {
-  grid-column: span 1;
-}
-
-.bento-telemetry {
-  grid-column: span 2;
-  background: linear-gradient(135deg, rgba(255, 255, 255, 0.95) 0%, rgba(246, 243, 238, 0.75) 100%);
-}
-
-.bento-card-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 12px;
-  margin-bottom: 20px;
-  flex-wrap: wrap;
-}
-
-.bento-tag {
-  font-size: 13px;
-  font-weight: 700;
-  color: var(--coffee);
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-}
-
-.bento-tag.pulse-tag {
-  color: var(--charcoal);
-}
-
-.bento-metric {
-  font-size: 13px;
-  font-weight: 700;
-  color: var(--muted);
-  background: rgba(121, 82, 57, 0.07);
-  padding: 4px 12px;
-  border-radius: 9999px;
-  letter-spacing: 0.5px;
-}
-
-.bento-card-body h3 {
-  margin: 0 0 12px;
-  font-size: 20px;
-  font-weight: 700;
-  line-height: 1.5;
-  color: var(--charcoal);
-}
-
-.bento-card-body p {
-  margin: 0 0 20px;
-  font-size: 14.5px;
-  line-height: 1.85;
-  color: var(--muted);
-}
-
-/* پیل‌های مشخصات فنی (Telemetry Pills) */
-.bento-specs {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 10px;
-  margin-top: 8px;
-}
-
-.spec-pill {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  padding: 6px 14px;
-  background: rgba(247, 244, 238, 0.85);
-  border: 1px solid rgba(140, 94, 60, 0.12);
-  border-radius: 10px;
-  font-size: 13px;
-}
-
-.spec-label {
-  color: var(--muted);
-}
-
-.spec-pill strong {
-  color: var(--coffee);
-  font-weight: 700;
-}
-
-/* نوار پیشرفت برشته‌کاری (Roast Progress Tracker) */
-.bento-roast-progress {
-  margin-top: 10px;
-}
-
-.progress-labels {
-  display: flex;
-  justify-content: space-between;
-  font-size: 12px;
-  color: var(--muted);
-  margin-bottom: 8px;
-}
-
-.progress-labels .active {
-  color: var(--coffee);
-  font-weight: 700;
-}
-
-.roast-bar-track {
-  width: 100%;
-  height: 8px;
-  background: rgba(140, 94, 60, 0.12);
-  border-radius: 9999px;
-  overflow: hidden;
-}
-
-.roast-bar-fill {
-  width: 62%;
-  height: 100%;
-  background: linear-gradient(90deg, #c99752, #795239);
-  border-radius: 9999px;
-  transition: width 1s var(--ease-spring);
-}
-
-/* نشانگر زمان پخت شیرینی‌پزی */
-.bake-schedule {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  padding: 6px 12px;
-  background: rgba(125, 140, 108, 0.1);
-  border: 1px solid rgba(125, 140, 108, 0.2);
-  border-radius: 10px;
-  font-size: 13px;
-  color: var(--sage);
-  font-weight: 600;
-}
-
-.bake-dot {
-  width: 8px;
-  height: 8px;
-  border-radius: 50%;
-  background: var(--sage);
-  flex-shrink: 0;
-}
-
-/* بلوک مانیتورینگ زنده تله‌متری (Live Telemetry Block) */
-.telemetry-live-stats {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 12px;
-  margin-top: 14px;
-}
-
-.telemetry-stat-item {
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-  padding: 12px;
-  background: rgba(247, 244, 238, 0.85);
-  border: 1px solid rgba(140, 94, 60, 0.1);
-  border-radius: 14px;
-  text-align: center;
-}
-
-.telemetry-stat-item .stat-num {
-  font-size: 22px;
-  font-weight: 800;
-  color: var(--coffee);
-  line-height: 1.2;
-}
-
-.telemetry-stat-item .stat-desc {
-  font-size: 12px;
-  color: var(--muted);
-  white-space: nowrap;
-}
-
-/* انیمیشن پالس زنده وضعیت باریستا */
-.status-pulse-dot {
-  display: inline-block;
-  width: 9px;
-  height: 9px;
-  border-radius: 50%;
-  background: #34d399;
-  box-shadow: 0 0 0 0 rgba(52, 211, 153, 0.7);
-  animation: sorenPulseGreen 2s infinite;
-  flex-shrink: 0;
-}
-
-@keyframes sorenPulseGreen {
-  0% {
-    transform: scale(0.95);
-    box-shadow: 0 0 0 0 rgba(52, 211, 153, 0.7);
-  }
-  70% {
-    transform: scale(1);
-    box-shadow: 0 0 0 6px rgba(52, 211, 153, 0);
-  }
-  100% {
-    transform: scale(0.95);
-    box-shadow: 0 0 0 0 rgba(52, 211, 153, 0);
-  }
-}
-
-/* ----- 3. ارتقای کارت‌های محصولات به معماری دو لایه‌ای لوکس (Doppelrand Cards) ----- */
+/* ----- 2. ارتقای کارت‌های محصولات به معماری دو لایه‌ای لوکس (Doppelrand Cards) ----- */
 .featured-card {
   border: 1px solid rgba(140, 94, 60, 0.12) !important;
   border-radius: 24px !important;
@@ -7995,52 +7678,14 @@ main {
   box-shadow: 0 4px 14px rgba(121, 82, 57, 0.25) !important;
 }
 
-/* استایل رسپانسیو بنتو در موبایل و تبلت (سقوط کامل به ستون واحد و ایمن از اورفلو) */
-@media (max-width: 767px) {
-  .craft-bento-grid {
-    grid-template-columns: 1fr !important;
-    gap: 16px !important;
-  }
-
-  .bento-pour-over,
-  .bento-roastery,
-  .bento-bakehouse,
-  .bento-telemetry {
-    grid-column: span 1 !important;
-  }
-
-  .bento-card-inner {
-    padding: 20px 16px !important;
-  }
-
-  .telemetry-live-stats {
-    gap: 8px !important;
-  }
-
-  .telemetry-stat-item {
-    padding: 8px 6px !important;
-  }
-
-  .telemetry-stat-item .stat-num {
-    font-size: 18px !important;
-  }
-}
-
 /* رعایت تنظیمات کاربر برای کاهش انیمیشن (Prefers Reduced Motion) */
 @media (prefers-reduced-motion: reduce) {
-  .bento-card,
   .hero-btn,
   .featured-card,
   .category-chip,
-  .hero-image-frame .hero-image,
-  .roast-bar-fill {
+  .hero-image-frame .hero-image {
     transition: none !important;
     transform: none !important;
-  }
-
-  .badge-dot.pulse-amber,
-  .status-pulse-dot {
-    animation: none !important;
   }
 }
 
