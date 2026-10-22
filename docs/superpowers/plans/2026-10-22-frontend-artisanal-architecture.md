@@ -39,43 +39,43 @@
 ## Tasks
 
 ### Task 1: High-Contrast Design Tokens, Typography & Price Badge Styling in CSS
-- [ ] Add terrace glare tokens (`--terrace-text`, `--ceramic-bg`, `--tag-border`) and typography utilities to `frontend/css/style.css`.
-- [ ] Add CSS styling for hand-stamped price tags and secondary origin tasting notes.
-- [ ] Add CSS for `#drink-customizer-sheet`, `#drink-customizer-backdrop`, modifier option groups, and dietary badges.
-- [ ] Add CSS keyframe animations for digit-flip (`.digit-flip-up`) and order pill pulse (`.order-pill-pulse`).
-- [ ] Add CSS for `.cart-item-recipe-tags`, `.recipe-tag`, and `.cart-upsell-shelf`.
-- [ ] Verify CSS syntax and rules.
-- [ ] Commit changes.
+- [x] Add terrace glare tokens (`--terrace-text`, `--ceramic-bg`, `--tag-border`) and typography utilities to `frontend/css/style.css`.
+- [x] Add CSS styling for hand-stamped price tags and secondary origin tasting notes.
+- [x] Add CSS for `#drink-customizer-sheet`, `#drink-customizer-backdrop`, modifier option groups, and dietary badges.
+- [x] Add CSS keyframe animations for digit-flip (`.digit-flip-up`) and order pill pulse (`.order-pill-pulse`).
+- [x] Add CSS for `.cart-item-recipe-tags`, `.recipe-tag`, and `.cart-upsell-shelf`.
+- [x] Verify CSS syntax and rules.
+- [x] Commit changes.
 
 ### Task 2: HTML Enhancements for Product Cards & Modal Templates in `index.html`
-- [ ] Add secondary tasting notes, hand-stamped badges, and "سفارشی‌سازی" buttons to coffee cards in `frontend/index.html`.
-- [ ] Add HTML structure for `#drink-customizer-backdrop` and `#drink-customizer-sheet` with drag handle, dynamic body container, and live price CTA.
-- [ ] Add container for `#cart-upsell-shelf` within `#cart-bottom-sheet`.
-- [ ] Verify HTML validity and structure.
-- [ ] Commit changes.
+- [x] Add secondary tasting notes, hand-stamped badges, and "سفارشی‌سازی" buttons to coffee cards in `frontend/index.html`.
+- [x] Add HTML structure for `#drink-customizer-backdrop` and `#drink-customizer-sheet` with drag handle, dynamic body container, and live price CTA.
+- [x] Add container for `#cart-upsell-shelf` within `#cart-bottom-sheet`.
+- [x] Verify HTML validity and structure.
+- [x] Commit changes.
 
 ### Task 3: Drink Customizer Modal Engine & Live Number-Flip Logic in `main.js`
-- [ ] Define drink archetypes (Milk-Based Hot Coffee, Black Coffee, Iced Drinks, Shakes) with modifier definitions and prices in `frontend/main.js`.
-- [ ] Implement `openDrinkCustomizer(productId)` and `closeDrinkCustomizer()`.
-- [ ] Implement drag-to-dismiss gesture handling for the customizer sheet.
-- [ ] Implement real-time price calculation and digit-flip animation when modifier chips change.
-- [ ] Implement add-to-cart logic that bundles customizations and `barista_summary` into `SorenCartStore`.
-- [ ] Commit changes.
+- [x] Define drink archetypes (Milk-Based Hot Coffee, Black Coffee, Iced Drinks, Shakes) with modifier definitions and prices in `frontend/main.js`.
+- [x] Implement `openDrinkCustomizer(productId)` and `closeDrinkCustomizer()`.
+- [x] Implement drag-to-dismiss gesture handling for the customizer sheet.
+- [x] Implement real-time price calculation and digit-flip animation when modifier chips change.
+- [x] Implement add-to-cart logic that bundles customizations and `barista_summary` into `SorenCartStore`.
+- [x] Commit changes.
 
 ### Task 4: In-Cart Recipe Tags & Contextual Upsell Shelf in `main.js`
-- [ ] Update `renderCartBottomSheet(items)` to display `.cart-item-recipe-tags` under customized items.
-- [ ] Implement `renderCartUpsellShelf()`: detect coffee items in cart and display the Basque Cheesecake upsell row with a 1-tap `+ افزودن` button.
-- [ ] Wire 1-tap add to seamlessly add the cheesecake without closing or jumping the cart sheet.
-- [ ] Commit changes.
+- [x] Update `renderCartBottomSheet(items)` to display `.cart-item-recipe-tags` under customized items.
+- [x] Implement `renderCartUpsellShelf()`: detect coffee items in cart and display the Basque Cheesecake upsell row with a 1-tap `+ افزودن` button.
+- [x] Wire 1-tap add to seamlessly add the cheesecake without closing or jumping the cart sheet.
+- [x] Commit changes.
 
 ### Task 5: Sticky Category Scroll-Spy & Floating Pill Pulse Polish
-- [ ] Upgrade category bar to use `IntersectionObserver` across category targets for scroll-spy highlighting.
-- [ ] Ensure smooth scrolling on chip tap with proper sticky header offset.
-- [ ] Add subtle spring pulse animation and haptics (`navigator.vibrate(12)`) to `#floating-order-bar` when items are added.
-- [ ] Commit changes.
+- [x] Upgrade category bar to use `IntersectionObserver` across category targets for scroll-spy highlighting.
+- [x] Ensure smooth scrolling on chip tap with proper sticky header offset.
+- [x] Add subtle spring pulse animation and haptics (`navigator.vibrate(12)`) to `#floating-order-bar` when items are added.
+- [x] Commit changes.
 
 ### Task 6: End-to-End Verification & Responsive Testing
-- [ ] Run responsive tests and browser checks.
-- [ ] Verify touch interactions, drag gestures, modifier calculations, upsell shelf, and localStorage persistence.
-- [ ] Ensure zero console errors and clean FCP performance.
-- [ ] Commit and finalize.
+- [x] Run responsive tests and browser checks.
+- [x] Verify touch interactions, drag gestures, modifier calculations, upsell shelf, and localStorage persistence.
+- [x] Ensure zero console errors and clean FCP performance.
+- [x] Commit and finalize.
