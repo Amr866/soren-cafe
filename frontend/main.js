@@ -230,7 +230,7 @@ const SorenAudio = {
         this.playWarmTap();
         if (typeof navigator !== "undefined" && navigator.vibrate) {
           try {
-            navigator.vibrate(10);
+            navigator.vibrate(12);
           } catch (err) {}
         }
       }
@@ -1012,66 +1012,14 @@ function initSingleSurfaceCatalog() {
     }
   }
 
-  // کلیک روی هر یک از تراشه‌ها همراه با اسکرول نرم به بخش مربوطه
+  // کلیک روی هر یک از تراشه‌ها
   chips.forEach((chip) => {
     chip.addEventListener("click", () => {
       triggerHaptic();
       const cat = chip.dataset.category || "all";
       setCategory(cat, true);
-
-      // اسکرول نرم به اولین آیتم دسته‌بندی با احتساب هدر چسبان
-      if (cat !== "all") {
-        const target = document.querySelector(`.featured-card[data-category="${cat}"]`);
-        if (target) {
-          const headerOffset = 95;
-          const elementPosition = target.getBoundingClientRect().top;
-          const offsetPosition = elementPosition + window.pageYOffset - headerOffset;
-          window.scrollTo({
-            top: offsetPosition,
-            behavior: "smooth",
-          });
-        }
-      } else {
-        const menuAnchor = document.getElementById("featured-products") || document.getElementById("menu");
-        if (menuAnchor) {
-          menuAnchor.scrollIntoView({ behavior: "smooth", block: "start" });
-        }
-      }
     });
   });
-
-  // پایش اسکرول منو و هایلایت خودکار تراشه فعال (IntersectionObserver Scroll-Spy)
-  if ("IntersectionObserver" in window) {
-    const categoryTargets = [
-      { cat: "coffee", el: document.querySelector('.featured-card[data-category="coffee"]') },
-      { cat: "shakes", el: document.querySelector('.featured-card[data-category="shakes"]') },
-      { cat: "cake", el: document.querySelector('.featured-card[data-category="cake"]') },
-    ].filter((t) => t.el);
-
-    if (categoryTargets.length > 0) {
-      const catObserver = new IntersectionObserver(
-        (entries) => {
-          const visible = entries.find((e) => e.isIntersecting && e.intersectionRatio >= 0.2);
-          if (visible && visible.target) {
-            const currentCat = visible.target.dataset.category;
-            chips.forEach((c) => {
-              const match = c.dataset.category === currentCat;
-              c.classList.toggle("active", match);
-              c.setAttribute("aria-pressed", String(match));
-              if (match) {
-                try {
-                  c.scrollIntoView({ behavior: "smooth", block: "nearest", inline: "center" });
-                } catch (e) {}
-              }
-            });
-          }
-        },
-        { rootMargin: "-80px 0px -40% 0px", threshold: [0.2] }
-      );
-
-      categoryTargets.forEach((t) => catObserver.observe(t.el));
-    }
-  }
 
   // خواندن اولیه دسته‌بندی از روی URL و شنیدن تغییرات تاریخچه (Popstate / Hashchange)
   function checkUrlCategory(shouldPushState = false) {
@@ -1154,26 +1102,10 @@ function initSingleSurfaceCatalog() {
       if (!actionBox) return;
 
       const name = card.dataset.name || card.querySelector("h3, .product-title")?.textContent.trim() || "محصول";
-      const isCoffee =
-        card.dataset.category === "coffee" ||
-        id.startsWith("prd_espresso") ||
-        id.startsWith("prd_latte") ||
-        id.startsWith("prd_cappuccino") ||
-        id.startsWith("prd_americano") ||
-        id.startsWith("prd_mocha") ||
-        id.startsWith("prd_doppio");
-
-      const customizeBtnHtml = isCoffee
-        ? `<button type="button" class="card-customize-btn" data-id="${id}" aria-label="شخصی‌سازی ${name}">
-            <span>سفارشی‌سازی</span>
-            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
-          </button>`
-        : "";
 
       if (qty > 0 && isStepperActive) {
         // حالت فعال: نمایش کنترل‌های افزودن و کاهش موقت
         actionBox.innerHTML = `
-          ${customizeBtnHtml}
           <div class="card-stepper" data-id="${id}" aria-label="تنظیم تعداد ${name}">
             <button type="button" class="stepper-btn stepper-minus" data-id="${id}" aria-label="کاهش تعداد ${name}">−</button>
             <span class="stepper-count" aria-live="polite">${toFaDigits(qty)}</span>
@@ -1183,7 +1115,6 @@ function initSingleSurfaceCatalog() {
       } else if (qty > 0) {
         // حالت محوشده استپر: بازگشت به دکمه تمیز همراه با نشانگر تعداد در سبد
         actionBox.innerHTML = `
-          ${customizeBtnHtml}
           <button
             class="featured-order card-add-btn has-items"
             type="button"
@@ -1208,7 +1139,6 @@ function initSingleSurfaceCatalog() {
       } else {
         // حالت اولیه: بدون آیتم در سبد
         actionBox.innerHTML = `
-          ${customizeBtnHtml}
           <button
             class="featured-order card-add-btn"
             type="button"
@@ -1373,10 +1303,7 @@ function initCartBottomSheetAndFloatingBar() {
     if (discountEl) discountEl.textContent = "۰ تومان";
     if (finalPriceEl) finalPriceEl.textContent = formatPriceFa(totalPrice);
 
-    const upsellContainer = document.getElementById("cart-upsell-shelf-container");
-
     if (validItems.length === 0) {
-      if (upsellContainer) upsellContainer.innerHTML = "";
       itemsList.innerHTML = `
         <div class="sheet-empty-state">
           <span class="sheet-empty-icon" aria-hidden="true">☕</span>
@@ -1399,18 +1326,11 @@ function initCartBottomSheetAndFloatingBar() {
         const name = item.name || "محصول کافه سورن";
         const id = item.id;
 
-        const tagsHtml = Array.isArray(item.recipeTags) && item.recipeTags.length > 0
-          ? `<div class="cart-item-recipe-tags">
-              ${item.recipeTags.map((t) => `<span class="recipe-tag ${t.dietary ? 'dietary' : ''}">${t.text}</span>`).join('')}
-            </div>`
-          : "";
-
         return `
           <article class="sheet-item-row" data-id="${id}">
             <img src="${imgSrc}" alt="${name}" class="sheet-item-img" loading="lazy" />
             <div class="sheet-item-info">
               <h4 class="sheet-item-name">${name}</h4>
-              ${tagsHtml}
               <span class="sheet-item-unit-price">${formatPriceFa(unitPrice)} واحد</span>
               <span class="sheet-item-total-price">${formatPriceFa(lineTotal)}</span>
             </div>
@@ -1513,7 +1433,7 @@ function initCartBottomSheetAndFloatingBar() {
     }
   }
 
-  // همگام‌سازی نوار شناور سفارش جاری
+  // همگام‌سازی نوار شناور سفارش جاری با انیمیشن تپش فنری و لرزش هپتیک
   let lastPillCount = 0;
   function syncFloatingOrderBar() {
     if (!floatingBar) return;
@@ -1559,7 +1479,7 @@ function initCartBottomSheetAndFloatingBar() {
 
       if (typeof navigator !== "undefined" && navigator.vibrate) {
         try {
-          navigator.vibrate(10);
+          navigator.vibrate(12);
         } catch (err) {}
       }
 
@@ -1753,484 +1673,6 @@ if (document.readyState === "loading") {
   document.addEventListener("DOMContentLoaded", initCartBottomSheetAndFloatingBar);
 } else {
   initCartBottomSheetAndFloatingBar();
-}
-
-/* ========================================================
-   2.4 برگه کشویی سفارشی‌سازی نوشیدنی‌ها (iOS-Style Drink Customizer Modal)
-   با انتخاب پویای رسپی و انیمیشن ارقام قیمت (Live Number-Flip)
-   ======================================================== */
-const DRINK_CUSTOMIZATION_ARCHETYPES = {
-  // ۱. نوشیدنی‌های بر پایه شیر داغ (لته، کاپوچینو، موکا)
-  milk_based: {
-    type: "milk_based",
-    subtitle: "انتخاب نوع شیر، خاستگاه قهوه، سیروپ دست‌ساز و بافت فوم",
-    groups: [
-      {
-        id: "milk",
-        title: "انتخاب نوع شیر",
-        required: true,
-        options: [
-          { id: "whole", name: "شیر پرچرب محلی", price: 0, default: true, tag: null },
-          { id: "oat", name: "شیر جو دوسر Oatly باریستا", price: 35000, tag: { text: "🌱 گیاهی / Vegan", type: "vegan" } },
-          { id: "almond", name: "شیر بادام ارگانیک", price: 45000, tag: { text: "🌱 بدون لاکتوز", type: "lactose-free" } },
-          { id: "lowfat", name: "شیر کم‌چرب سبک", price: 0, tag: null },
-        ],
-      },
-      {
-        id: "bean",
-        title: "نوع دانه و خاستگاه برشته‌کاری",
-        required: true,
-        options: [
-          { id: "house_blend", name: "بِلند امضای سورن (آجیلی و شکلات تلخ)", price: 0, default: true },
-          { id: "ethiopia", name: "تک‌خاستگاه اتیوپی یرگاچف (گلی و یاس)", price: 50000 },
-          { id: "decaf", name: "دی‌کف سوئیس‌واتر (بدون کافئین طبیعی)", price: 20000 },
-        ],
-      },
-      {
-        id: "shots",
-        title: "تعداد و شدت شات اسپرسو",
-        required: true,
-        options: [
-          { id: "double", name: "دبل شات استاندارد (2x)", price: 0, default: true },
-          { id: "single", name: "سینگل شات ملایم (1x)", price: 0 },
-          { id: "triple", name: "تریپل شات انرژی‌بخش (3x)", price: 30000 },
-          { id: "ristretto", name: "ریسترتو غلیظ و متراکم (Ristretto)", price: 0 },
-        ],
-      },
-      {
-        id: "syrup",
-        title: "سیروپ‌های دست‌ساز کافه",
-        required: false,
-        options: [
-          { id: "none", name: "بدون سیروپ (طبیعی)", price: 0, default: true },
-          { id: "salted_caramel", name: "کارامل نمکی دست‌ساز کافه سورن", price: 25000 },
-          { id: "vanilla", name: "وانیل طبیعی ماداگاسکار", price: 25000 },
-          { id: "hazelnut", name: "فندق برشته ایتالیایی", price: 25000 },
-        ],
-      },
-      {
-        id: "texture",
-        title: "بافت فوم و دمای سرو",
-        required: true,
-        options: [
-          { id: "microfoam_65", name: "میکروفوم ابریشمی استاندارد (۶۵°C)", price: 0, default: true },
-          { id: "extra_foam", name: "فوم مخملی متراکم (Extra Foam)", price: 0 },
-          { id: "extra_hot_75", name: "دمای داغ‌تر (۷۵°C)", price: 0 },
-        ],
-      },
-    ],
-  },
-
-  // ۲. قهوه‌های سیاه و خالص (اسپرسو، دوبل، آمریکانو، پوراوور)
-  black_coffee: {
-    type: "black_coffee",
-    subtitle: "انتخاب خاستگاه دانه، سبک عصاره‌گیری و دمای سرو",
-    groups: [
-      {
-        id: "bean",
-        title: "خاستگاه دانه و برشته‌کاری",
-        required: true,
-        options: [
-          { id: "house_blend", name: "بِلند امضای سورن (طعم متعادل و آجیلی)", price: 0, default: true },
-          { id: "ethiopia", name: "اتیوپی یرگاچف تخصصی (نت یاس و مرکبات)", price: 50000 },
-          { id: "decaf", name: "دی‌کف سوئیس‌واتر طبیعی (بدون کافئین)", price: 20000 },
-        ],
-      },
-      {
-        id: "shots",
-        title: "شدت و تعداد شات",
-        required: true,
-        options: [
-          { id: "double", name: "دبل شات استاندارد (2x)", price: 0, default: true },
-          { id: "single", name: "تک‌شات سینگل (1x)", price: 0 },
-          { id: "triple", name: "تریپل شات پرانرژی (3x)", price: 30000 },
-          { id: "ristretto", name: "ریسترتو متراکم ۹.۲ بار", price: 0 },
-        ],
-      },
-      {
-        id: "temp",
-        title: "دمای سرو",
-        required: true,
-        options: [
-          { id: "hot", name: "سرو داغ عصاره‌گیری ۹۳.۵°C", price: 0, default: true },
-          { id: "iced", name: "سرو روی یخ بلوری (Iced)", price: 0 },
-        ],
-      },
-    ],
-  },
-
-  // ۳. نوشیدنی‌های سرد و شیک‌ها (آیس‌لاته، کلدبرو، شیک‌ها)
-  iced_drinks: {
-    type: "iced_drinks",
-    subtitle: "میزان یخ، شیرینی و تاپینگ کلد فوم دست‌ساز",
-    groups: [
-      {
-        id: "milk",
-        title: "انتخاب شیر یا بستنی پایه",
-        required: true,
-        options: [
-          { id: "whole", name: "پایه شیر تازه محلی", price: 0, default: true, tag: null },
-          { id: "oat", name: "شیر جو دوسر گیاهی Oatly", price: 35000, tag: { text: "🌱 گیاهی", type: "vegan" } },
-          { id: "almond", name: "شیر بادام ارگانیک", price: 45000, tag: { text: "🌱 بدون لاکتوز", type: "lactose-free" } },
-        ],
-      },
-      {
-        id: "ice",
-        title: "میزان یخ کریستالی",
-        required: true,
-        options: [
-          { id: "standard_ice", name: "یخ کریستالی استاندارد (۱۰۰٪)", price: 0, default: true },
-          { id: "mild_ice", name: "یخ ملایم (۵۰٪)", price: 0 },
-          { id: "no_ice", name: "بدون یخ", price: 0 },
-        ],
-      },
-      {
-        id: "sweetness",
-        title: "میزان شیرینی",
-        required: true,
-        options: [
-          { id: "zero", name: "بدون شکر (۰٪)", price: 0, default: true },
-          { id: "half", name: "شیرینی ملایم (۵۰٪)", price: 0 },
-          { id: "full", name: "شیرینی استاندارد (۱۰۰٪)", price: 0 },
-        ],
-      },
-      {
-        id: "topping",
-        title: "تاپینگ باریستا",
-        required: false,
-        options: [
-          { id: "none", name: "بدون تاپینگ", price: 0, default: true },
-          { id: "vanilla_cold_foam", name: "وانیل سوئیت کلد فوم دست‌ساز روی نوشیدنی", price: 30000 },
-        ],
-      },
-    ],
-  },
-};
-
-let currentCustomizerProduct = null;
-let currentCustomizerArchetype = null;
-let currentSelectedModifiers = {};
-
-function initDrinkCustomizerModal() {
-  const sheet = document.getElementById("drink-customizer-sheet");
-  const backdrop = document.getElementById("drink-customizer-backdrop");
-  const dragZone = document.getElementById("customizer-drag-zone");
-  const closeBtn = document.getElementById("customizer-close-btn");
-  const container = document.getElementById("customizer-modifiers-container");
-  const titleEl = document.getElementById("customizer-product-title");
-  const descEl = document.getElementById("customizer-product-desc");
-  const submitBtn = document.getElementById("customizer-submit-btn");
-  const priceEl = document.getElementById("customizer-btn-price");
-
-  if (!sheet || !backdrop || !container) return;
-
-  function toFaDigits(num) {
-    const fa = ["۰", "۱", "۲", "۳", "۴", "۵", "۶", "۷", "۸", "۹"];
-    return String(num).replace(/[0-9]/g, (d) => fa[d]);
-  }
-
-  function formatPriceNumberOnly(num) {
-    const formatted = new Intl.NumberFormat("fa-IR").format(Number(num) || 0);
-    return toFaDigits(formatted);
-  }
-
-  function getArchetype(prod) {
-    const id = (prod.id || "").toLowerCase();
-    const name = (prod.name || "").toLowerCase();
-    if (id.includes("iced") || name.includes("آیس") || id.includes("coldbrew") || id.includes("shake") || prod.category === "shake") {
-      return DRINK_CUSTOMIZATION_ARCHETYPES.iced_drinks;
-    }
-    if (id.includes("latte") || id.includes("cappuccino") || id.includes("mocha") || id.includes("flatwhite") || id.includes("cortado") || name.includes("لاته") || name.includes("کاپوچینو") || name.includes("موکا")) {
-      return DRINK_CUSTOMIZATION_ARCHETYPES.milk_based;
-    }
-    return DRINK_CUSTOMIZATION_ARCHETYPES.black_coffee;
-  }
-
-  function calculateCustomizerTotal() {
-    if (!currentCustomizerProduct || !currentCustomizerArchetype) return 0;
-    const basePrice = Number(currentCustomizerProduct.price) || 0;
-    let extra = 0;
-    currentCustomizerArchetype.groups.forEach((group) => {
-      const selectedId = currentSelectedModifiers[group.id];
-      const opt = group.options.find((o) => o.id === selectedId);
-      if (opt && opt.price) {
-        extra += opt.price;
-      }
-    });
-    return basePrice + extra;
-  }
-
-  function updatePriceDisplay(animated = true) {
-    const total = calculateCustomizerTotal();
-    if (!priceEl) return;
-    if (animated) {
-      priceEl.classList.remove("price-digit-flip");
-      void priceEl.offsetWidth; // ریفلو جهت انیمیشن ترنزیشن اعداد
-      priceEl.textContent = formatPriceNumberOnly(total);
-      priceEl.classList.add("price-digit-flip");
-    } else {
-      priceEl.textContent = formatPriceNumberOnly(total);
-    }
-  }
-
-  function renderModifierGroups() {
-    if (!currentCustomizerArchetype || !container) return;
-    container.innerHTML = "";
-
-    currentCustomizerArchetype.groups.forEach((group) => {
-      const groupEl = document.createElement("div");
-      groupEl.className = "modifier-group";
-
-      const header = document.createElement("div");
-      header.className = "modifier-group-header";
-      header.innerHTML = `
-        <h4 class="modifier-group-title">${group.title}</h4>
-        ${group.required ? '<span class="modifier-group-required">الزامی</span>' : ""}
-      `;
-      groupEl.appendChild(header);
-
-      const grid = document.createElement("div");
-      grid.className = "modifier-options-grid";
-
-      group.options.forEach((opt) => {
-        const isSelected = currentSelectedModifiers[group.id] === opt.id;
-        const card = document.createElement("div");
-        card.className = `modifier-option-card ${isSelected ? "is-selected" : ""}`;
-        card.dataset.groupId = group.id;
-        card.dataset.optionId = opt.id;
-
-        const tagHtml = opt.tag
-          ? `<span class="dietary-tag ${opt.tag.type}">${opt.tag.text}</span>`
-          : "";
-
-        const priceDeltaHtml = opt.price > 0
-          ? `<span class="option-price-delta">+${formatPriceNumberOnly(opt.price)} ت</span>`
-          : '<span class="option-price-delta free">بدون هزینه</span>';
-
-        card.innerHTML = `
-          <div class="option-left">
-            <span class="option-radio-dot" aria-hidden="true"></span>
-            <span class="option-name">
-              ${opt.name}
-              ${tagHtml}
-            </span>
-          </div>
-          ${priceDeltaHtml}
-        `;
-
-        card.addEventListener("click", () => {
-          if (typeof navigator !== "undefined" && navigator.vibrate) {
-            try { navigator.vibrate(8); } catch (e) {}
-          }
-          currentSelectedModifiers[group.id] = opt.id;
-          grid.querySelectorAll(".modifier-option-card").forEach((c) => c.classList.remove("is-selected"));
-          card.classList.add("is-selected");
-          updatePriceDisplay(true);
-        });
-
-        grid.appendChild(card);
-      });
-
-      groupEl.appendChild(grid);
-      container.appendChild(groupEl);
-    });
-  }
-
-  function openDrinkCustomizer(productId) {
-    let prod = null;
-    if (window.PRODUCT_CATALOG) {
-      prod = Object.values(window.PRODUCT_CATALOG).find((p) => p.id === productId);
-    }
-    if (!prod) {
-      const card = document.querySelector(`.featured-card[data-id="${productId}"], .product-card[data-id="${productId}"]`);
-      if (card) {
-        prod = {
-          id: productId,
-          name: card.dataset.name || card.querySelector("h3")?.textContent.trim() || "قهوه تخصصی",
-          price: Number(card.dataset.price) || 95000,
-          category: card.dataset.category || "coffee",
-          image: card.querySelector("img")?.getAttribute("src") || "./images/products/coffee/espresso.png",
-        };
-      }
-    }
-    if (!prod) return;
-
-    currentCustomizerProduct = prod;
-    currentCustomizerArchetype = getArchetype(prod);
-    currentSelectedModifiers = {};
-
-    currentCustomizerArchetype.groups.forEach((group) => {
-      const defaultOpt = group.options.find((o) => o.default) || group.options[0];
-      currentSelectedModifiers[group.id] = defaultOpt.id;
-    });
-
-    if (titleEl) titleEl.textContent = `سفارشی‌سازی «${prod.name}»`;
-    if (descEl) descEl.textContent = currentCustomizerArchetype.subtitle;
-
-    renderModifierGroups();
-    updatePriceDisplay(false);
-
-    sheet.classList.add("is-open");
-    sheet.setAttribute("aria-hidden", "false");
-    backdrop.classList.add("is-open");
-    backdrop.setAttribute("aria-hidden", "false");
-    document.body.style.overflow = "hidden";
-
-    if (typeof navigator !== "undefined" && navigator.vibrate) {
-      try { navigator.vibrate(12); } catch (e) {}
-    }
-  }
-
-  function closeDrinkCustomizer() {
-    sheet.classList.remove("is-open");
-    sheet.setAttribute("aria-hidden", "true");
-    backdrop.classList.remove("is-open");
-    backdrop.setAttribute("aria-hidden", "true");
-    sheet.style.transform = "";
-    document.body.style.overflow = "";
-    currentCustomizerProduct = null;
-    currentCustomizerArchetype = null;
-  }
-
-  // رویداد ثبت و افزودن نوشیدنی سفارشی‌شده به سبد
-  if (submitBtn) {
-    submitBtn.addEventListener("click", () => {
-      if (!currentCustomizerProduct || !currentCustomizerArchetype) return;
-
-      const total = calculateCustomizerTotal();
-      const timestamp = Date.now();
-      const customId = `${currentCustomizerProduct.id}_custom_${timestamp}`;
-      const recipeTags = [];
-      const summaryParts = [];
-
-      currentCustomizerArchetype.groups.forEach((group) => {
-        const optId = currentSelectedModifiers[group.id];
-        const opt = group.options.find((o) => o.id === optId);
-        if (opt && !opt.default) {
-          const shortName = opt.name.split("(")[0].trim();
-          recipeTags.push({
-            text: shortName,
-            dietary: opt.tag ? opt.tag.type : null,
-          });
-          summaryParts.push(shortName);
-        }
-      });
-
-      const customItem = {
-        id: customId,
-        productId: currentCustomizerProduct.id,
-        name: currentCustomizerProduct.name,
-        price: total,
-        basePrice: currentCustomizerProduct.price,
-        image: currentCustomizerProduct.image,
-        category: currentCustomizerProduct.category || "coffee",
-        quantity: 1,
-        qty: 1,
-        recipeTags: recipeTags,
-        baristaSummary: summaryParts.join(" • ") || "رسپی استاندارد سورن",
-        customizations: { ...currentSelectedModifiers },
-      };
-
-      if (window.SorenCartStore) {
-        window.SorenCartStore.addItem(customItem);
-      }
-
-      if (typeof navigator !== "undefined" && navigator.vibrate) {
-        try { navigator.vibrate(14); } catch (e) {}
-      }
-
-      closeDrinkCustomizer();
-
-      if (typeof showToast === "function") {
-        showToast(`«${currentCustomizerProduct.name}» با رسپی اختصاصی به سبد سفارش افزوده شد.`);
-      }
-
-      if (typeof window.syncCardSteppers === "function") {
-        window.syncCardSteppers();
-      }
-    });
-  }
-
-  if (closeBtn) {
-    closeBtn.addEventListener("click", (e) => {
-      e.preventDefault();
-      closeDrinkCustomizer();
-    });
-  }
-
-  if (backdrop) {
-    backdrop.addEventListener("click", () => {
-      closeDrinkCustomizer();
-    });
-  }
-
-  document.addEventListener("keydown", (e) => {
-    if (e.key === "Escape" && sheet.classList.contains("is-open")) {
-      closeDrinkCustomizer();
-    }
-  });
-
-  // ژست لمسی بستن کشویی با کشیدن به پایین
-  function attachCustomizerDrag(element) {
-    if (!element) return;
-    let startY = 0;
-    let currentDelta = 0;
-    let isDragging = false;
-
-    element.addEventListener(
-      "touchstart",
-      (e) => {
-        if (e.touches.length !== 1) return;
-        if (e.target.closest("button")) return;
-        startY = e.touches[0].clientY;
-        currentDelta = 0;
-        isDragging = true;
-        sheet.style.transition = "none";
-      },
-      { passive: true }
-    );
-
-    element.addEventListener(
-      "touchmove",
-      (e) => {
-        if (!isDragging) return;
-        const dy = e.touches[0].clientY - startY;
-        if (dy > 0) {
-          currentDelta = dy;
-          sheet.style.transform = `translateY(${dy}px)`;
-          const dim = Math.min(dy / 300, 0.6);
-          if (backdrop) backdrop.style.opacity = `${1 - dim}`;
-        }
-      },
-      { passive: true }
-    );
-
-    element.addEventListener("touchend", () => {
-      if (!isDragging) return;
-      isDragging = false;
-      sheet.style.transition = "";
-      if (backdrop) backdrop.style.opacity = "";
-      if (currentDelta > 80) {
-        closeDrinkCustomizer();
-      } else {
-        sheet.style.transform = "";
-      }
-      currentDelta = 0;
-    });
-  }
-
-  if (dragZone) attachCustomizerDrag(dragZone);
-  const customizerHeader = sheet.querySelector(".customizer-header");
-  if (customizerHeader) attachCustomizerDrag(customizerHeader);
-
-  window.openDrinkCustomizer = openDrinkCustomizer;
-  window.closeDrinkCustomizer = closeDrinkCustomizer;
-}
-
-if (document.readyState === "loading") {
-  document.addEventListener("DOMContentLoaded", initDrinkCustomizerModal);
-} else {
-  initDrinkCustomizerModal();
 }
 
 /* ========================================
@@ -3020,32 +2462,8 @@ if (document.readyState === "loading") {
     toastTimer = setTimeout(() => toast.classList.remove("is-visible"), 3000);
   }
 
-  // رویداد افزودن به سبد خرید، سفارشی‌سازی و تعامل با استپرها (Event Delegation لمسی سراسری)
+  // رویداد افزودن به سبد خرید و تعامل با استپرها (Event Delegation لمسی سراسری با لرزش هپتیک)
   document.addEventListener("click", (e) => {
-    // ۱. باز کردن برگه سفارشی‌سازی با کلیک روی دکمه سفارشی‌سازی یا کارت قهوه
-    const customizeBtn = e.target.closest(".card-customize-btn");
-    if (customizeBtn) {
-      const card = customizeBtn.closest(".product-card, .featured-card");
-      const id = card ? (card.dataset.id || card.dataset.productId) : customizeBtn.dataset.id;
-      if (id && typeof window.openDrinkCustomizer === "function") {
-        window.openDrinkCustomizer(id);
-        return;
-      }
-    }
-
-    const coffeeCardTarget = e.target.closest(".featured-card[data-category='coffee'], .product-card[data-category='coffee']");
-    if (
-      coffeeCardTarget &&
-      !e.target.closest("button, a, input, .card-stepper, .stepper-btn, .card-action-box")
-    ) {
-      const id = coffeeCardTarget.dataset.id || coffeeCardTarget.dataset.productId;
-      if (id && typeof window.openDrinkCustomizer === "function") {
-        window.openDrinkCustomizer(id);
-        return;
-      }
-    }
-
-    // ۲. افزودن سریع یا تعامل با استپرها
     const addBtn = e.target.closest(".btn-add, .featured-order, .card-add-btn");
     const plusBtn = e.target.closest(".stepper-plus");
     const minusBtn = e.target.closest(".stepper-minus");
@@ -3055,7 +2473,7 @@ if (document.readyState === "loading") {
       const card = button.closest(".product-card, .featured-card");
       if (!card) return;
 
-      // لرزش هپتیک ۱۲ میلی‌ثانیه برای فیدبک فیزیکی
+      // لرزش هپتیک ۱۰ میلی‌ثانیه برای فیدبک فیزیکی
       if (typeof navigator !== "undefined" && navigator.vibrate) {
         try { navigator.vibrate(12); } catch (err) {}
       }
@@ -3116,7 +2534,7 @@ if (document.readyState === "loading") {
         }, 1800);
       }
     } else if (minusBtn) {
-      // لرزش هپتیک ۱۲ میلی‌ثانیه برای کاهش تعداد
+      // لرزش هپتیک ۱۰ میلی‌ثانیه برای کاهش تعداد
       if (typeof navigator !== "undefined" && navigator.vibrate) {
         try { navigator.vibrate(12); } catch (err) {}
       }
