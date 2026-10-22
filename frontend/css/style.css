@@ -33,6 +33,14 @@
   --muted: #766e66;
   --white: #ffffff;
 
+  /* توکن‌های کنتراست ضدتابش آفتاب و تجربه ارگونومیک (Terrace Glare & Artisanal Tokens) */
+  --terrace-text: #1c130d;
+  --terrace-text-secondary: #6e5a4d;
+  --ceramic-bg: #faf7f2;
+  --ceramic-warm: #f4ece1;
+  --tag-border: rgba(121, 82, 57, 0.22);
+  --stamp-shadow: 0 2px 6px rgba(28, 19, 13, 0.06);
+
   --font-sans: "Vazirmatn", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
   --font-latin: "Plus Jakarta Sans", -apple-system, BlinkMacSystemFont, sans-serif;
 
@@ -7787,6 +7795,563 @@ main {
     transform: none !important;
   }
 }
+
+/* ========================================================
+   SOREN CAFÉ — ARTISANAL SPECIALTY CUSTOMIZER & LUXURY MENU
+   (Typography, Hand-Stamped Badges, iOS Customizer Sheet, Upsell Shelf)
+   ======================================================== */
+
+/* 1. نشان‌های قیمت تمبرخورده دست‌ساز (Hand-Stamped Tactile Price Badges) */
+.hand-stamped-price {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 4px;
+  background: var(--ceramic-warm, #f4ece1);
+  border: 1.5px dashed var(--tag-border, rgba(121, 82, 57, 0.28));
+  padding: 4px 10px;
+  border-radius: 8px;
+  color: var(--terrace-text, #1c130d);
+  font-family: var(--font-latin);
+  font-weight: 700;
+  font-size: 15px;
+  letter-spacing: -0.2px;
+  box-shadow: var(--stamp-shadow, 0 2px 6px rgba(28, 19, 13, 0.05));
+}
+
+.hand-stamped-price .price-currency {
+  font-family: var(--font-sans);
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--terrace-text-secondary, #6e5a4d);
+}
+
+.featured-prices.stamped-container {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 2px;
+}
+
+.featured-prices.stamped-container del {
+  font-size: 11px;
+  color: var(--terrace-text-secondary, #6e5a4d);
+  font-family: var(--font-latin);
+  margin-right: 4px;
+}
+
+/* 2. نت‌های طعمی ثانویه و دمای دم‌آوری (Secondary Origin Tasting Notes - WCAG AA) */
+.drink-tasting-notes {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin: 6px 0 10px;
+  font-size: 11.5px;
+  font-weight: 500;
+  line-height: 1.5;
+  color: var(--terrace-text-secondary, #6e5a4d);
+}
+
+.drink-tasting-notes .tasting-dot {
+  display: inline-block;
+  width: 3.5px;
+  height: 3.5px;
+  border-radius: 50%;
+  background: var(--coffee, #795239);
+  opacity: 0.6;
+}
+
+.drink-tasting-notes .origin-tag {
+  color: var(--coffee, #795239);
+  font-weight: 600;
+}
+
+.drink-tasting-notes .temp-tag {
+  font-family: var(--font-latin);
+  font-weight: 600;
+  direction: ltr;
+  display: inline-block;
+}
+
+/* دکمه اختصاصی سفارشی‌سازی روی کارت محصول */
+.card-customize-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  background: transparent;
+  border: 1px solid var(--tag-border, rgba(121, 82, 57, 0.25));
+  border-radius: 10px;
+  padding: 6px 10px;
+  font-family: var(--font-sans);
+  font-size: 11.5px;
+  font-weight: 600;
+  color: var(--coffee, #795239);
+  cursor: pointer;
+  transition: all 0.2s var(--ease-spring);
+  touch-action: manipulation;
+}
+
+.card-customize-btn:hover {
+  background: var(--ceramic-warm, #f4ece1);
+  border-color: var(--coffee, #795239);
+}
+
+.card-customize-btn:active {
+  transform: scale(0.96);
+}
+
+/* 3. برگه کشویی سفارشی‌سازی نوشیدنی‌ها (iOS-Style Drink Customizer Bottom Sheet) */
+.drink-customizer-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(28, 19, 13, 0.45);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  z-index: 1000;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.3s ease, visibility 0.3s ease;
+}
+
+.drink-customizer-backdrop.is-open {
+  opacity: 1;
+  visibility: visible;
+}
+
+.drink-customizer-sheet {
+  position: fixed;
+  right: 0;
+  left: 0;
+  bottom: 0;
+  max-height: 90dvh;
+  max-height: 90vh;
+  background: var(--ceramic-bg, #faf7f2);
+  z-index: 1001;
+  border-radius: 28px 28px 0 0;
+  transform: translateY(105%);
+  transition: transform 0.35s cubic-bezier(0.22, 1, 0.36, 1);
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 -12px 40px rgba(28, 19, 13, 0.18), 0 -2px 10px rgba(28, 19, 13, 0.05);
+  will-change: transform;
+  overflow: hidden;
+}
+
+@media (min-width: 768px) {
+  .drink-customizer-sheet {
+    max-width: 520px;
+    left: 50% !important;
+    right: auto !important;
+    transform: translate(-50%, 105%);
+    border-radius: 24px;
+    bottom: 24px;
+    max-height: 85vh;
+    box-shadow: 0 24px 60px rgba(28, 19, 13, 0.28);
+  }
+
+  .drink-customizer-sheet.is-open {
+    transform: translate(-50%, 0) !important;
+  }
+}
+
+.drink-customizer-sheet.is-open {
+  transform: translateY(0);
+}
+
+.customizer-header {
+  padding: 12px 20px 16px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-bottom: 1px solid rgba(121, 82, 57, 0.1);
+  flex-shrink: 0;
+}
+
+.customizer-title-box {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.customizer-title {
+  font-size: 17px;
+  font-weight: 800;
+  color: var(--terrace-text, #1c130d);
+  margin: 0;
+}
+
+.customizer-subtitle {
+  font-size: 12px;
+  color: var(--terrace-text-secondary, #6e5a4d);
+  margin: 0;
+}
+
+.customizer-close-btn {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  border: none;
+  background: var(--ceramic-warm, #f4ece1);
+  color: var(--terrace-text, #1c130d);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  font-size: 15px;
+  transition: transform 0.2s ease, background-color 0.2s ease;
+}
+
+.customizer-close-btn:active {
+  transform: scale(0.9);
+}
+
+.customizer-body {
+  padding: 16px 20px;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+/* گروه‌های انتخاب آپشن (Modifier Groups) */
+.modifier-group {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.modifier-group-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.modifier-group-title {
+  font-size: 13.5px;
+  font-weight: 700;
+  color: var(--terrace-text, #1c130d);
+  margin: 0;
+}
+
+.modifier-group-required {
+  font-size: 11px;
+  color: var(--coffee, #795239);
+  background: var(--ceramic-warm, #f4ece1);
+  padding: 2px 8px;
+  border-radius: 6px;
+  font-weight: 600;
+}
+
+.modifier-options-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 8px;
+}
+
+.modifier-option-card {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 11px 14px;
+  background: var(--white, #ffffff);
+  border: 1.5px solid rgba(121, 82, 57, 0.14);
+  border-radius: 12px;
+  cursor: pointer;
+  transition: all 0.2s var(--ease-spring);
+  user-select: none;
+  touch-action: manipulation;
+}
+
+.modifier-option-card:active {
+  transform: scale(0.98);
+}
+
+.modifier-option-card.is-selected {
+  border-color: var(--coffee, #795239);
+  background: #fbf7f1;
+  box-shadow: 0 2px 8px rgba(121, 82, 57, 0.12);
+}
+
+.option-left {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.option-radio-dot {
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  border: 2px solid rgba(121, 82, 57, 0.35);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+}
+
+.modifier-option-card.is-selected .option-radio-dot {
+  border-color: var(--coffee, #795239);
+  background: var(--coffee, #795239);
+}
+
+.modifier-option-card.is-selected .option-radio-dot::after {
+  content: "";
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #ffffff;
+}
+
+.option-name {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--terrace-text, #1c130d);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.dietary-tag {
+  font-size: 10px;
+  font-weight: 600;
+  padding: 2px 6px;
+  border-radius: 4px;
+}
+
+.dietary-tag.vegan {
+  background: #eef6ed;
+  color: #2e6930;
+  border: 1px solid rgba(46, 105, 48, 0.2);
+}
+
+.dietary-tag.lactose-free {
+  background: #edf4f9;
+  color: #1f5c87;
+  border: 1px solid rgba(31, 92, 135, 0.2);
+}
+
+.option-price-delta {
+  font-family: var(--font-latin);
+  font-size: 12.5px;
+  font-weight: 700;
+  color: var(--coffee, #795239);
+  direction: ltr;
+}
+
+.option-price-delta.free {
+  color: var(--terrace-text-secondary, #6e5a4d);
+  font-family: var(--font-sans);
+  font-size: 11px;
+}
+
+/* فوتر برگه سفارشی‌سازی و دکمه تسویه با ترنزیشن ارقام */
+.customizer-footer {
+  padding: 14px 20px calc(14px + var(--safe-bottom, 12px));
+  border-top: 1px solid rgba(121, 82, 57, 0.12);
+  background: var(--ceramic-bg, #faf7f2);
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-shrink: 0;
+}
+
+.customizer-add-btn {
+  flex: 1;
+  height: 50px;
+  border: none;
+  border-radius: 14px;
+  background: var(--coffee, #795239);
+  color: #ffffff;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 18px;
+  font-family: var(--font-sans);
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+  box-shadow: 0 4px 16px rgba(121, 82, 57, 0.28);
+  transition: transform 0.2s var(--ease-spring), background-color 0.2s ease;
+  touch-action: manipulation;
+}
+
+.customizer-add-btn:active {
+  transform: scale(0.97);
+  background: var(--coffee-hover, #61402b);
+}
+
+.customizer-add-btn .btn-price-box {
+  display: flex;
+  align-items: baseline;
+  gap: 4px;
+  font-family: var(--font-latin);
+  font-size: 15px;
+  font-weight: 800;
+  overflow: hidden;
+  position: relative;
+  height: 22px;
+}
+
+.customizer-add-btn .price-digit-flip {
+  display: inline-block;
+  animation: digitFlipUp 0.24s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
+
+@keyframes digitFlipUp {
+  0% {
+    transform: translateY(100%);
+    opacity: 0;
+  }
+  100% {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+/* 4. برچسب‌های رسپی داخل سبد خرید (Cart Item Recipe Tags) */
+.cart-item-recipe-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  margin: 4px 0 6px;
+}
+
+.recipe-tag {
+  font-size: 10.5px;
+  font-weight: 600;
+  background: var(--ceramic-warm, #f4ece1);
+  color: var(--terrace-text, #1c130d);
+  padding: 2px 7px;
+  border-radius: 6px;
+  border: 1px solid rgba(121, 82, 57, 0.12);
+  line-height: 1.4;
+}
+
+.recipe-tag.dietary {
+  background: #eef6ed;
+  color: #2e6930;
+  border-color: rgba(46, 105, 48, 0.2);
+}
+
+/* 5. شلف هوشمند مکمل قهوه در سبد خرید (Contextual Cart Upsell Shelf) */
+.cart-upsell-shelf {
+  background: linear-gradient(135deg, #fbf7f1 0%, #f4ece1 100%);
+  border: 1.5px solid rgba(121, 82, 57, 0.18);
+  border-radius: 16px;
+  padding: 12px 14px;
+  margin: 12px 0 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.upsell-shelf-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.upsell-shelf-title {
+  font-size: 12.5px;
+  font-weight: 700;
+  color: var(--coffee, #795239);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin: 0;
+}
+
+.upsell-badge {
+  font-size: 10px;
+  font-weight: 700;
+  background: var(--terracotta, #c86d51);
+  color: #ffffff;
+  padding: 2px 6px;
+  border-radius: 4px;
+}
+
+.upsell-shelf-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.upsell-item-content {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.upsell-item-thumb {
+  width: 44px;
+  height: 44px;
+  object-fit: contain;
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.6);
+  padding: 2px;
+}
+
+.upsell-item-meta {
+  display: flex;
+  flex-direction: column;
+}
+
+.upsell-item-name {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--terrace-text, #1c130d);
+  margin: 0;
+}
+
+.upsell-item-price {
+  font-family: var(--font-latin);
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--coffee, #795239);
+}
+
+.upsell-add-btn {
+  background: var(--coffee, #795239);
+  color: #ffffff;
+  border: none;
+  border-radius: 10px;
+  padding: 6px 14px;
+  font-family: var(--font-sans);
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  box-shadow: 0 2px 6px rgba(121, 82, 57, 0.2);
+  transition: transform 0.2s var(--ease-spring), background-color 0.2s ease;
+  touch-action: manipulation;
+}
+
+.upsell-add-btn:active {
+  transform: scale(0.95);
+}
+
+/* 6. انیمیشن تپش فنری پیل شناور سفارش جاری (Floating Order Pill Pulse) */
+.order-pill-pulse {
+  animation: pillSpringPulse 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+@keyframes pillSpringPulse {
+  0% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.06);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
 
 
 
