@@ -7680,29 +7680,6 @@ main {
    SOREN CAFÉ — LUXURY AWWWARDS-TIER CRAFT DESIGN SYSTEM
    ======================================================== */
 
-/* ----- 1. دکمه تنظیمات بازخورد صوتی تعاملی (Acoustic Haptics Button) ----- */
-.sound-button {
-  position: relative;
-  transition: transform 0.25s var(--ease-spring), background-color 0.2s ease, color 0.2s ease;
-}
-
-.sound-button.sound-muted svg {
-  opacity: 0.45;
-}
-
-.sound-button.sound-muted::after {
-  content: "";
-  position: absolute;
-  width: 22px;
-  height: 2px;
-  background: var(--terracotta);
-  transform: rotate(45deg);
-  border-radius: 1px;
-}
-
-.sound-button:active {
-  transform: scale(0.92);
-}
 
 /* ----- 2. ارتقای کارت‌های محصولات به معماری دو لایه‌ای لوکس (Doppelrand Cards) ----- */
 .featured-card {

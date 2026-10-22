@@ -206,20 +206,8 @@ const SorenAudio = {
       }
     } catch (e) {}
 
-    const toggleBtn = document.getElementById("soren-sound-toggle");
-    if (toggleBtn) {
-      this.updateToggleButton(toggleBtn);
-      toggleBtn.addEventListener("click", () => {
-        this.enabled = !this.enabled;
-        try {
-          localStorage.setItem("soren_sound_enabled", String(this.enabled));
-        } catch (e) {}
-        this.updateToggleButton(toggleBtn);
-        if (this.enabled) {
-          this.playWarmTap();
-        }
-      });
-    }
+    // Audio and haptics remain enabled by default across navigation and interactions
+    this.enabled = true;
 
     // بازخورد صوتی روی دکمه‌های ناوبری، تب‌ها، چیپ‌ها و دکمه‌های کنترلی
     document.addEventListener("click", (e) => {
