@@ -1,6 +1,25 @@
 /* ========================================
+   0. تعریف فونت محلی وزیرمتن (Local High-Speed Vazirmatn Fallback)
+======================================== */
+@font-face {
+  font-family: "Vazirmatn";
+  src: url("../fonts/Vazirmatn-Regular.woff2") format("woff2");
+  font-weight: 100 500;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Vazirmatn";
+  src: url("../fonts/Vazirmatn-Bold.woff2") format("woff2");
+  font-weight: 600 900;
+  font-style: normal;
+  font-display: swap;
+}
+
+/* ========================================
    1. متغیرها و تنظیمات عمومی
-   (فونت وزیرمتن از Google Fonts در HTML بارگذاری می‌شود)
+   (فونت وزیرمتن محلی و گوگلی پشتیبانی می‌شود)
 ======================================== */
 
 :root {
@@ -6943,52 +6962,104 @@ main {
   align-items: center;
   justify-content: center;
   gap: 8px;
-  background: rgba(121, 82, 57, 0.08);
-  border: 1px solid rgba(121, 82, 57, 0.18);
+  background: rgba(255, 255, 255, 0.18);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.28);
   border-radius: 999px;
   padding: 3px 6px;
   user-select: none;
   -webkit-user-select: none;
   touch-action: manipulation;
+  animation: sorenStepperEnter 0.26s var(--ease-spring) forwards;
+  transition: opacity 0.22s ease, transform 0.22s var(--ease-spring);
+}
+
+.card-stepper.is-collapsing {
+  opacity: 0;
+  transform: scale(0.9);
+  pointer-events: none;
+}
+
+@keyframes sorenStepperEnter {
+  from {
+    opacity: 0;
+    transform: scale(0.88);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
 }
 
 .stepper-btn {
-  min-width: 34px;
-  min-height: 34px;
-  width: 34px;
-  height: 34px;
+  min-width: 32px;
+  min-height: 32px;
+  width: 32px;
+  height: 32px;
   border-radius: 50%;
   border: none;
-  background: var(--coffee);
-  color: #ffffff;
+  background: #c89d66;
+  color: #1a1615;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 16px;
-  font-weight: 700;
+  font-size: 17px;
+  font-weight: 800;
   cursor: pointer;
   padding: 0;
   line-height: 1;
-  transition: transform 0.15s ease, background 0.15s ease;
+  transition: transform 0.16s var(--ease-spring), background 0.15s ease, box-shadow 0.15s ease;
   touch-action: manipulation;
   -webkit-tap-highlight-color: transparent;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
 }
 
 .stepper-btn:hover {
-  background: #62402b;
+  background: #dfb27c;
+  transform: scale(1.08);
 }
 
 .stepper-btn:active {
-  transform: scale(0.92);
+  transform: scale(0.9);
 }
 
 .stepper-count {
-  min-width: 22px;
+  min-width: 24px;
   text-align: center;
-  font-weight: 700;
-  font-size: 14px;
-  color: var(--charcoal);
-  font-feature-settings: "tnum";
+  font-weight: 800;
+  font-size: 15px;
+  color: #ffffff;
+  font-family: var(--font-sans) !important;
+  font-feature-settings: "tnum" 1, "ss01" 1;
+  font-variant-numeric: tabular-nums;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.5);
+}
+
+/* نشانگر کوچک تعداد در سبد بعد از محو شدن استپر */
+.card-in-cart-pill {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 20px;
+  height: 20px;
+  padding: 0 6px;
+  background: #c89d66;
+  color: #1a1615;
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 800;
+  margin-right: 6px;
+  font-family: var(--font-sans) !important;
+  font-feature-settings: "tnum" 1, "ss01" 1;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.25);
+  animation: sorenPillPop 0.25s var(--ease-spring);
+}
+
+@keyframes sorenPillPop {
+  0% { transform: scale(0.5); opacity: 0; }
+  100% { transform: scale(1); opacity: 1; }
 }
 
 .featured-order:active,
@@ -7635,9 +7706,8 @@ main {
 
 /* ----- 2. ارتقای کارت‌های محصولات به معماری دو لایه‌ای لوکس (Doppelrand Cards) ----- */
 .featured-card {
-  border: 1px solid rgba(140, 94, 60, 0.12) !important;
+  border: 1px solid rgba(255, 255, 255, 0.12) !important;
   border-radius: 24px !important;
-  background: rgba(255, 255, 255, 0.9) !important;
   box-shadow: var(--shadow-sm) !important;
   transition: transform 0.35s var(--ease-spring), box-shadow 0.35s var(--ease-spring), border-color 0.25s ease !important;
 }
@@ -7645,14 +7715,43 @@ main {
 .featured-card:hover {
   transform: translateY(-4px) !important;
   box-shadow: var(--shadow-luxury) !important;
-  border-color: rgba(140, 94, 60, 0.24) !important;
+  border-color: rgba(200, 157, 102, 0.45) !important;
+}
+
+/* فونت بهینه‌سازی شده برای تمام قیمت‌ها، مبالغ و شمارنده‌ها با اعداد فارسی یکدست */
+.featured-prices,
+.featured-prices strong,
+.featured-prices del,
+.price,
+.price-value,
+.order-bar-price,
+.sheet-item-unit-price,
+.sheet-item-total-price,
+.sheet-subtotal-price,
+.sheet-discount-price,
+.sheet-final-price,
+.cart-total-price,
+.cart-item-price,
+.summary-value,
+.stepper-count,
+.sheet-stepper-count {
+  font-family: var(--font-sans) !important;
+  font-feature-settings: "tnum" 1, "ss01" 1;
+  font-variant-numeric: tabular-nums lining-nums;
 }
 
 .featured-prices strong {
-  font-family: var(--font-latin) !important;
-  font-variant-numeric: tabular-nums !important;
   font-size: 20px !important;
-  letter-spacing: -0.5px !important;
+  font-weight: 800 !important;
+  letter-spacing: 0 !important;
+  color: #ffffff !important;
+}
+
+.featured-prices strong small {
+  font-size: 11px !important;
+  font-weight: 500 !important;
+  color: #d9d0c9 !important;
+  letter-spacing: 0 !important;
 }
 
 .featured-order {

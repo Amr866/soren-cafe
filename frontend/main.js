@@ -192,6 +192,132 @@ if (typeof window !== "undefined") {
 }
 
 /* ========================================================
+   موتور سنتز صدای ارگانیک و بازخورد لمسی (Soren Acoustic & Haptic Engine)
+   ======================================================== */
+const SorenAudio = {
+  ctx: null,
+  enabled: true,
+
+  init() {
+    try {
+      const saved = localStorage.getItem("soren_sound_enabled");
+      if (saved !== null) {
+        this.enabled = saved === "true";
+      }
+    } catch (e) {}
+
+    const toggleBtn = document.getElementById("soren-sound-toggle");
+    if (toggleBtn) {
+      this.updateToggleButton(toggleBtn);
+      toggleBtn.addEventListener("click", () => {
+        this.enabled = !this.enabled;
+        try {
+          localStorage.setItem("soren_sound_enabled", String(this.enabled));
+        } catch (e) {}
+        this.updateToggleButton(toggleBtn);
+        if (this.enabled) {
+          this.playWarmTap();
+        }
+      });
+    }
+
+    // بازخورد صوتی روی دکمه‌های ناوبری، تب‌ها، چیپ‌ها و دکمه‌های کنترلی
+    document.addEventListener("click", (e) => {
+      const target = e.target.closest(
+        ".category-chip, .hero-btn-primary, .sheet-checkout-btn, .order-bar-btn, .cart-button, .bottom-nav-cart, .filter-btn, .mobile-nav-item, #drawer-close-btn, #sheet-close-btn"
+      );
+      if (target) {
+        this.playWarmTap();
+        if (typeof navigator !== "undefined" && navigator.vibrate) {
+          try {
+            navigator.vibrate(10);
+          } catch (err) {}
+        }
+      }
+    });
+  },
+
+  updateToggleButton(btn) {
+    if (this.enabled) {
+      btn.classList.remove("sound-muted");
+      btn.setAttribute("title", "صدای تعاملی فعال است (کلیک برای قطع)");
+      btn.setAttribute("aria-label", "صدای تعاملی فعال است");
+    } else {
+      btn.classList.add("sound-muted");
+      btn.setAttribute("title", "صدای تعاملی غیرفعال است (کلیک برای وصل)");
+      btn.setAttribute("aria-label", "صدای تعاملی غیرفعال است");
+    }
+  },
+
+  getContext() {
+    if (typeof window === "undefined") return null;
+    const AudioCtx = window.AudioContext || window.webkitAudioContext;
+    if (!AudioCtx) return null;
+    if (!this.ctx || this.ctx.state === "closed") {
+      this.ctx = new AudioCtx();
+    }
+    if (this.ctx.state === "suspended") {
+      this.ctx.resume().catch(() => {});
+    }
+    return this.ctx;
+  },
+
+  playTone(freqStart, freqEnd, duration, volume = 0.05, type = "sine") {
+    if (!this.enabled) return;
+    try {
+      const ctx = this.getContext();
+      if (!ctx) return;
+
+      const trigger = () => {
+        try {
+          const osc = ctx.createOscillator();
+          const gain = ctx.createGain();
+          const now = ctx.currentTime;
+
+          osc.type = type;
+          osc.frequency.setValueAtTime(freqStart, now);
+          osc.frequency.exponentialRampToValueAtTime(Math.max(20, freqEnd), now + duration);
+
+          gain.gain.setValueAtTime(volume, now);
+          gain.gain.exponentialRampToValueAtTime(0.0001, now + duration);
+
+          osc.connect(gain);
+          gain.connect(ctx.destination);
+
+          osc.start(now);
+          osc.stop(now + duration + 0.01);
+        } catch (err) {}
+      };
+
+      if (ctx.state === "suspended") {
+        ctx.resume().then(trigger).catch(() => {});
+      } else {
+        trigger();
+      }
+    } catch (e) {}
+  },
+
+  // صدای افزایش و افزودن به سبد (صدای زنگوله گرم و صعودی)
+  playAdd() {
+    this.playTone(340, 560, 0.09, 0.05, "sine");
+  },
+
+  // صدای کاهش یا حذف آیتم (صدای ملایم نزولی)
+  playRemove() {
+    this.playTone(420, 240, 0.08, 0.04, "sine");
+  },
+
+  // صدای لمس سبک چوب و کلیک ارگانیک
+  playWarmTap() {
+    this.playTone(380, 160, 0.07, 0.04, "sine");
+  },
+};
+
+if (typeof window !== "undefined") {
+  window.SorenAudio = SorenAudio;
+}
+
+/* ========================================================
    موتور واکنشی و متمرکز سبد خرید (SorenCartStore)
    ======================================================== */
 const SorenCartStore = {
@@ -248,12 +374,18 @@ const SorenCartStore = {
     }
     this.save();
     this.notify(true);
+    if (typeof SorenAudio !== "undefined" && typeof SorenAudio.playAdd === "function") {
+      SorenAudio.playAdd();
+    }
   },
 
   removeItem(id) {
     this.items = this.items.filter((it) => it.id !== id);
     this.save();
     this.notify(true);
+    if (typeof SorenAudio !== "undefined" && typeof SorenAudio.playRemove === "function") {
+      SorenAudio.playRemove();
+    }
   },
 
   updateQuantity(id, delta) {
@@ -267,6 +399,13 @@ const SorenCartStore = {
     }
     this.save();
     this.notify(true);
+    if (typeof SorenAudio !== "undefined") {
+      if (delta > 0 && typeof SorenAudio.playAdd === "function") {
+        SorenAudio.playAdd();
+      } else if (delta < 0 && typeof SorenAudio.playRemove === "function") {
+        SorenAudio.playRemove();
+      }
+    }
   },
 
   getItems() {
@@ -898,16 +1037,59 @@ function initSingleSurfaceCatalog() {
   window.addEventListener("hashchange", () => checkUrlCategory(false));
   checkUrlCategory(false);
 
-  // ۲. همگام‌سازی استپرهای تعاملی لمسی کارت‌ها (+ / تعداد / -) با SorenCartStore
-  function syncCardSteppers() {
-    if (typeof SorenCartStore === "undefined") return;
-    const cards = document.querySelectorAll(".featured-card[data-id], .product-card[data-id]");
+  // ۲. مدیریت هوشمند استپرهای موقت (+ / تعداد / -) با قابلیت ناپدید شدن خودکار پس از چند ثانیه
+  const activeStepperTimers = new Map();
+
+  function showCardStepper(id, duration = 3500) {
+    if (!id) return;
+    if (activeStepperTimers.has(id)) {
+      clearTimeout(activeStepperTimers.get(id));
+    }
+
+    activeStepperTimers.set(
+      id,
+      setTimeout(() => {
+        activeStepperTimers.delete(id);
+        dismissCardStepper(id);
+      }, duration)
+    );
+
+    renderSingleCardAction(id, true);
+  }
+
+  function dismissCardStepper(id) {
+    const cards = document.querySelectorAll(
+      `.featured-card[data-id="${id}"], .featured-card[data-product-id="${id}"], .product-card[data-id="${id}"]`
+    );
+    cards.forEach((card) => {
+      const stepper = card.querySelector(".card-stepper");
+      if (stepper) {
+        stepper.classList.add("is-collapsing");
+        setTimeout(() => {
+          renderSingleCardAction(id, false);
+        }, 220);
+      } else {
+        renderSingleCardAction(id, false);
+      }
+    });
+  }
+
+  function dismissCardStepperImmediately(id) {
+    if (activeStepperTimers.has(id)) {
+      clearTimeout(activeStepperTimers.get(id));
+      activeStepperTimers.delete(id);
+    }
+    renderSingleCardAction(id, false);
+  }
+
+  function renderSingleCardAction(id, isStepperActive = false) {
+    if (!id) return;
+    const cards = document.querySelectorAll(
+      `.featured-card[data-id="${id}"], .featured-card[data-product-id="${id}"], .product-card[data-id="${id}"]`
+    );
+    const qty = typeof SorenCartStore !== "undefined" ? SorenCartStore.getItemQuantity(id) : 0;
 
     cards.forEach((card) => {
-      const id = card.dataset.id || card.dataset.productId;
-      if (!id) return;
-
-      const name = card.dataset.name || card.querySelector("h3, .product-title")?.textContent.trim() || "";
       let actionBox = card.querySelector(".card-action-box");
       if (!actionBox) {
         const footer = card.querySelector(".featured-footer, .product-footer");
@@ -919,9 +1101,10 @@ function initSingleSurfaceCatalog() {
       }
       if (!actionBox) return;
 
-      const qty = SorenCartStore.getItemQuantity(id);
+      const name = card.dataset.name || card.querySelector("h3, .product-title")?.textContent.trim() || "محصول";
 
-      if (qty > 0) {
+      if (qty > 0 && isStepperActive) {
+        // حالت فعال: نمایش کنترل‌های افزودن و کاهش موقت
         actionBox.innerHTML = `
           <div class="card-stepper" data-id="${id}" aria-label="تنظیم تعداد ${name}">
             <button type="button" class="stepper-btn stepper-minus" data-id="${id}" aria-label="کاهش تعداد ${name}">−</button>
@@ -929,7 +1112,32 @@ function initSingleSurfaceCatalog() {
             <button type="button" class="stepper-btn stepper-plus" data-id="${id}" aria-label="افزایش تعداد ${name}">+</button>
           </div>
         `;
+      } else if (qty > 0) {
+        // حالت محوشده استپر: بازگشت به دکمه تمیز همراه با نشانگر تعداد در سبد
+        actionBox.innerHTML = `
+          <button
+            class="featured-order card-add-btn has-items"
+            type="button"
+            data-product="${name}"
+            data-id="${id}"
+            aria-label="افزودن ${name} به سبد (${toFaDigits(qty)} عدد در سبد)"
+          >
+            <svg
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="1.8"
+              aria-hidden="true"
+            >
+              <path d="M5 8h14l1 12H4L5 8Z" stroke-linejoin="round" />
+              <path d="M9 9V6a3 3 0 0 1 6 0v3" stroke-linecap="round" />
+            </svg>
+            <span>افزودن به سبد</span>
+            <span class="card-in-cart-pill" aria-label="${toFaDigits(qty)} عدد">${toFaDigits(qty)}</span>
+          </button>
+        `;
       } else {
+        // حالت اولیه: بدون آیتم در سبد
         actionBox.innerHTML = `
           <button
             class="featured-order card-add-btn"
@@ -955,6 +1163,18 @@ function initSingleSurfaceCatalog() {
     });
   }
 
+  function syncCardSteppers() {
+    if (typeof SorenCartStore === "undefined") return;
+    const cards = document.querySelectorAll(".featured-card[data-id], .product-card[data-id]");
+
+    cards.forEach((card) => {
+      const id = card.dataset.id || card.dataset.productId;
+      if (!id) return;
+      const isActive = activeStepperTimers.has(id);
+      renderSingleCardAction(id, isActive);
+    });
+  }
+
   // گوش دادن به تغییرات سبد خرید جهت بازنشانی آنی استپرها
   window.addEventListener("soren:cart-changed", () => {
     syncCardSteppers();
@@ -964,6 +1184,10 @@ function initSingleSurfaceCatalog() {
   syncCardSteppers();
 
   // قرار دادن توابع روی شیء window برای دسترسی همگانی
+  window.showCardStepper = showCardStepper;
+  window.dismissCardStepper = dismissCardStepper;
+  window.dismissCardStepperImmediately = dismissCardStepperImmediately;
+  window.renderSingleCardAction = renderSingleCardAction;
   window.syncCardSteppers = syncCardSteppers;
   window.setMenuCategory = setCategory;
 }
@@ -2194,6 +2418,11 @@ if (document.readyState === "loading") {
 
       SorenCart.addItem(product);
 
+      // فعال‌سازی استپر موقت روی کارت (ناپدید شدن خودکار پس از چند ثانیه)
+      if (id && typeof window.showCardStepper === "function") {
+        window.showCardStepper(id, 3500);
+      }
+
       // اجرای میکرو-انیمیشن پرواز آیتم به سمت سبد خرید (تنها هنگام افزودن اولیه)
       if (addBtn) {
         animateFlyToCart(addBtn);
@@ -2220,6 +2449,16 @@ if (document.readyState === "loading") {
       const id = minusBtn.dataset.id || card?.dataset.id || card?.dataset.productId;
       if (id) {
         SorenCartStore.updateQuantity(id, -1);
+        const newQty = SorenCartStore.getItemQuantity(id);
+        if (newQty > 0) {
+          if (typeof window.showCardStepper === "function") {
+            window.showCardStepper(id, 3500);
+          }
+        } else {
+          if (typeof window.dismissCardStepperImmediately === "function") {
+            window.dismissCardStepperImmediately(id);
+          }
+        }
       }
     }
   });
@@ -2675,103 +2914,6 @@ if (typeof window !== "undefined") {
   window.SorenCatalog = SorenCatalog;
   window.initSorenLogoExperience = initSorenLogoExperience;
 }
-
-/* ========================================================
-   موتور سنتز صدای ارگانیک و بازخورد لمسی (Soren Acoustic & Haptic Engine)
-   ======================================================== */
-const SorenAudio = {
-  ctx: null,
-  enabled: true,
-
-  init() {
-    try {
-      const saved = localStorage.getItem("soren_sound_enabled");
-      if (saved !== null) {
-        this.enabled = saved === "true";
-      }
-    } catch (e) {}
-
-    const toggleBtn = document.getElementById("soren-sound-toggle");
-    if (toggleBtn) {
-      this.updateToggleButton(toggleBtn);
-      toggleBtn.addEventListener("click", () => {
-        this.enabled = !this.enabled;
-        try {
-          localStorage.setItem("soren_sound_enabled", String(this.enabled));
-        } catch (e) {}
-        this.updateToggleButton(toggleBtn);
-        if (this.enabled) {
-          this.playWarmTap();
-        }
-      });
-    }
-
-    // بازخورد صوتی و لرزشی روی دکمه‌های کلیدی تعاملی
-    document.addEventListener("click", (e) => {
-      const target = e.target.closest(
-        ".card-add-btn, .category-chip, .hero-btn-primary, .sheet-checkout-btn, .order-bar-btn"
-      );
-      if (target) {
-        this.playWarmTap();
-        if (typeof navigator !== "undefined" && navigator.vibrate) {
-          try {
-            navigator.vibrate(10);
-          } catch (err) {}
-        }
-      }
-    });
-  },
-
-  updateToggleButton(btn) {
-    if (this.enabled) {
-      btn.classList.remove("sound-muted");
-      btn.setAttribute("title", "صدای تعاملی فعال است (کلیک برای قطع)");
-      btn.setAttribute("aria-label", "صدای تعاملی فعال است");
-    } else {
-      btn.classList.add("sound-muted");
-      btn.setAttribute("title", "صدای تعاملی غیرفعال است (کلیک برای وصل)");
-      btn.setAttribute("aria-label", "صدای تعاملی غیرفعال است");
-    }
-  },
-
-  getContext() {
-    if (!this.ctx && typeof window !== "undefined") {
-      const AudioCtx = window.AudioContext || window.webkitAudioContext;
-      if (AudioCtx) {
-        this.ctx = new AudioCtx();
-      }
-    }
-    if (this.ctx && this.ctx.state === "suspended") {
-      this.ctx.resume().catch(() => {});
-    }
-    return this.ctx;
-  },
-
-  playWarmTap() {
-    if (!this.enabled) return;
-    try {
-      const ctx = this.getContext();
-      if (!ctx) return;
-      const osc = ctx.createOscillator();
-      const gain = ctx.createGain();
-
-      osc.type = "sine";
-      const now = ctx.currentTime;
-      // فرکانس گرم و صمیمی مانند کلیک دانه قهوه
-      osc.frequency.setValueAtTime(420, now);
-      osc.frequency.exponentialRampToValueAtTime(160, now + 0.07);
-
-      gain.gain.setValueAtTime(0.045, now);
-      gain.gain.exponentialRampToValueAtTime(0.0001, now + 0.07);
-
-      osc.connect(gain);
-      gain.connect(ctx.destination);
-
-      osc.start(now);
-      osc.stop(now + 0.075);
-    } catch (e) {}
-  },
-};
 
 // راه‌اندازی اولیه در زمان لود صفحه
 document.addEventListener("DOMContentLoaded", () => {
