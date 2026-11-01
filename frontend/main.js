@@ -1973,6 +1973,7 @@ if (document.readyState === "loading") {
   if (checkoutBtn) {
     checkoutBtn.addEventListener("click", openCheckoutModal);
   }
+  window.openCheckoutModal = openCheckoutModal;
 
   async function openCheckoutModal() {
     const items = SorenCart.getItems();
@@ -2088,6 +2089,65 @@ if (document.readyState === "loading") {
     `;
 
     modalBackdrop.classList.add("is-open");
+
+    // اتصال ژست Swipe-to-Dismiss به هدر مودال در موبایل (Apple Design Bottom Drawer Gesture)
+    const modalHeader = modalBackdrop.querySelector(".soren-modal-header");
+    const modalCard = modalBackdrop.querySelector(".soren-modal-card");
+    if (modalHeader && modalCard && !modalHeader.dataset.dragAttached) {
+      modalHeader.dataset.dragAttached = "true";
+      let startY = 0;
+      let currentDelta = 0;
+      let isDragging = false;
+
+      modalHeader.addEventListener(
+        "touchstart",
+        (e) => {
+          if (e.touches.length !== 1) return;
+          if (e.target.closest("button")) return;
+          startY = e.touches[0].clientY;
+          currentDelta = 0;
+          isDragging = true;
+          modalCard.style.transition = "none";
+        },
+        { passive: true }
+      );
+
+      modalHeader.addEventListener(
+        "touchmove",
+        (e) => {
+          if (!isDragging) return;
+          const dy = e.touches[0].clientY - startY;
+          if (dy > 0) {
+            if (e.cancelable) e.preventDefault();
+            currentDelta = dy;
+            modalCard.style.transform = `translateY(${dy}px)`;
+            const dim = Math.min(dy / 300, 0.6);
+            modalBackdrop.style.opacity = `${1 - dim}`;
+          } else {
+            currentDelta = 0;
+            modalCard.style.transform = "";
+          }
+        },
+        { passive: false }
+      );
+
+      const endModalDrag = () => {
+        if (!isDragging) return;
+        isDragging = false;
+        modalCard.style.transition = "";
+        modalBackdrop.style.opacity = "";
+        if (currentDelta > 65) {
+          modalBackdrop.classList.remove("is-open");
+          modalCard.style.transform = "";
+        } else {
+          modalCard.style.transform = "";
+        }
+        currentDelta = 0;
+      };
+
+      modalHeader.addEventListener("touchend", endModalDrag, { passive: true });
+      modalHeader.addEventListener("touchcancel", endModalDrag, { passive: true });
+    }
 
     const closeBtn = modalBackdrop.querySelector(".soren-modal-close");
     closeBtn.addEventListener("click", () => modalBackdrop.classList.remove("is-open"));
