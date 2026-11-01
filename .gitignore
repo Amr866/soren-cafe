@@ -17,8 +17,13 @@ bun.lockb
 .DS_Store
 Thumbs.db
 
+# TypeScript build cache
+*.tsbuildinfo
+
 # Knowledge Graph & Assistant artifacts (Graphify & Ponytail)
 graphify-out/
 .graphify*
 .ponytail*
+.superpowers/
+.specify/
 

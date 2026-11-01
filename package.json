@@ -12,8 +12,16 @@
     "start": "bun --filter soren-cafe-backend start",
     "seed": "bun --filter soren-cafe-backend seed",
     "reset": "bun --filter soren-cafe-backend reset",
+    "typecheck": "bun --filter soren-cafe-backend typecheck",
+    "test": "bun --filter soren-cafe-backend test",
+    "test:unit": "bun --cwd backend test tests/unit",
+    "test:integration": "bun --cwd backend test tests/integration",
+    "test:security": "node scripts/run-security-test.mjs",
+    "test:security:manual": "bun --filter soren-cafe-backend test:security",
     "test:load": "bun --filter soren-cafe-backend test:load",
-    "test:security": "bun --filter soren-cafe-backend test:security",
-    "test:responsive": "node scripts/verify-responsive.mjs"
+    "test:static": "node scripts/verify-responsive.mjs --static-only",
+    "test:responsive": "node scripts/verify-responsive.mjs",
+    "test:e2e": "node scripts/verify-stepper-and-upsell.mjs",
+    "test:ci": "bun run typecheck && bun run test && bun run test:security && bun run test:static"
   }
 }

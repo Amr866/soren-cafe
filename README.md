@@ -4,16 +4,19 @@
 > High-Performance Real-Time Ordering System, Telemetry Observability Suite & Microsecond Backend Engine.
 
 [![Bun](https://img.shields.io/badge/Bun-1.4.2-black?logo=bun)](https://bun.sh)
+[![CI Quality Gate](https://github.com/Amr866/soren-cafe/actions/workflows/ci.yml/badge.svg)](https://github.com/Amr866/soren-cafe/actions/workflows/ci.yml)
 [![SQLite](https://img.shields.io/badge/SQLite-WAL%20Mode-blue?logo=sqlite)](https://sqlite.org)
 [![WebSocket](https://img.shields.io/badge/WebSockets-Real--Time-orange)](https://developer.mozilla.org/en-US/docs/Web/API/WebSockets_API)
 [![Scalar Docs](https://img.shields.io/badge/API%20Docs-Scalar-purple)](http://localhost:4000/docs)
 [![Zero-JS-Bloat](https://img.shields.io/badge/Frontend-Vanilla%20JS%20%7C%20PWA-green)](frontend/)
+[![Typography](https://img.shields.io/badge/Typography-Peyda%20%7C%20Vazirmatn-8A5A36)](frontend/fonts/)
 
 ---
 
 ## 🏛️ معماری و ویژگی‌های کلیدی (Key Features)
 
 ### ۱. رابط کاربری مشتری (Craft Frontend Experience)
+* **تایپوگرافی مدرن و دست‌ساز (Peyda WOFF2 Modern Typography):** پیاده‌سازی تایپ‌فیس لوکس و هندسی **«پیدا»** در ۶ وزن کامل با بهینه‌سازی فرمت `WOFF2` (کاهش ۸۱٪ حجم، زیر ۳۸ کیلوبایت برای هر فایل)، ارقام جدولی (`tabular-nums`) و پیش‌لود مستقیم در مرورگر.
 * **عملکرد فوق‌العاده سریع (<400ms FCP):** ساخته‌شده با Vanilla HTML5/CSS/JavaScript بدون هیچ فریم‌ورک سنگین، کامپایلر یا لایبرری اضافی؛ آماده برای اجرای آنی روی اینترنت موبایل.
 * **استپرهای درلحظه روی کارت‌ها (Instant In-Card Steppers):** افزودن سریع آیتم‌ها تنها با لمس مستقیم دکمه `+` روی کارت‌ها، باز شدن نرم استپر `[ − ] [ ۱ ] [ + ]` و فیدبک لمسی هپتیک فیزیکی (`navigator.vibrate(12)`).
 * **پیل شناور سفارش جاری (Floating Order Pill):** نوار خلاصه سفارش چسبان با انیمیشن تپش فنری (`order-pill-pulse`) و همگام‌سازی بی‌درنگ اقلام و قیمت کل.
@@ -68,10 +71,14 @@ bun run dev
 | `bun run dev` | اجرای سرور با قابلیت Hot-Reload و گوش فرادادن به تغییرات فایل‌ها |
 | `bun run seed` | بارگذاری اولیه ۳۷ محصول، دسته‌بندی‌ها و متادیتا در SQLite |
 | `bun run reset` | پاکسازی سفارشات تستی، آزادسازی تمام میزها و تنظیم مجدد دیتابیس |
+| `bun run typecheck` | اعتبارسنجی استاتیک تایپ‌ها و تطابق سورس کدهای TypeScript بدون صدور فایل خروجی (`tsc --noEmit`) |
+| `bun run test` | اجرای تست‌های واحد (Unit) لایه دیتابیس و تست‌های یکپارچگی (Integration) روت‌های API |
+| `bun run test:security` | تست نفوذ خودکار (جلوگیری از تقلب قیمت، حفاظت پین باریستا، و مسدودسازی Rate-Limit) |
+| `bun run test:static` | ممیزی استاتیک فایل‌های فرانت‌اند، تگ‌های متا، مانیفست PWA و صحت لینک تمامی دارایی‌ها |
+| `bun run test:ci` | اجرای یکپارچه تمامی گیت‌های کیفیت CI (تایپ‌چک + تست‌های Bun + تست نفوذ + ممیزی استاتیک) |
+| `bun run test:e2e` | راستی‌آزمایی عملکرد استپرهای درون کارتی، پیل شناور و شلف هوشمند مکمل سبد خرید |
+| `bun run test:responsive` | تست خودکار ۴۸ سناریوی ابعاد نمایشگر در مرورگر Headless Chrome با پروتکل CDP |
 | `bun run test:load` | تست استرس و شلیک ۱۰,۰۰۰ درخواست پرسرعت (۵,۰۰۰+ RPS) برای تست پایداری |
-| `bun run test:security` | تست نفوذ خودکار (جلوگیری از تقلب قیمت، حفاظت بروت‌فورس پین باریستا، و Rate-Limit) |
-| `bun run test:responsive` | تست خودکار ۴۸ سناریوی ابعاد نمایشگر در مرورگر Headless Chrome با CDP |
-| `node scripts/verify-stepper-and-upsell.mjs` | راستی‌آزمایی عملکرد استپرهای درون کارتی، پیل شناور و شلف آپ‌سل سبد خرید |
 
 ---
 

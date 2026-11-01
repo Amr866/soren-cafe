@@ -1,12 +1,12 @@
 import { networkInterfaces } from "os";
-import { telemetry } from "./telemetry.ts";
+import { telemetry, type TraceStep } from "./telemetry.ts";
 import { cleanExpiredTableHolds, getTableRowCounts } from "./db.ts";
 import { corsHeaders, jsonResponse, errorResponse, BARISTA_PIN } from "./routes/helpers.ts";
 import { handleStaticRoutes } from "./routes/static.ts";
 import { handleClusterRoutes } from "./routes/cluster.ts";
 import { handleApiRoutes, type ApiClientContext } from "./routes/api.ts";
 
-const PORT = Number(process.env.PORT) || 4000;
+const PORT = process.env.PORT !== undefined ? Number(process.env.PORT) : (process.env.NODE_ENV === "test" ? 0 : 4000);
 
 // Telemetry & Rate Limiting state
 const startTime = Date.now();
@@ -98,7 +98,8 @@ export const server = Bun.serve({
     },
   },
 
-  async fetch(req, server) {
+  async fetch(req, serverArg) {
+    const srv = serverArg || server;
     totalRequestsHandled++;
     requestsInLastSecond++;
     const t0 = performance.now();
@@ -120,7 +121,7 @@ export const server = Bun.serve({
 
     // 1. WebSocket Upgrade route
     if (url.pathname === "/ws") {
-      const upgraded = server.upgrade(req);
+      const upgraded = srv?.upgrade?.(req);
       if (upgraded) return undefined;
       return new Response("WebSocket upgrade failed", { status: 400 });
     }
@@ -158,12 +159,7 @@ export const server = Bun.serve({
       const isAudience = req.headers.get("x-client-id") !== null;
 
       const tGatewayStart = performance.now();
-      const traceSteps: Array<{
-        node: string;
-        durationUs: number;
-        status: "ok" | "miss" | "hit" | "rejected";
-        detail: string;
-      }> = [];
+      const traceSteps: TraceStep[] = [];
 
       // Security Check A: Zero-Trust WAF Filter (SQLi Inspection)
       const sqliPattern =
@@ -196,7 +192,7 @@ export const server = Bun.serve({
           timestamp: Date.now(),
         });
 
-        server.publish(
+        srv?.publish?.(
           "dashboard-clients",
           JSON.stringify({
             event: "telemetry:threat_detected",
@@ -244,7 +240,7 @@ export const server = Bun.serve({
           timestamp: Date.now(),
         });
 
-        server.publish(
+        srv?.publish?.(
           "dashboard-clients",
           JSON.stringify({
             event: "telemetry:threat_detected",
@@ -296,7 +292,7 @@ export const server = Bun.serve({
         port: PORT,
       };
 
-      const apiRes = await handleApiRoutes(req, url, path, method, clientContext, server);
+      const apiRes = await handleApiRoutes(req, url, path, method, clientContext, srv);
       if (apiRes) return apiRes;
 
       return errorResponse("روت مورد نظر یافت نشد.", 404);

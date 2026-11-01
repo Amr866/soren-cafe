@@ -1,10 +1,75 @@
 /* ========================================
-   0. تعریف فونت محلی وزیرمتن (Local High-Speed Vazirmatn Fallback)
+   0. تعریف فونت لوکس و مدرن پیدا (Peyda Modern Font Family)
+   و فونت پشتیبان وزیرمتن (Vazirmatn Fallback)
 ======================================== */
+@font-face {
+  font-family: "Peyda";
+  src: url("../fonts/Peyda-Regular.woff2") format("woff2");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Peyda";
+  src: url("../fonts/Peyda-Medium.woff2") format("woff2");
+  font-weight: 500;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Peyda";
+  src: url("../fonts/Peyda-SemiBold.woff2") format("woff2");
+  font-weight: 600;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Peyda";
+  src: url("../fonts/Peyda-Bold.woff2") format("woff2");
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Peyda";
+  src: url("../fonts/Peyda-ExtraBold.woff2") format("woff2");
+  font-weight: 800;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Peyda";
+  src: url("../fonts/Peyda-Black.woff2") format("woff2");
+  font-weight: 900;
+  font-style: normal;
+  font-display: swap;
+}
+
 @font-face {
   font-family: "Vazirmatn";
   src: url("../fonts/Vazirmatn-Regular.woff2") format("woff2");
-  font-weight: 100 500;
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Vazirmatn";
+  src: url("../fonts/Vazirmatn-Medium.woff2") format("woff2");
+  font-weight: 500;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Vazirmatn";
+  src: url("../fonts/Vazirmatn-SemiBold.woff2") format("woff2");
+  font-weight: 600;
   font-style: normal;
   font-display: swap;
 }
@@ -12,7 +77,15 @@
 @font-face {
   font-family: "Vazirmatn";
   src: url("../fonts/Vazirmatn-Bold.woff2") format("woff2");
-  font-weight: 600 900;
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Vazirmatn";
+  src: url("../fonts/Vazirmatn-ExtraBold.woff2") format("woff2");
+  font-weight: 800;
   font-style: normal;
   font-display: swap;
 }
@@ -33,7 +106,9 @@
   --muted: #766e66;
   --white: #ffffff;
 
-  --font-sans: "Vazirmatn", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  --font-peyda: "Peyda", "Vazirmatn", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  --font-sans: "Peyda", "Vazirmatn", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  --font-body: "Vazirmatn", "Peyda", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
   --font-latin: "Plus Jakarta Sans", -apple-system, BlinkMacSystemFont, sans-serif;
 
   /* سیستم منحنی‌های حرکتی لوکس و شتاب فنری (Physics-Driven Spring Easings) */
@@ -52,6 +127,12 @@
   /* فاصله‌ی چپ و راست محتوا */
   --section-gap: 80px;
   /* فاصله‌ی بین سکشن‌ها */
+
+  /* توکن‌های باتم‌شیت جزئیات منو (Menu Detail Bottom Sheet Tokens) */
+  --sheet-bg: #FAF7F2;
+  --sheet-border: rgba(140, 94, 60, 0.16);
+  --sheet-backdrop: rgba(20, 16, 14, 0.48);
+  --sheet-radius: 28px;
 
   /* توکن‌های تجربه موبایل و PWA */
   --app-height: 100dvh;
@@ -724,11 +805,24 @@ main {
 
 .highlight-value {
   color: var(--coffee);
-  font-size: 24px;
+  font-size: 26px;
   font-weight: 800;
-  font-family: var(--font-latin);
+  font-family: var(--font-peyda);
+  font-feature-settings: 'tnum' 1, 'ss01' 1;
   font-variant-numeric: tabular-nums;
-  letter-spacing: -0.5px;
+  letter-spacing: 0;
+  line-height: 1.2;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.highlight-star {
+  color: #c98a2c;
+  font-size: 0.75em;
+  line-height: 1;
+  display: inline-block;
+  transform: translateY(-1px);
 }
 
 .highlight-label {
@@ -2081,16 +2175,29 @@ main {
 
   .featured-card {
     aspect-ratio: auto !important;
-    border-radius: 16px !important;
+    border-radius: 20px !important;
     display: flex !important;
     flex-direction: column !important;
+    background: #ffffff !important;
+    border: 1px solid rgba(140, 94, 60, 0.14) !important;
+    box-shadow: 0 4px 16px -2px rgba(36, 33, 32, 0.05) !important;
+    cursor: pointer;
+    overflow: hidden;
+  }
+
+  .featured-card .featured-overlay {
+    display: none !important;
   }
 
   .featured-card .featured-image {
+    position: relative !important;
+    z-index: 1 !important;
     aspect-ratio: 1 / 1 !important;
     width: 100% !important;
     object-fit: cover !important;
-    max-height: 180px !important;
+    max-height: 170px !important;
+    background: #f7f4ee !important;
+    border-radius: 18px 18px 0 0 !important;
   }
 
   .featured-top {
@@ -2098,34 +2205,49 @@ main {
     right: 8px !important;
     left: 8px !important;
     gap: 4px !important;
+    z-index: 2 !important;
   }
 
-  .featured-top span {
-    font-size: 10px !important;
-    padding: 2px 6px !important;
+  .featured-top span,
+  .featured-top .featured-popular {
+    font-size: 11px !important;
+    font-weight: 600 !important;
+    padding: 3px 8px !important;
+    background: rgba(247, 244, 238, 0.94) !important;
+    color: var(--coffee, #795239) !important;
+    border: 1px solid rgba(140, 94, 60, 0.2) !important;
+    border-radius: 999px !important;
+    backdrop-filter: blur(4px);
   }
 
   .featured-content {
-    padding: 12px 10px !important;
+    padding: 12px !important;
     flex: 1 !important;
     display: flex !important;
     flex-direction: column !important;
     justify-content: space-between !important;
+    background: #ffffff !important;
+    z-index: 2 !important;
   }
 
   .featured-category {
     font-size: 11px !important;
+    font-weight: 600 !important;
+    color: #795239 !important;
     margin-bottom: 2px !important;
   }
 
   .featured-content h3 {
     font-size: 15px !important;
+    font-weight: 700 !important;
+    color: #242120 !important;
     line-height: 1.3 !important;
     margin-bottom: 4px !important;
   }
 
   .featured-content p {
     font-size: 12px !important;
+    color: #766e66 !important;
     line-height: 1.4 !important;
     margin-bottom: 8px !important;
     display: -webkit-box !important;
@@ -2137,7 +2259,7 @@ main {
   .featured-footer {
     flex-direction: column !important;
     align-items: stretch !important;
-    gap: 6px !important;
+    gap: 8px !important;
     margin-top: auto !important;
   }
 
@@ -2148,12 +2270,18 @@ main {
     justify-content: space-between !important;
   }
 
-  .featured-prices del {
-    font-size: 11px !important;
+  .featured-prices strong {
+    font-size: 15px !important;
+    font-weight: 800 !important;
+    color: #242120 !important;
+    font-variant-numeric: tabular-nums !important;
+    font-feature-settings: "tnum" 1 !important;
   }
 
-  .featured-prices strong {
-    font-size: 14px !important;
+  .featured-prices strong small {
+    font-size: 11px !important;
+    font-weight: 500 !important;
+    color: #766e66 !important;
   }
 
   .card-action-box {
@@ -7895,4 +8023,289 @@ main {
   100% {
     transform: scale(1);
   }
+}
+
+
+/* ------------------------------------------------------------------
+   تایپوگرافی مدرن قیمت به سبک فین‌تک / دیجی‌کالا (Peyda Tabular Lockup)
+   ------------------------------------------------------------------ */
+.soren-price-lockup {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 3px;
+  direction: rtl;
+  font-family: var(--font-peyda);
+}
+
+.soren-price-lockup .price-amount {
+  font-size: 1.15rem;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: "tnum" 1;
+}
+
+.soren-price-lockup .toman-glyph {
+  font-size: 0.68rem;
+  font-weight: 600;
+  color: var(--muted, #766E66);
+  opacity: 0.85;
+}
+
+/* ========================================================
+   برگه کشویی جزئیات محصول (Artisanal Menu Detail Bottom Sheet)
+   ======================================================== */
+.menu-detail-backdrop {
+  position: fixed;
+  inset: 0;
+  background: var(--sheet-backdrop, rgba(20, 16, 14, 0.48));
+  -webkit-backdrop-filter: blur(5px);
+  backdrop-filter: blur(5px);
+  z-index: 998;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.3s ease;
+}
+
+.menu-detail-backdrop.is-open {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.menu-detail-sheet {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  max-width: 520px;
+  margin-inline: auto;
+  max-height: 85vh;
+  background: #FAF7F2;
+  border-top: 1px solid rgba(140, 94, 60, 0.18);
+  border-radius: 28px 28px 0 0;
+  box-shadow: 0 -12px 40px rgba(20, 16, 14, 0.18);
+  z-index: 999;
+  display: flex;
+  flex-direction: column;
+  transform: translateY(105%);
+  transition: transform 0.38s cubic-bezier(0.32, 0.72, 0, 1);
+  will-change: transform;
+  overflow: hidden;
+  direction: rtl;
+}
+
+.menu-detail-sheet.is-open {
+  transform: translateY(0);
+}
+
+.menu-detail-sheet.is-dragging {
+  transition: none !important;
+}
+
+.sheet-drag-handle-zone {
+  width: 100%;
+  padding: 12px 0 6px;
+  display: flex;
+  justify-content: center;
+  cursor: grab;
+  touch-action: none;
+}
+
+.sheet-drag-handle-bar {
+  width: 44px;
+  height: 4px;
+  background: rgba(140, 94, 60, 0.25);
+  border-radius: 999px;
+}
+
+.menu-detail-sheet .sheet-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 4px 20px 10px;
+}
+
+.sheet-category-badge {
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--coffee, #795239);
+  background: rgba(140, 94, 60, 0.1);
+  padding: 3px 10px;
+  border-radius: 999px;
+  letter-spacing: 0.02em;
+}
+
+.sheet-close-btn {
+  background: transparent;
+  border: none;
+  color: #766E66;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: background 0.2s, color 0.2s;
+}
+
+.sheet-close-btn:hover {
+  background: rgba(140, 94, 60, 0.08);
+  color: #242120;
+}
+
+.menu-detail-sheet .sheet-body {
+  padding: 0 20px 16px;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  flex: 1;
+}
+
+.detail-visual-box {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 16 / 10;
+  border-radius: 18px;
+  overflow: hidden;
+  background: #ede7dc;
+  margin-bottom: 16px;
+}
+
+.detail-visual-box img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.detail-provenance-tag {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  font-size: 11px;
+  font-weight: 600;
+  color: #795239;
+  background: rgba(250, 247, 242, 0.92);
+  border: 1px solid rgba(140, 94, 60, 0.2);
+  padding: 3px 9px;
+  border-radius: 999px;
+  backdrop-filter: blur(4px);
+}
+
+.detail-title-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 12px;
+  margin-bottom: 8px;
+}
+
+.detail-title {
+  font-size: 20px;
+  font-weight: 800;
+  color: #242120;
+  margin: 0;
+}
+
+.detail-price-box {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 4px;
+}
+
+.detail-price {
+  font-size: 19px;
+  font-weight: 800;
+  color: #795239;
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: "tnum" 1;
+}
+
+.detail-currency {
+  font-size: 12px;
+  font-weight: 600;
+  color: #766e66;
+}
+
+.detail-desc {
+  font-size: 13.5px;
+  line-height: 1.6;
+  color: #5c554e;
+  margin-bottom: 16px;
+}
+
+.detail-specs-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 10px;
+  background: #ffffff;
+  border: 1px solid rgba(140, 94, 60, 0.12);
+  border-radius: 14px;
+  padding: 12px;
+  margin-bottom: 8px;
+}
+
+.spec-cell {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.spec-label {
+  font-size: 11px;
+  color: #8c827a;
+  font-weight: 500;
+}
+
+.spec-val {
+  font-size: 12.5px;
+  font-weight: 700;
+  color: #242120;
+}
+
+.menu-detail-sheet .sheet-footer {
+  padding: 12px 20px calc(12px + env(safe-area-inset-bottom, 8px));
+  background: #FAF7F2;
+  border-top: 1px solid rgba(140, 94, 60, 0.1);
+}
+
+.detail-add-btn {
+  width: 100%;
+  min-height: 48px;
+  border-radius: 999px;
+  background: var(--coffee, #795239);
+  color: #ffffff;
+  font-size: 15px;
+  font-weight: 700;
+  border: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  box-shadow: 0 4px 14px rgba(121, 82, 57, 0.28);
+  transition: transform 0.15s ease, background 0.2s ease;
+}
+
+.detail-add-btn:active {
+  transform: scale(0.98);
+}
+
+.detail-add-btn.is-added {
+  background: var(--sage, #5a7350);
+}
+
+.detail-add-btn:disabled,
+.detail-add-btn.is-sold-out {
+  background: #c5bdb4 !important;
+  color: #ffffff !important;
+  cursor: not-allowed !important;
+  box-shadow: none !important;
+  transform: none !important;
+}
+
+.tabular-nums,
+.featured-prices strong,
+.detail-price {
+  font-variant-numeric: tabular-nums lining-nums;
+  font-feature-settings: "tnum" 1;
 }

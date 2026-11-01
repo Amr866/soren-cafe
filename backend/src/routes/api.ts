@@ -14,7 +14,7 @@ import {
   getAnalyticsStats,
   getTableRowCounts,
 } from "../db.ts";
-import { telemetry } from "../telemetry.ts";
+import { telemetry, type TraceStep } from "../telemetry.ts";
 import { jsonResponse, errorResponse, BARISTA_PIN } from "./helpers.ts";
 
 export interface ApiClientContext {
@@ -24,12 +24,7 @@ export interface ApiClientContext {
   isAudience: boolean;
   workerNode: "worker_1" | "worker_2";
   t0: number;
-  traceSteps: Array<{
-    node: string;
-    durationUs: number;
-    status: "ok" | "miss" | "hit" | "rejected";
-    detail: string;
-  }>;
+  traceSteps: TraceStep[];
   startTime: number;
   totalRequestsHandled: number;
   activeWsClients: number;
@@ -163,7 +158,7 @@ export async function handleApiRoutes(
   if (path.match(/^\/tables\/([^/]+)\/hold$/) && method === "POST") {
     const match = path.match(/^\/tables\/([^/]+)\/hold$/)!;
     const tableId = match[1];
-    const body = await req.json().catch(() => ({}));
+    const body = (await req.json().catch(() => ({}))) as any;
     const targetClientId = body.clientId || rawClientId;
     const ttlSeconds = Number(body.ttlSeconds) || 120;
 
@@ -196,7 +191,7 @@ export async function handleApiRoutes(
       });
 
       // Broadcast real-time table status update
-      server.publish(
+      server?.publish?.(
         "all-clients",
         JSON.stringify({
           event: "table:held",
@@ -228,12 +223,12 @@ export async function handleApiRoutes(
   if (path.match(/^\/tables\/([^/]+)\/release$/) && method === "POST") {
     const match = path.match(/^\/tables\/([^/]+)\/release$/)!;
     const tableId = match[1];
-    const body = await req.json().catch(() => ({}));
+    const body = (await req.json().catch(() => ({}))) as any;
 
     try {
       releaseTable(tableId, body.clientId || rawClientId);
 
-      server.publish(
+      server?.publish?.(
         "all-clients",
         JSON.stringify({
           event: "table:released",
@@ -251,12 +246,12 @@ export async function handleApiRoutes(
   if (path.match(/^\/tables\/([^/]+)\/book$/) && method === "POST") {
     const match = path.match(/^\/tables\/([^/]+)\/book$/)!;
     const tableId = match[1];
-    const body = await req.json().catch(() => ({}));
+    const body = (await req.json().catch(() => ({}))) as any;
 
     try {
       const result = occupyTable(tableId, body.clientId || rawClientId);
 
-      server.publish(
+      server?.publish?.(
         "all-clients",
         JSON.stringify({
           event: "table:taken",
@@ -295,7 +290,7 @@ export async function handleApiRoutes(
     }
 
     if (isTamperAttempt) {
-      server.publish(
+      server?.publish?.(
         "dashboard-clients",
         JSON.stringify({
           event: "telemetry:threat_detected",
@@ -353,7 +348,7 @@ export async function handleApiRoutes(
       });
 
       // Broadcast real-time order arrival to Barista KDS
-      server.publish(
+      server?.publish?.(
         "barista-kds",
         JSON.stringify({
           event: "order:created",
@@ -362,7 +357,7 @@ export async function handleApiRoutes(
       );
 
       // Broadcast Microsecond Database Transaction Waterfall to Mission Control Dashboard
-      server.publish(
+      server?.publish?.(
         "dashboard-clients",
         JSON.stringify({
           event: "telemetry:db_txn",
@@ -393,7 +388,7 @@ export async function handleApiRoutes(
   if (path.match(/^\/products\/([^/]+)\/toggle-stock$/) && method === "PATCH") {
     const pin = req.headers.get("x-barista-pin");
     if (pin !== BARISTA_PIN) {
-      server.publish(
+      server?.publish?.(
         "dashboard-clients",
         JSON.stringify({
           event: "telemetry:threat_detected",
@@ -412,7 +407,7 @@ export async function handleApiRoutes(
 
     const match = path.match(/^\/products\/([^/]+)\/toggle-stock$/)!;
     const productId = match[1];
-    const body = await req.json().catch(() => ({}));
+    const body = (await req.json().catch(() => ({}))) as any;
     const isAvailable = Boolean(body.isAvailable);
 
     const updated = setProductAvailability(productId, isAvailable);
@@ -423,7 +418,7 @@ export async function handleApiRoutes(
     // Invalidate L1 Cache so instant changes take effect
     telemetry.invalidateCache();
 
-    server.publish(
+    server?.publish?.(
       "all-clients",
       JSON.stringify({
         event: "product:stock_updated",
@@ -438,7 +433,7 @@ export async function handleApiRoutes(
   if (path === "/orders" && method === "GET") {
     const pin = req.headers.get("x-barista-pin");
     if (pin !== BARISTA_PIN) {
-      server.publish(
+      server?.publish?.(
         "dashboard-clients",
         JSON.stringify({
           event: "telemetry:threat_detected",
@@ -476,7 +471,7 @@ export async function handleApiRoutes(
 
     const match = path.match(/^\/orders\/([^/]+)\/status$/)!;
     const orderId = match[1];
-    const body = await req.json().catch(() => ({}));
+    const body = (await req.json().catch(() => ({}))) as any;
     const status = body.status;
 
     const validStatuses = ["PENDING", "BREWING", "READY", "DELIVERED", "CANCELLED"];
@@ -487,14 +482,14 @@ export async function handleApiRoutes(
     const updated = updateOrderStatus(orderId, status);
     if (!updated) return errorResponse("سفارش یافت نشد.", 404);
 
-    server.publish(
+    server?.publish?.(
       "all-clients",
       JSON.stringify({
         event: "order:status_updated",
         data: { orderId, status },
       })
     );
-    server.publish(
+    server?.publish?.(
       `order_${orderId}`,
       JSON.stringify({
         event: "order:status_updated",
@@ -516,7 +511,7 @@ export async function handleApiRoutes(
     const tableNumber = decodeURIComponent(match[1]);
     const result = settleTableOrders(tableNumber);
 
-    server.publish(
+    server?.publish?.(
       "all-clients",
       JSON.stringify({
         event: "table:settled",

@@ -16,7 +16,7 @@ console.log(`
 try {
   const healthRes = await fetch(`${BASE_URL}/api/v1/health`);
   if (!healthRes.ok) throw new Error("Health check failed");
-  const health = await healthRes.json();
+  const health = (await healthRes.json()) as any;
   console.log(`\x1b[32m✔ Server Online\x1b[0m | Uptime: ${health.uptimeSeconds}s | Memory RSS: ${health.memoryRssMb} MB\n`);
 } catch {
   console.error(`\x1b[31m✖ Server not running at ${BASE_URL}. Start it first with: bun src/server.ts\x1b[0m\n`);
@@ -38,7 +38,7 @@ try {
     }),
   });
 
-  const tamperData = await tamperRes.json();
+  const tamperData = (await tamperRes.json()) as any;
   if (tamperData.order && tamperData.order.total_price === 95000) {
     console.log(`  \x1b[32m✔ Anti-Tamper Passed:\x1b[0m Client passed price=0, Server recalculated authoritative price: \x1b[33m${tamperData.order.total_price.toLocaleString()} تومان\x1b[0m`);
   } else {

@@ -8,11 +8,14 @@
     "start": "bun src/server.ts",
     "seed": "bun src/seed.ts",
     "reset": "bun src/seed.ts --reset",
+    "typecheck": "tsc --noEmit",
+    "test": "bun test",
     "test:load": "bun scripts/load-test.ts",
     "test:security": "bun scripts/security-audit.ts"
   },
   "devDependencies": {
     "@types/bun": "latest",
-    "autocannon": "^7.15.0"
+    "autocannon": "^7.15.0",
+    "typescript": "^7.0.2"
   }
 }

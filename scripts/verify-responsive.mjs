@@ -9,7 +9,36 @@ const __dirname = path.dirname(__filename);
 const ROOT_DIR = path.resolve(__dirname, "..");
 const FRONTEND_DIR = path.resolve(ROOT_DIR, "frontend");
 
-const CHROME_PATH = "C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe";
+function getChromePath() {
+  if (process.env.CHROME_BIN) return process.env.CHROME_BIN;
+  if (process.env.CHROME_PATH) return process.env.CHROME_PATH;
+
+  if (process.platform === "win32") {
+    const defaultWin = "C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe";
+    const x86Win = "C:\\Program Files (x86)\\Google\\Chrome\\Application\\chrome.exe";
+    const localWin = path.join(process.env.LOCALAPPDATA || "", "Google/Chrome/Application/chrome.exe");
+    for (const p of [defaultWin, x86Win, localWin]) {
+      if (fs.existsSync(p)) return p;
+    }
+    return defaultWin;
+  }
+  if (process.platform === "darwin") {
+    return "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome";
+  }
+  // Linux / CI environments
+  const linuxCandidates = [
+    "/usr/bin/google-chrome",
+    "/usr/bin/google-chrome-stable",
+    "/usr/bin/chromium",
+    "/usr/bin/chromium-browser",
+  ];
+  for (const p of linuxCandidates) {
+    if (fs.existsSync(p)) return p;
+  }
+  return "google-chrome";
+}
+
+const CHROME_PATH = getChromePath();
 
 const VIEWPORTS = [
   { name: "320px (iPhone SE 1st gen)", width: 320, height: 658, mobile: true },
@@ -247,6 +276,10 @@ async function launchChrome(port = 9222) {
     [
       "--headless=new",
       `--remote-debugging-port=${port}`,
+      "--no-sandbox",
+      "--disable-setuid-sandbox",
+      "--disable-dev-shm-usage",
+      "--disable-gpu",
       "--no-first-run",
       "--no-default-browser-check",
       "--disable-extensions",
@@ -493,6 +526,17 @@ async function runBrowserVerification() {
 
 async function main() {
   const staticPassed = auditStaticHtml();
+
+  if (process.argv.includes("--static-only") || process.env.STATIC_ONLY === "true") {
+    if (staticPassed) {
+      console.log("\n🎉 ALL STATIC HTML, PWA & ASSET AUDIT CHECKS PASSED SUCCESSFULLY!\n");
+      process.exit(0);
+    } else {
+      console.error("\n💥 STATIC AUDIT FAILED. See error output above.\n");
+      process.exit(1);
+    }
+  }
+
   const browserPassed = await runBrowserVerification();
 
   if (staticPassed && browserPassed) {

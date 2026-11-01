@@ -1,0 +1,45 @@
+name: Performance & Load Benchmark
+
+on:
+  workflow_dispatch:
+    inputs:
+      requests:
+        description: 'Total Requests to simulate'
+        required: false
+        default: '10000'
+
+jobs:
+  benchmark:
+    name: 10,000 RPS Stress Benchmark
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Setup Bun Runtime
+        uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: 1.4.2
+
+      - name: Install Dependencies
+        run: bun install
+
+      - name: Seed Database
+        run: bun run seed
+
+      - name: Start Soren Engine Server in Background
+        run: |
+          bun src/server.ts &
+          sleep 2
+        working-directory: ./backend
+        env:
+          PORT: 4000
+          NODE_ENV: production
+
+      - name: Run Autocannon Load & Latency Test
+        run: bun scripts/load-test.ts
+        working-directory: ./backend
+        env:
+          TARGET_URL: http://localhost:4000

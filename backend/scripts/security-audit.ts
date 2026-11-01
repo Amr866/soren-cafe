@@ -22,6 +22,8 @@ try {
   process.exit(1);
 }
 
+let failureCount = 0;
+
 // ---------------- ATTACK 1: Price Tampering (Zero-Trust Bypass) ----------------
 console.log(`\x1b[1;33m[ATTACK VECTOR 1] Insecure Direct Object Price Tampering\x1b[0m`);
 console.log(`Attacker payload: Altering Cortado price (95,000 Toman) to 0 Toman...`);
@@ -39,16 +41,18 @@ try {
     }),
   });
 
-  const data = await res.json();
+  const data = (await res.json()) as any;
   if (data.order && data.order.total_price === 190000) {
     console.log(`\x1b[32m✔ DEFENSE SUCCESS (Anti-Tamper Active):\x1b[0m`);
     console.log(`  - Malicious Price Submitted: 0 Toman`);
     console.log(`  - Authoritative Price Enforced: \x1b[1;32m${data.order.total_price.toLocaleString()} تومان\x1b[0m (95,000 × 2)`);
     console.log(`  - Visual SOC Alert dispatched to /dashboard\n`);
   } else {
+    failureCount++;
     console.log(`\x1b[31m✖ VULNERABILITY DETECTED: Server accepted altered price!\x1b[0m\n`);
   }
 } catch (e: any) {
+  failureCount++;
   console.log(`\x1b[31m✖ Attack failed with network error: ${e.message}\x1b[0m\n`);
 }
 
@@ -69,15 +73,17 @@ try {
   });
 
   if (res.status === 401) {
-    const err = await res.json();
+    const err = (await res.json()) as any;
     console.log(`\x1b[32m✔ DEFENSE SUCCESS (Access Denied):\x1b[0m`);
     console.log(`  - HTTP Status: \x1b[33m401 Unauthorized\x1b[0m`);
     console.log(`  - Server Response: "${err.message}"`);
     console.log(`  - Visual SOC Alert dispatched to /dashboard\n`);
   } else {
+    failureCount++;
     console.log(`\x1b[31m✖ VULNERABILITY DETECTED: Unauthorized access allowed!\x1b[0m\n`);
   }
 } catch (e: any) {
+  failureCount++;
   console.log(`\x1b[31m✖ Error: ${e.message}\x1b[0m\n`);
 }
 
@@ -117,6 +123,15 @@ console.log(`\x1b[32m✔ DEFENSE SUCCESS (Rate-Limiter Active):\x1b[0m`);
 console.log(`  - Accepted within tolerance: ${acceptedCount} orders`);
 console.log(`  - Blocked by Shield: \x1b[1;31m${blockedCount} orders (HTTP 429 Too Many Requests)\x1b[0m`);
 console.log(`  - Threat logged on Mission Control Radar.\n`);
+
+if (blockedCount === 0) {
+  failureCount++;
+}
+
+if (failureCount > 0) {
+  console.error(`\x1b[31m✖ SECURITY AUDIT FAILED with ${failureCount} issue(s)!\x1b[0m\n`);
+  process.exit(1);
+}
 
 console.log(`\x1b[32m════════════════════════════════════════════════════════════════════\x1b[0m`);
 console.log(`\x1b[1;32mALL 3 SECURITY AUDIT VECTORS NEUTRALIZED DEFENSIVELY BY SOREN ENGINE\x1b[0m`);
