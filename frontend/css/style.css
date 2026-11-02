@@ -1276,6 +1276,12 @@ main {
   line-height: 2;
 }
 
+
+/* نشانگرهای اسلایدر دسته‌بندی در دسکتاپ مخفی است */
+.category-carousel-dots {
+  display: none;
+}
+
 .categories-grid {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
@@ -9182,7 +9188,7 @@ a.brand,
     line-height: 1.25 !important;
   }
 
-  /* کارت‌های کامل و بدون برش دسته‌بندی‌ها (Zero Truncation) */
+  /* اسلایدر متمرکز دسته‌بندی‌ها در موبایل (Single-Card Focused Snap) */
   .categories-section {
     padding-block: 36px !important;
   }
@@ -9196,23 +9202,36 @@ a.brand,
   }
 
   .categories-grid {
-    display: grid !important;
-    grid-template-columns: 1fr !important;
+    display: flex !important;
+    grid-template-columns: none !important;
+    overflow-x: auto !important;
+    scroll-snap-type: x mandatory !important;
+    -webkit-overflow-scrolling: touch !important;
+    scrollbar-width: none !important;
     gap: 16px !important;
-    overflow-x: visible !important;
+    padding-bottom: 4px !important;
     margin-inline: 0 !important;
     padding-inline: 0 !important;
     width: 100% !important;
   }
 
+  .categories-grid::-webkit-scrollbar {
+    display: none !important;
+  }
+
   .category-card {
+    flex: 0 0 100% !important;
+    min-width: 100% !important;
     width: 100% !important;
     max-width: 100% !important;
     aspect-ratio: 16 / 9 !important;
+    scroll-snap-align: center !important;
+    scroll-snap-stop: always !important;
     border-radius: 18px !important;
     border: 1px solid rgba(140, 94, 60, 0.16) !important;
     overflow: hidden !important;
     position: relative !important;
+    box-sizing: border-box !important;
   }
 
   .category-content {
@@ -9239,6 +9258,35 @@ a.brand,
     display: inline-flex !important;
     align-items: center !important;
     justify-content: center !important;
+  }
+
+  /* نشانگرهای ورق‌زدن دسته‌بندی در موبایل */
+  .category-carousel-dots {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: 8px !important;
+    margin-top: 14px !important;
+    padding-block: 4px !important;
+  }
+
+  .carousel-dot {
+    width: 8px !important;
+    height: 8px !important;
+    min-width: 8px !important;
+    min-height: 8px !important;
+    padding: 0 !important;
+    border-radius: 999px !important;
+    background: rgba(140, 94, 60, 0.22) !important;
+    border: none !important;
+    cursor: pointer !important;
+    transition: width 0.28s cubic-bezier(0.16, 1, 0.3, 1), background-color 0.25s ease !important;
+    touch-action: manipulation !important;
+  }
+
+  .carousel-dot.active {
+    width: 24px !important;
+    background: var(--terracotta, #c86d51) !important;
   }
 
   /* دکمه‌های کاتالوگ و ارگونومی لمسی ۴۴ پیکسلی */
