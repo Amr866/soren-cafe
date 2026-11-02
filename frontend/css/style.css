@@ -9286,56 +9286,14 @@ a.brand,
     font-variant-numeric: tabular-nums !important;
     font-feature-settings: "tnum" 1 !important;
   }
-}
 
-/* ========================================================
-   مجوزها و اعتبارنامه اصالت در فوتر (Artisanal Credentials)
-   ======================================================== */
-.footer-credentials {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  justify-content: center;
-  gap: 10px;
-  margin: 18px 0 22px;
-}
-
-.credential-pill {
-  display: inline-flex;
-  align-items: center;
-  gap: 7px;
-  padding: 6px 14px;
-  border-radius: 999px;
-  background: rgba(247, 244, 238, 0.05);
-  border: 1px solid rgba(247, 244, 238, 0.12);
-  color: #c4b8aa;
-  font-size: 11.5px;
-  font-weight: 500;
-  line-height: 1;
-}
-
-.credential-pill svg {
-  color: var(--footer-terracotta, #c86d51);
-  flex-shrink: 0;
-}
-
-@media (max-width: 640px) {
-  .footer-credentials {
-    justify-content: center;
-    gap: 8px;
-    margin: 16px 0 20px;
-  }
-
-  .credential-pill {
-    font-size: 10.5px;
-    padding: 6px 10px;
-  }
-
+  /* فوتر متوازن و متمرکز در موبایل */
   .footer-bottom {
     flex-direction: column !important;
     align-items: center !important;
     text-align: center !important;
     gap: 6px !important;
+    padding-top: 8px !important;
   }
 
   .footer-bottom p {
@@ -9343,6 +9301,7 @@ a.brand,
     color: #a99d92 !important;
     font-variant-numeric: tabular-nums !important;
     text-align: center !important;
+    line-height: 1.6 !important;
   }
 
   .footer-bottom-note {
@@ -9351,5 +9310,3 @@ a.brand,
     text-align: center !important;
   }
 }
-
-
