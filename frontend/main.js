@@ -743,11 +743,11 @@ if (typeof window !== "undefined") {
   // مدیریت وضعیت زنده باریستا از طریق وب‌سوکت
   if (typeof SorenWS !== "undefined" && drawerBaristaText) {
     SorenWS.on("connection:open", () => {
-      drawerBaristaText.textContent = "باریستا: آماده پذیرش سفارش حضوری و بیرون‌بر ☕";
+      drawerBaristaText.textContent = "باریستا: آماده پذیرش سفارش حضوری و بیرون‌بر";
     });
 
     SorenWS.on("connection:close", () => {
-      drawerBaristaText.textContent = "باریستا: ثبت آفلاین و همگام‌سازی ☕";
+      drawerBaristaText.textContent = "باریستا: ثبت آفلاین و همگام‌سازی";
     });
 
     SorenWS.on("barista:status", (data) => {
@@ -1350,7 +1350,7 @@ function initCartBottomSheetAndFloatingBar() {
         <div class="cart-upsell-shelf" role="complementary" aria-label="پیشنهاد ویژه باریستا">
           <div class="upsell-shelf-header">
             <h5 class="upsell-shelf-title">
-              <span>☕ پیشنهاد باریستا؛ ترکیب بی‌نظیر با قهوه:</span>
+              <span>پیشنهاد باریستا؛ ترکیب مکمل با قهوه:</span>
             </h5>
             <span class="upsell-badge">AOV +۲۵٪</span>
           </div>
