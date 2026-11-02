@@ -970,6 +970,7 @@ function initSingleSurfaceCatalog() {
 
   // ۱. فیلتر کلاینت‌ساید آنی دسته‌بندی با انیمیشن Fade ملایم
   function setCategory(cat, shouldPushState = true) {
+    if (typeof window !== "undefined") window.setCatalogCategory = setCategory;
     if (!cat) cat = "all";
 
     // به‌روزرسانی وضعیت تراشه‌ها
@@ -1147,6 +1148,82 @@ function initSingleSurfaceCatalog() {
   window.renderSingleCardAction = renderSingleCardAction;
   window.syncCardSteppers = syncCardSteppers;
   window.setMenuCategory = setCategory;
+  window.setCatalogCategory = setCategory;
+}
+
+/* ========================================================
+   2.3 اسلایدر متمرکز دسته‌بندی‌ها و همگام‌سازی با کاتالوگ منو
+   (Category Carousel Scroll-Snap & Catalog Sync Engine)
+   ======================================================== */
+function initCategoryCarouselSync() {
+  const container = document.querySelector(".categories-grid");
+  const dotsBar = document.getElementById("category-dots");
+  if (!container || !dotsBar) return;
+
+  const cards = Array.from(container.querySelectorAll(".category-card"));
+  const dots = Array.from(dotsBar.querySelectorAll(".carousel-dot"));
+  if (cards.length === 0 || dots.length === 0) return;
+
+  let isProgrammaticScroll = false;
+  let scrollTimeout = null;
+
+  function updateActiveState(catId, index) {
+    dots.forEach((dot, i) => {
+      const match = i === index || dot.dataset.category === catId;
+      dot.classList.toggle("active", match);
+      dot.setAttribute("aria-selected", String(match));
+    });
+
+    if (catId && typeof window.setCatalogCategory === "function") {
+      window.setCatalogCategory(catId, false);
+    }
+  }
+
+  // 1. کلیک روی هر یک از نشانگرهای گرد (Dots Tap)
+  dots.forEach((dot, index) => {
+    dot.addEventListener("click", () => {
+      const targetCard = cards[index];
+      if (targetCard) {
+        isProgrammaticScroll = true;
+        targetCard.scrollIntoView({ behavior: "smooth", block: "nearest", inline: "center" });
+        updateActiveState(dot.dataset.category, index);
+        clearTimeout(scrollTimeout);
+        scrollTimeout = setTimeout(() => {
+          isProgrammaticScroll = false;
+        }, 600);
+      }
+    });
+  });
+
+  // 2. همگام‌سازی خودکار حین ورق‌زدن با IntersectionObserver
+  if ("IntersectionObserver" in window) {
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (isProgrammaticScroll) return;
+        entries.forEach((entry) => {
+          if (entry.isIntersecting && entry.intersectionRatio >= 0.55) {
+            const catId = entry.target.dataset.category;
+            const index = cards.indexOf(entry.target);
+            if (index !== -1) {
+              updateActiveState(catId, index);
+            }
+          }
+        });
+      },
+      {
+        root: container,
+        threshold: [0.55, 0.75],
+      }
+    );
+
+    cards.forEach((card) => observer.observe(card));
+  }
+}
+
+if (document.readyState === "loading") {
+  document.addEventListener("DOMContentLoaded", initCategoryCarouselSync);
+} else {
+  initCategoryCarouselSync();
 }
 
 /* ========================================================
@@ -3371,6 +3448,9 @@ document.addEventListener("DOMContentLoaded", () => {
   }
   if (typeof initSingleSurfaceCatalog === "function") {
     initSingleSurfaceCatalog();
+  }
+  if (typeof initCategoryCarouselSync === "function") {
+    initCategoryCarouselSync();
   }
   if (typeof initCartBottomSheetAndFloatingBar === "function") {
     initCartBottomSheetAndFloatingBar();
