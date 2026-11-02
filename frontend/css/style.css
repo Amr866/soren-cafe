@@ -8971,17 +8971,19 @@ main {
   align-items: center !important;
   justify-content: center !important;
   border-radius: 12px !important;
-  background: #ffffff !important;
-  border: 1px solid rgba(140, 94, 60, 0.14) !important;
-  color: #5e554a !important;
-  transition: background-color 0.15s ease, color 0.15s ease, transform 0.15s ease !important;
+  background: rgba(247, 244, 238, 0.05) !important;
+  border: 1px solid rgba(247, 244, 238, 0.16) !important;
+  color: #e4d8cc !important;
+  transition: background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease, transform 0.2s ease !important;
   touch-action: manipulation !important;
 }
 
+.footer-social-links a:hover,
 .footer-social-links a:active {
-  background: rgba(140, 94, 60, 0.12) !important;
-  color: #242120 !important;
-  transform: scale(0.96) !important;
+  background: rgba(121, 82, 57, 0.35) !important;
+  border-color: rgba(200, 109, 81, 0.65) !important;
+  color: #ffffff !important;
+  transform: translateY(-2px) !important;
 }
 
 a.brand,
@@ -9118,45 +9120,69 @@ a.brand,
     width: 100% !important;
   }
 
-  /* ریتم مینیمال و افقی بخش ویژگی‌های درباره سورن */
+  /* ریتم متعادل ۳ ستونه کارت‌های ویژگی درباره ما */
   .about-section {
     padding-block: 40px !important;
   }
 
   .features-grid {
     display: grid !important;
-    grid-template-columns: 1fr !important;
-    gap: 10px !important;
-    margin-top: 18px !important;
+    grid-template-columns: repeat(3, 1fr) !important;
+    gap: 8px !important;
+    margin-top: 20px !important;
+    width: 100% !important;
   }
 
   .feature-card {
     display: flex !important;
-    flex-direction: row !important;
+    flex-direction: column !important;
     align-items: center !important;
-    text-align: right !important;
-    gap: 14px !important;
-    padding: 12px 14px !important;
+    text-align: center !important;
+    gap: 8px !important;
+    padding: 14px 6px 12px !important;
     background: #ffffff !important;
     border: 1px solid rgba(140, 94, 60, 0.12) !important;
     border-radius: 14px !important;
     box-shadow: 0 2px 8px -2px rgba(36, 33, 32, 0.04) !important;
+    box-sizing: border-box !important;
+  }
+
+  .feature-card .feature-icon {
+    width: 36px !important;
+    height: 36px !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    border-radius: 10px !important;
+    background: #f7f4ee !important;
+    color: #795239 !important;
+    margin: 0 !important;
+    flex-shrink: 0 !important;
+  }
+
+  .feature-card .feature-icon svg {
+    width: 20px !important;
+    height: 20px !important;
   }
 
   .feature-card h3 {
-    font-size: 13px !important;
-    font-weight: 600 !important;
+    font-size: 11.5px !important;
+    font-weight: 700 !important;
     color: #242120 !important;
-    margin: 0 0 2px 0 !important;
+    margin: 0 !important;
+    white-space: nowrap !important;
+    letter-spacing: -0.2px !important;
   }
 
   .feature-card p {
-    font-size: 12px !important;
+    font-size: 9.5px !important;
     color: #7b7266 !important;
     margin: 0 !important;
+    white-space: nowrap !important;
+    line-height: 1.25 !important;
   }
 
-  /* نوار لغزنده افقی دسته‌بندی‌ها (Swipe Carousel) */
+  /* کارت‌های کامل و بدون برش دسته‌بندی‌ها (Zero Truncation) */
   .categories-section {
     padding-block: 36px !important;
   }
@@ -9170,30 +9196,23 @@ a.brand,
   }
 
   .categories-grid {
-    display: flex !important;
-    grid-template-columns: none !important;
-    overflow-x: auto !important;
-    scroll-snap-type: x mandatory !important;
-    -webkit-overflow-scrolling: touch !important;
-    scrollbar-width: none !important;
-    gap: 12px !important;
-    padding-bottom: 8px !important;
-    margin-inline: -16px !important;
-    padding-inline: 16px !important;
-  }
-
-  .categories-grid::-webkit-scrollbar {
-    display: none !important;
+    display: grid !important;
+    grid-template-columns: 1fr !important;
+    gap: 16px !important;
+    overflow-x: visible !important;
+    margin-inline: 0 !important;
+    padding-inline: 0 !important;
+    width: 100% !important;
   }
 
   .category-card {
-    flex: 0 0 82% !important;
-    max-width: 290px !important;
-    aspect-ratio: 16 / 10 !important;
-    scroll-snap-align: center !important;
-    border-radius: 16px !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    aspect-ratio: 16 / 9 !important;
+    border-radius: 18px !important;
     border: 1px solid rgba(140, 94, 60, 0.16) !important;
     overflow: hidden !important;
+    position: relative !important;
   }
 
   .category-content {
@@ -9201,20 +9220,21 @@ a.brand,
   }
 
   .category-content h3 {
-    font-size: 20px !important;
+    font-size: 21px !important;
     margin-bottom: 4px !important;
+    font-weight: 800 !important;
   }
 
   .category-content p {
-    font-size: 12px !important;
+    font-size: 12.5px !important;
     margin-bottom: 12px !important;
-    line-height: 1.45 !important;
+    line-height: 1.4 !important;
   }
 
   .category-button {
     min-height: 44px !important;
-    padding-inline: 14px !important;
-    font-size: 12px !important;
+    padding-inline: 16px !important;
+    font-size: 12.5px !important;
     border-radius: 999px !important;
     display: inline-flex !important;
     align-items: center !important;
@@ -9267,3 +9287,69 @@ a.brand,
     font-feature-settings: "tnum" 1 !important;
   }
 }
+
+/* ========================================================
+   مجوزها و اعتبارنامه اصالت در فوتر (Artisanal Credentials)
+   ======================================================== */
+.footer-credentials {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  margin: 18px 0 22px;
+}
+
+.credential-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 6px 14px;
+  border-radius: 999px;
+  background: rgba(247, 244, 238, 0.05);
+  border: 1px solid rgba(247, 244, 238, 0.12);
+  color: #c4b8aa;
+  font-size: 11.5px;
+  font-weight: 500;
+  line-height: 1;
+}
+
+.credential-pill svg {
+  color: var(--footer-terracotta, #c86d51);
+  flex-shrink: 0;
+}
+
+@media (max-width: 640px) {
+  .footer-credentials {
+    justify-content: center;
+    gap: 8px;
+    margin: 16px 0 20px;
+  }
+
+  .credential-pill {
+    font-size: 10.5px;
+    padding: 6px 10px;
+  }
+
+  .footer-bottom {
+    flex-direction: column !important;
+    align-items: center !important;
+    text-align: center !important;
+    gap: 6px !important;
+  }
+
+  .footer-bottom p {
+    font-size: 11px !important;
+    color: #a99d92 !important;
+    font-variant-numeric: tabular-nums !important;
+    text-align: center !important;
+  }
+
+  .footer-bottom-note {
+    color: #c4b8aa !important;
+    font-size: 11px !important;
+    text-align: center !important;
+  }
+}
+
+
