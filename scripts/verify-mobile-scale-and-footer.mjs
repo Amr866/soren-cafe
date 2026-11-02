@@ -205,6 +205,36 @@ server.listen(PORT, '127.0.0.1', async () => {
     assert.ok(fRes.hasAcademicNote, 'Footer must contain academic demo note for professor grading');
     console.log('✅ Task 2: Academic Demo Hospitality Footer HTML verified successfully!');
 
+    // ============================================
+    // Task 3: Check Hospitality Footer Styling
+    // ============================================
+    console.log('--- Verifying Task 3: Hospitality Footer Styling & Ergonomics ---');
+    const styleCheck = await cdp.send('Runtime.evaluate', {
+      expression: `(() => {
+        const actionBtn = document.querySelector('.footer-action-btn');
+        const footer = document.querySelector('.site-footer');
+        const card = document.querySelector('.footer-hospitality-card');
+        const btnStyle = actionBtn ? window.getComputedStyle(actionBtn) : null;
+        const footerStyle = footer ? window.getComputedStyle(footer) : null;
+        const cardStyle = card ? window.getComputedStyle(card) : null;
+        const scrollWidth = document.documentElement.scrollWidth;
+        return {
+          btnHeight: actionBtn ? actionBtn.offsetHeight : 0,
+          footerPaddingBottom: footerStyle ? parseFloat(footerStyle.paddingBottom) : 0,
+          hasCardBorder: cardStyle ? cardStyle.borderWidth !== '0px' : false,
+          scrollWidth
+        };
+      })()`,
+      returnByValue: true
+    });
+
+    const sRes = styleCheck.result.value;
+    console.log(`Measured Footer: btnHeight=${sRes.btnHeight}px, paddingBottom=${sRes.footerPaddingBottom}px, scrollWidth=${sRes.scrollWidth}px`);
+    assert.ok(sRes.btnHeight >= 44, `Action button height (${sRes.btnHeight}px) must be >= 44px touch target`);
+    assert.ok(sRes.footerPaddingBottom >= 80, `Footer padding-bottom (${sRes.footerPaddingBottom}px) must be >= 80px for bottom-nav safe area`);
+    assert.ok(sRes.scrollWidth <= 390, `Page scrollWidth (${sRes.scrollWidth}px) must not exceed 390px viewport width`);
+    console.log('✅ Task 3: Hospitality Footer Styling verified successfully!');
+
     cdp.close();
     await fetch(`http://127.0.0.1:${CHROME_PORT}/json/close/${tabInfo.id}`);
   } catch (err) {

@@ -9361,3 +9361,207 @@ a.brand,
     text-align: center !important;
   }
 }
+
+/* ========================================================
+   کارت جامع میزبانی کافه و فوتر مدرن آکادمیک
+   (Academic Demo Hospitality Card & Modern Footer)
+   ======================================================== */
+.footer-hospitality-card {
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 20px;
+  padding: 28px 24px;
+  box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.3);
+  box-sizing: border-box;
+  width: 100%;
+}
+
+.footer-header-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.footer-live-status {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 14px;
+  border-radius: 999px;
+  background: rgba(46, 125, 50, 0.16);
+  border: 1px solid rgba(76, 175, 80, 0.35);
+  color: #c8e6c9 !important;
+  font-size: 12.5px;
+  font-weight: 700 !important;
+  background: rgba(46, 125, 50, 0.3) !important;
+  border: 1px solid rgba(129, 199, 132, 0.5) !important;
+}
+
+.status-indicator {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #4caf50;
+  box-shadow: 0 0 0 2px rgba(76, 175, 80, 0.25);
+  animation: statusPulse 2s infinite ease-in-out;
+}
+
+@keyframes statusPulse {
+  0%, 100% { transform: scale(1); opacity: 1; }
+  50% { transform: scale(1.18); opacity: 0.75; }
+}
+
+.footer-hospitality-desc {
+  margin: 14px 0 20px;
+  color: var(--footer-muted, #b9aea3);
+  font-size: 13.5px;
+  line-height: 1.7;
+  max-width: 620px;
+}
+
+.footer-actions-row {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 12px;
+  margin-bottom: 20px;
+}
+
+.footer-action-btn {
+  min-height: 46px;
+  padding: 10px 18px;
+  border-radius: 12px;
+  font-size: 13.5px;
+  font-weight: 700;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  text-decoration: none;
+  box-sizing: border-box;
+  transition: transform 160ms cubic-bezier(0.23, 1, 0.32, 1), background 160ms ease, border-color 160ms ease;
+}
+
+.footer-action-btn:active {
+  transform: scale(0.97);
+}
+
+.footer-btn-call {
+  background: var(--footer-terracotta, #c86d51);
+  color: #ffffff !important;
+  border: 1px solid transparent;
+}
+
+.footer-btn-call:hover {
+  background: #b75e43;
+}
+
+.footer-btn-map {
+  background: rgba(255, 255, 255, 0.06);
+  color: #f7f4ee !important;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+}
+
+.footer-btn-map:hover {
+  background: rgba(255, 255, 255, 0.12);
+  border-color: rgba(255, 255, 255, 0.2);
+}
+
+.footer-social-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.footer-social-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 16px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.09);
+  color: #f7f4ee;
+  font-size: 12.5px;
+  text-decoration: none;
+  transition: transform 160ms cubic-bezier(0.23, 1, 0.32, 1), background 160ms ease;
+}
+
+.footer-social-pill:active {
+  transform: scale(0.97);
+}
+
+.footer-social-pill:hover {
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.footer-social-pill .social-handle {
+  color: var(--footer-terracotta, #c86d51);
+  font-family: monospace, sans-serif;
+  font-weight: 600;
+}
+
+.footer-academic-badge {
+  font-size: 12px;
+  color: #b9aea3 !important;
+  margin: 0 0 4px;
+  text-align: center;
+  font-weight: 500;
+}
+
+.footer-copy {
+  font-size: 11px;
+  color: #8c8278 !important;
+  margin: 0;
+  text-align: center;
+}
+
+@media (max-width: 640px) {
+  .site-footer {
+    padding: 32px 16px calc(var(--bottom-nav-height, 68px) + var(--safe-bottom, 12px) + 24px) !important;
+  }
+
+  .footer-hospitality-card {
+    padding: 20px 16px !important;
+    border-radius: 16px !important;
+  }
+
+  .footer-header-row {
+    flex-direction: column !important;
+    align-items: flex-start !important;
+    gap: 12px !important;
+  }
+
+  .footer-actions-row {
+    grid-template-columns: 1fr !important;
+    gap: 10px !important;
+  }
+
+  .footer-action-btn {
+    width: 100% !important;
+    min-height: 48px !important;
+  }
+
+  .footer-social-row {
+    flex-direction: column !important;
+    width: 100% !important;
+    gap: 8px !important;
+  }
+
+  .footer-social-pill {
+    width: 100% !important;
+    min-height: 42px !important;
+    box-sizing: border-box !important;
+    justify-content: center !important;
+  }
+
+  .footer-bottom {
+    flex-direction: column !important;
+    align-items: center !important;
+    text-align: center !important;
+    gap: 4px !important;
+  }
+}
+
+.footer-live-status .status-text { color: #c8e6c9 !important; font-weight: 700 !important; }
