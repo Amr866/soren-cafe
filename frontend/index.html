@@ -457,7 +457,7 @@
         </header>
 
         <div class="categories-grid">
-          <article class="category-card">
+          <article class="category-card" data-category="coffee">
             <img
               class="category-image"
               src="./images/ui/coffee-section.png"
@@ -479,7 +479,7 @@
             </div>
           </article>
 
-          <article class="category-card">
+          <article class="category-card" data-category="shakes">
             <img
               class="category-image"
               src="./images/ui/shake-section.png"
@@ -501,7 +501,7 @@
             </div>
           </article>
 
-          <article class="category-card">
+          <article class="category-card" data-category="cake">
             <img
               class="category-image"
               src="./images/ui/cake-section.png"
@@ -522,6 +522,13 @@
               </a>
             </div>
           </article>
+        </div>
+
+        <!-- نشانگرهای ورق‌زدن دسته‌بندی در موبایل (Category Carousel Dots) -->
+        <div class="category-carousel-dots" id="category-dots" role="tablist" aria-label="ورق‌زدن دسته‌بندی‌های سورن">
+          <button type="button" class="carousel-dot active" data-index="0" data-category="coffee" role="tab" aria-selected="true" aria-label="دسته‌بندی قهوه‌ها"></button>
+          <button type="button" class="carousel-dot" data-index="1" data-category="shakes" role="tab" aria-selected="false" aria-label="دسته‌بندی بار سرد و شیک‌ها"></button>
+          <button type="button" class="carousel-dot" data-index="2" data-category="cake" role="tab" aria-selected="false" aria-label="دسته‌بندی کیک و دسر"></button>
         </div>
       </section>
 
