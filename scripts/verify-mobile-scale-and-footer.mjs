@@ -172,6 +172,39 @@ server.listen(PORT, '127.0.0.1', async () => {
     assert.ok(metrics.titleFontSize >= 23, `Category card title font size (${metrics.titleFontSize}px) must be >= 23px for readability`);
     console.log('✅ Task 1: Mobile Category Card Scale & Proportions verified successfully!');
 
+    // ============================================
+    // Task 2: Check Academic Demo Hospitality Footer HTML
+    // ============================================
+    console.log('--- Verifying Task 2: Academic Demo Hospitality Footer HTML ---');
+    const footerCheck = await cdp.send('Runtime.evaluate', {
+      expression: `(() => {
+        const liveStatus = document.querySelector('.footer-live-status');
+        const callBtn = document.querySelector('a[href^="tel:"]');
+        const mapBtn = document.querySelector('.footer-action-btn[href*="maps"]');
+        const sitemapLinks = document.querySelectorAll('.footer-links');
+        const academicNote = document.querySelector('.footer-academic-badge');
+        return {
+          hasLiveStatus: !!liveStatus,
+          liveStatusText: liveStatus ? liveStatus.textContent.trim() : null,
+          hasCallBtn: !!callBtn,
+          callHref: callBtn ? callBtn.getAttribute('href') : null,
+          hasMapBtn: !!mapBtn,
+          sitemapCount: sitemapLinks.length,
+          hasAcademicNote: !!academicNote
+        };
+      })()`,
+      returnByValue: true
+    });
+
+    const fRes = footerCheck.result.value;
+    assert.ok(fRes.hasLiveStatus, 'Footer must contain .footer-live-status badge');
+    assert.ok(fRes.liveStatusText.includes('هم‌اکنون باز است'), 'Live status must show cafe is open');
+    assert.ok(fRes.hasCallBtn, 'Footer must contain direct call action button with tel: protocol');
+    assert.ok(fRes.hasMapBtn, 'Footer must contain direct map navigation action button');
+    assert.strictEqual(fRes.sitemapCount, 0, 'Redundant sitemap link columns must be removed from mobile footer');
+    assert.ok(fRes.hasAcademicNote, 'Footer must contain academic demo note for professor grading');
+    console.log('✅ Task 2: Academic Demo Hospitality Footer HTML verified successfully!');
+
     cdp.close();
     await fetch(`http://127.0.0.1:${CHROME_PORT}/json/close/${tabInfo.id}`);
   } catch (err) {
