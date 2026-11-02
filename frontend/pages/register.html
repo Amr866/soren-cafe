@@ -13,7 +13,7 @@
     <link rel="icon" type="image/svg+xml" href="../images/brand/favicon.svg" />
     <link rel="apple-touch-icon" href="../images/brand/favicon.svg" />
 
-    <!-- فونت‌های اختصاصی لوکس: وزیرمتن و پلاس جاکارتا سانس -->
+    <!-- Typography: Vazirmatn & Plus Jakarta Sans -->
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
@@ -21,8 +21,7 @@
       rel="stylesheet"
     />
 
-    <!-- استایل و اسکریپت -->
-        <!-- پیش‌لود پرسرعت فونت‌های محلی پیدا -->
+        <!-- Preload critical local font weights -->
     <link rel="preload" href="../fonts/Peyda-Regular.woff2" as="font" type="font/woff2" crossorigin />
     <link rel="preload" href="../fonts/Peyda-Bold.woff2" as="font" type="font/woff2" crossorigin />
     <link rel="stylesheet" href="../css/style.css?v=2.1-peyda-fix" />
@@ -32,11 +31,11 @@
   <body>
     <main class="auth-page">
       <div class="auth-card">
-        <!-- تصویر کافه -->
+        <!-- Visual brand showcase -->
         <aside class="auth-visual auth-visual--signup">
           <div class="visual-overlay"></div>
 
-          <!-- نشان برند -->
+          <!-- Brand emblem -->
           <div class="visual-badge">
             <span class="visual-badge-logo">
               <img src="../images/brand/soren-logo.svg" alt="" />
@@ -48,7 +47,7 @@
             </div>
           </div>
 
-          <!-- متن پایین تصویر -->
+          <!-- Brand narrative quote -->
           <div class="visual-note">
             <p class="visual-note-eyebrow">
               <span class="visual-note-dot"></span>
@@ -66,7 +65,7 @@
           </div>
         </aside>
 
-        <!-- فرم ثبت‌نام -->
+        <!-- Registration form -->
         <section class="auth-form-section" aria-labelledby="signup-title">
           <div class="form-topbar">
             <a href="../index.html" class="back-link">
@@ -84,7 +83,7 @@
             </header>
 
             <form class="auth-form" id="signupForm" method="post">
-              <!-- نام و ایمیل -->
+              <!-- Name and email inputs -->
               <div class="form-row">
                 <div class="form-group">
                   <label for="fullName">نام و نام خانوادگی</label>
@@ -123,7 +122,7 @@
                 </div>
               </div>
 
-              <!-- رمز عبور و تکرار آن -->
+              <!-- Password inputs -->
               <div class="form-row">
                 <div class="form-group">
                   <label for="password">رمز عبور</label>
@@ -181,7 +180,7 @@
                 </div>
               </div>
 
-              <!-- قدرت رمز عبور (با جاوااسکریپت به‌روز می‌شود) -->
+              <!-- Password strength indicator (updated dynamically) -->
               <div class="strength" id="passwordStrength" data-level="0">
                 <div class="strength-bars" aria-hidden="true">
                   <span class="strength-bar"></span>
@@ -192,7 +191,7 @@
                 <span class="strength-label" aria-live="polite">امنیت رمز</span>
               </div>
 
-              <!-- پذیرش قوانین -->
+              <!-- Terms and privacy consent -->
               <div class="form-terms">
                 <label class="check-option">
                   <input type="checkbox" name="terms" required />

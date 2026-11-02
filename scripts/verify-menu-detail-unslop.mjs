@@ -227,7 +227,7 @@ try {
     throw new Error('Menu Detail Bottom Sheet failed to open on card click');
   }
 
-  // Test 3: Tap "افزودن به سبد خرید" inside the sheet -> Adds to cart and auto-dismisses
+  // Test 3: Tap 'Add to Cart' inside the sheet -> Adds to cart and auto-dismisses
   const addEvaluation = await sendCommand('Runtime.evaluate', {
     expression: `(() => {
       const addBtn = document.getElementById('menu-detail-add-btn');

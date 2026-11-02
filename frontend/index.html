@@ -11,7 +11,7 @@
     <link rel="manifest" href="./manifest.json" />
     <link rel="icon" type="image/svg+xml" href="./images/brand/favicon.svg" />
     <link rel="apple-touch-icon" href="./images/brand/favicon.svg" />
-    <!-- فونت‌های اختصاصی لوکس: وزیرمتن و پلاس جاکارتا سانس -->
+    <!-- Typography: Vazirmatn & Plus Jakarta Sans -->
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
@@ -19,13 +19,12 @@
       rel="stylesheet"
     />
 
-    <!-- استایل -->
-        <!-- پیش‌لود پرسرعت فونت‌های محلی پیدا -->
+        <!-- Preload critical local font weights -->
     <link rel="preload" href="./fonts/Peyda-Regular.woff2" as="font" type="font/woff2" crossorigin />
     <link rel="preload" href="./fonts/Peyda-Bold.woff2" as="font" type="font/woff2" crossorigin />
     <link rel="stylesheet" href="./css/style.css?v=2.1-peyda-fix" />
 
-    <!-- اگر جاوااسکریپت غیرفعال بود، تصویر درباره‌ی ما پنهان نماند -->
+    <!-- Noscript fallback: keep about image visible if JS is disabled -->
     <noscript>
       <style>
         .artwork-reveal {
@@ -40,7 +39,6 @@
     <!-- ==================== Header ==================== -->
     <header class="site-header">
       <div class="header-inner">
-        <!-- لوگو و نام کافه -->
         <a class="brand" href="#home" aria-label="صفحه اصلی کافه سورن">
           <img
             src="./images/brand/soren-logo.svg"
@@ -55,7 +53,7 @@
           </span>
         </a>
 
-        <!-- منوی اصلی -->
+        <!-- Main navigation bar -->
         <nav class="desktop-nav" aria-label="منوی اصلی">
           <a class="nav-link active" href="#" aria-current="page">خانه</a>
 
@@ -89,9 +87,7 @@
           <a class="nav-link" href="#">تماس با ما</a>
         </nav>
 
-        <!-- جست‌وجو و آیکون‌ها -->
         <div class="header-actions">
-          <!-- جست‌وجوی دسکتاپ -->
           <form class="search-box desktop-search" role="search">
             <button
               class="search-toggle"
@@ -119,7 +115,6 @@
             />
           </form>
 
-          <!-- جست‌وجوی موبایل -->
           <button
             class="icon-button mobile-search"
             type="button"
@@ -137,7 +132,6 @@
             </svg>
           </button>
 
-          <!-- حساب کاربری (لینک به صفحه ورود/ثبت‌نام) -->
           <a
             href="./pages/login.html"
             class="icon-button account-button"
@@ -158,7 +152,6 @@
             </svg>
           </a>
 
-          <!-- سبد خرید (لینک به صفحه سبد خرید) -->
           <a
             href="./pages/cart.html"
             class="icon-button cart-button"
@@ -176,7 +169,6 @@
             </svg>
           </a>
 
-          <!-- دکمه منوی موبایل -->
           <button
             class="icon-button mobile-menu-button"
             type="button"
@@ -196,7 +188,6 @@
           </button>
         </div>
       </div>
-      <!-- پنل منوی موبایل -->
       <div class="mobile-panel" id="mobile-panel">
         <div class="mobile-panel-inner">
           <form class="mobile-search-form" role="search">
@@ -234,7 +225,7 @@
       </div>
     </header>
 
-    <!-- کشوی ناوبری ثانویه و اطلاعات کافه (Mobile Off-Canvas Drawer) -->
+    <!-- Mobile off-canvas navigation drawer & barista telemetry -->
     <div class="soren-drawer-backdrop" id="soren-drawer-backdrop" aria-hidden="true"></div>
     <aside class="soren-offcanvas-drawer" id="soren-offcanvas-drawer" aria-label="منوی اطلاعات کافه" aria-hidden="true">
       <div class="drawer-header">
@@ -248,13 +239,12 @@
       </div>
 
       <div class="drawer-body">
-        <!-- وضعیت زنده باریستا -->
+        <!-- Live barista status indicator -->
         <div class="drawer-barista-status">
           <span class="status-pulse-dot"></span>
           <span class="status-text" id="drawer-barista-text">باریستا: آماده پذیرش سفارش حضوری و بیرون‌بر</span>
         </div>
 
-        <!-- ناوبری ثانویه -->
         <nav class="drawer-nav" aria-label="لینک‌های کافه">
           <a href="#about-soren" class="drawer-nav-item">
             <span class="nav-item-icon">
@@ -283,7 +273,7 @@
           </a>
         </nav>
 
-        <!-- ساعات کاری و تماس -->
+        <!-- Business hours & contact info -->
         <div class="drawer-info-block">
           <h4 class="drawer-info-title">ساعات پذیرایی حضوری</h4>
           <p class="drawer-info-text">همه‌روزه از ساعت ۸:۰۰ صبح الی ۲۳:۳۰ شب</p>
@@ -380,7 +370,6 @@
       <!-- ==================== About Soren ==================== -->
       <section class="about-section" id="about-soren">
         <div class="about-container">
-          <!-- متن درباره کافه -->
           <div class="about-content">
             <div class="section-tag">
               <span class="tag-dot"></span>
@@ -434,7 +423,6 @@
             </div>
           </div>
 
-          <!-- تصویر -->
           <div class="about-artwork">
             <div class="artwork-reveal" id="about-artwork">
               <img
@@ -546,7 +534,7 @@
           <p>طعم‌هایی که ارزش امتحان کردن دارن؛ دسته‌بندی دلخواه خود را فیلتر کنید.</p>
         </header>
 
-        <!-- نوار تراشه‌های چسبان دسته‌بندی منو (Sticky Category Chips) -->
+        <!-- Sticky category filter chips -->
         <nav class="category-chips-bar" id="category-chips" aria-label="دسته‌بندی‌های منوی سورن">
           <div class="chips-scroll-track">
             <button type="button" class="category-chip active" data-category="all" aria-pressed="true">
@@ -573,7 +561,6 @@
         </nav>
 
         <div class="featured-grid" id="catalog-products-grid">
-          <!-- 1. اسپرسو دبل -->
           <article
             class="featured-card"
             data-id="prd_espresso_double"
@@ -626,7 +613,6 @@
             </div>
           </article>
 
-          <!-- 2. کاپوچینو -->
           <article
             class="featured-card"
             data-id="prd_cappuccino"
@@ -679,7 +665,6 @@
             </div>
           </article>
 
-          <!-- 3. لاته -->
           <article
             class="featured-card"
             data-id="prd_latte"
@@ -732,7 +717,6 @@
             </div>
           </article>
 
-          <!-- 4. اسپرسو -->
           <article
             class="featured-card"
             data-id="prd_espresso"
@@ -785,7 +769,6 @@
             </div>
           </article>
 
-          <!-- 5. آمریکانو -->
           <article
             class="featured-card"
             data-id="prd_americano"
@@ -838,7 +821,6 @@
             </div>
           </article>
 
-          <!-- 6. موکا -->
           <article
             class="featured-card"
             data-id="prd_mocha"
@@ -891,7 +873,6 @@
             </div>
           </article>
 
-          <!-- 7. شیک شکلات -->
           <article
             class="featured-card"
             data-id="prd_shake_choc"
@@ -944,7 +925,6 @@
             </div>
           </article>
 
-          <!-- 8. شیک توت‌فرنگی -->
           <article
             class="featured-card"
             data-id="prd_shake_strawberry"
@@ -997,7 +977,6 @@
             </div>
           </article>
 
-          <!-- 9. شیک وانیل -->
           <article
             class="featured-card"
             data-id="prd_shake_vanilla"
@@ -1050,7 +1029,6 @@
             </div>
           </article>
 
-          <!-- 10. شیک اورئو -->
           <article
             class="featured-card"
             data-id="prd_shake_oreo"
@@ -1103,7 +1081,6 @@
             </div>
           </article>
 
-          <!-- 11. شیک موز -->
           <article
             class="featured-card"
             data-id="prd_shake_banana"
@@ -1156,7 +1133,6 @@
             </div>
           </article>
 
-          <!-- 12. شیک کارامل -->
           <article
             class="featured-card"
             data-id="prd_shake_caramel"
@@ -1209,7 +1185,6 @@
             </div>
           </article>
 
-          <!-- 13. کیک شکلاتی -->
           <article
             class="featured-card"
             data-id="prd_choc_cake"
@@ -1262,7 +1237,6 @@
             </div>
           </article>
 
-          <!-- 14. چیزکیک -->
           <article
             class="featured-card"
             data-id="prd_cheesecake"
@@ -1315,7 +1289,6 @@
             </div>
           </article>
 
-          <!-- 15. براونی شکلاتی فاج -->
           <article
             class="featured-card"
             data-id="prd_brownie"
@@ -1368,7 +1341,6 @@
             </div>
           </article>
 
-          <!-- 16. تیرامیسو -->
           <article
             class="featured-card"
             data-id="prd_tiramisu"
@@ -1421,7 +1393,6 @@
             </div>
           </article>
 
-          <!-- 17. کیک هویج و گردو -->
           <article
             class="featured-card"
             data-id="prd_carrot_cake"
@@ -1474,7 +1445,6 @@
             </div>
           </article>
 
-          <!-- 18. کوکی چاکلت چانک -->
           <article
             class="featured-card"
             data-id="prd_cookie"
@@ -1534,7 +1504,6 @@
     <footer class="site-footer" id="site-footer">
       <div class="footer-container">
         <div class="footer-main">
-          <!-- معرفی کافه -->
           <div class="footer-brand">
             <a
               href="./index.html"
@@ -1557,7 +1526,7 @@
             </p>
           </div>
 
-          <!-- لینک‌های سریع -->
+          <!-- Quick navigation links -->
           <nav class="footer-links" aria-label="لینک‌های سریع">
             <h3 class="footer-title">دسترسی سریع</h3>
             <ul>
@@ -1567,7 +1536,7 @@
             </ul>
           </nav>
 
-          <!-- منوی کافه -->
+          <!-- Menu links -->
           <nav class="footer-links" aria-label="دسته‌بندی محصولات">
             <h3 class="footer-title">منوی کافه</h3>
             <ul>
@@ -1577,7 +1546,7 @@
             </ul>
           </nav>
 
-          <!-- شبکه‌های اجتماعی -->
+          <!-- Social media links -->
           <div class="footer-social">
             <h3 class="footer-title">همراه سورن باشید</h3>
 
@@ -1634,14 +1603,12 @@
           </div>
         </div>
 
-        <!-- جداکننده -->
         <div class="footer-divider">
           <span></span>
           <span class="footer-divider-icon" aria-hidden="true">✦</span>
           <span></span>
         </div>
 
-        <!-- کپی‌رایت -->
         <div class="footer-bottom">
           <p>© ۱۴۰۵ کافه سورن؛ تمام حقوق محفوظ است.</p>
 
@@ -1816,23 +1783,21 @@
       </div>
 
       <div class="sheet-body">
-        <!-- لیست اقلام سبد خرید -->
+        <!-- Cart item list (dynamically populated) -->
         <div class="sheet-items-list" id="sheet-items-list">
-          <!-- محتوا به صورت پویا با جاوااسکریپت پر می‌شود -->
         </div>
 
-        <!-- شلف هوشمند مکمل قهوه جهت ارتقای ارزش سبد (Contextual Upsell Shelf) -->
+        <!-- Contextual coffee upsell shelf -->
         <div class="cart-upsell-shelf-container" id="cart-upsell-shelf-container">
-          <!-- با جاوااسکریپت در صورت وجود قهوه در سبد خرید پر می‌شود -->
         </div>
 
-        <!-- یادداشت به باریستا -->
+        <!-- Barista instructions -->
         <div class="sheet-note-box">
           <label for="sheet-order-note" class="sheet-note-label">یادداشت برای باریستا (اختیاری):</label>
           <input type="text" id="sheet-order-note" class="sheet-note-input" placeholder="مثلاً: شیر کم‌چرب، بدون شکر، دمای سرو ملایم..." />
         </div>
 
-        <!-- خلاصه فاکتور -->
+        <!-- Order total summary -->
         <div class="sheet-summary-box">
           <div class="summary-line">
             <span>مجموع اقلام</span>

@@ -12,7 +12,7 @@
     <link rel="icon" type="image/svg+xml" href="../images/brand/favicon.svg" />
     <link rel="apple-touch-icon" href="../images/brand/favicon.svg" />
 
-    <!-- فونت‌های اختصاصی لوکس: وزیرمتن و پلاس جاکارتا سانس -->
+    <!-- Typography: Vazirmatn & Plus Jakarta Sans -->
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
@@ -20,15 +20,14 @@
       rel="stylesheet"
     />
 
-    <!-- استایل -->
-        <!-- پیش‌لود پرسرعت فونت‌های محلی پیدا -->
+        <!-- Preload critical local font weights -->
     <link rel="preload" href="../fonts/Peyda-Regular.woff2" as="font" type="font/woff2" crossorigin />
     <link rel="preload" href="../fonts/Peyda-Bold.woff2" as="font" type="font/woff2" crossorigin />
     <link rel="stylesheet" href="../css/style.css?v=2.1-peyda-fix" />
   </head>
 
   <body>
-    <!-- آیکون‌ها: با <use href="#i-..."> در هر جای صفحه استفاده می‌شوند -->
+    <!-- Global SVG icon sprite symbols -->
     <svg width="0" height="0" style="position: absolute" aria-hidden="true">
       <symbol id="i-bag" viewBox="0 0 24 24">
         <path d="M5 8h14l1 12H4L5 8Z" />
@@ -75,7 +74,6 @@
     <!-- ==================== Header ==================== -->
     <header class="site-header">
       <div class="header-inner">
-        <!-- لوگو و نام کافه -->
         <a class="brand" href="../index.html" aria-label="صفحه اصلی کافه سورن">
           <img
             src="../images/brand/soren-logo.svg"
@@ -90,7 +88,7 @@
           </span>
         </a>
 
-        <!-- منوی اصلی -->
+        <!-- Main navigation bar -->
         <nav class="desktop-nav" aria-label="منوی اصلی">
           <a class="nav-link" href="../index.html">خانه</a>
 
@@ -124,9 +122,7 @@
           <a class="nav-link" href="#site-footer">تماس با ما</a>
         </nav>
 
-        <!-- جست‌وجو و آیکون‌ها -->
         <div class="header-actions">
-          <!-- جست‌وجوی دسکتاپ -->
           <form class="search-box desktop-search" role="search">
             <button
               class="search-toggle"
@@ -154,7 +150,6 @@
             />
           </form>
 
-          <!-- جست‌وجوی موبایل -->
           <button
             class="icon-button mobile-search"
             type="button"
@@ -172,7 +167,6 @@
             </svg>
           </button>
 
-          <!-- حساب کاربری -->
           <a
             href="./login.html"
             class="icon-button account-button"
@@ -193,7 +187,6 @@
             </svg>
           </a>
 
-          <!-- سبد خرید -->
           <a
             href="./cart.html"
             class="icon-button cart-button"
@@ -212,7 +205,6 @@
             </svg>
           </a>
 
-          <!-- دکمه منوی موبایل -->
           <button
             class="icon-button mobile-menu-button"
             type="button"
@@ -233,7 +225,6 @@
         </div>
       </div>
 
-      <!-- پنل منوی موبایل -->
       <div class="mobile-panel" id="mobile-panel">
         <div class="mobile-panel-inner">
           <form class="mobile-search-form" role="search">
@@ -274,7 +265,7 @@
     <!-- ==================== Cart ==================== -->
     <main class="cart-page">
       <section class="cart-section" aria-labelledby="cart-title">
-        <!-- عنوان سبد خرید -->
+        <!-- Cart title header -->
         <header class="cart-header">
           <div class="cart-title">
             <div class="cart-icon">
@@ -295,7 +286,7 @@
           </div>
         </header>
 
-        <!-- حالت سبد خالی -->
+        <!-- Empty cart state -->
         <div class="empty-cart" id="cart-state-empty">
           <div class="empty-illustration">
             <svg class="icon" aria-hidden="true"><use href="#i-coffee" /></svg>
@@ -337,7 +328,7 @@
           </div>
         </div>
 
-        <!-- حالت سبد پر -->
+        <!-- Populated cart view -->
         <div class="cart-content" id="cart-state-populated" hidden>
           <div class="cart-items">
             <div class="shipping-notice">
@@ -519,7 +510,7 @@
             </article>
           </div>
 
-          <!-- خلاصه سفارش -->
+          <!-- Order summary -->
           <aside class="order-summary" aria-label="خلاصه سفارش">
             <div class="summary-heading">
               <h2>خلاصه سفارش</h2>
@@ -624,7 +615,6 @@
     <footer class="site-footer" id="site-footer">
       <div class="footer-container">
         <div class="footer-main">
-          <!-- معرفی کافه -->
           <div class="footer-brand">
             <a
               href="../index.html"
@@ -647,7 +637,7 @@
             </p>
           </div>
 
-          <!-- لینک‌های سریع -->
+          <!-- Quick navigation links -->
           <nav class="footer-links" aria-label="لینک‌های سریع">
             <h3 class="footer-title">دسترسی سریع</h3>
             <ul>
@@ -657,7 +647,7 @@
             </ul>
           </nav>
 
-          <!-- منوی کافه -->
+          <!-- Menu links -->
           <nav class="footer-links" aria-label="دسته‌بندی محصولات">
             <h3 class="footer-title">منوی کافه</h3>
             <ul>
@@ -667,7 +657,7 @@
             </ul>
           </nav>
 
-          <!-- شبکه‌های اجتماعی -->
+          <!-- Social media links -->
           <div class="footer-social">
             <h3 class="footer-title">همراه سورن باشید</h3>
 
@@ -724,14 +714,12 @@
           </div>
         </div>
 
-        <!-- جداکننده -->
         <div class="footer-divider">
           <span></span>
           <span class="footer-divider-icon" aria-hidden="true">✦</span>
           <span></span>
         </div>
 
-        <!-- کپی‌رایت -->
         <div class="footer-bottom">
           <p>© ۱۴۰۵ کافه سورن؛ تمام حقوق محفوظ است.</p>
 

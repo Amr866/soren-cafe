@@ -111,14 +111,14 @@
   --font-body: "Vazirmatn", "Peyda", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
   --font-latin: "Plus Jakarta Sans", -apple-system, BlinkMacSystemFont, sans-serif;
 
-  /* سیستم منحنی‌های حرکتی لوکس و شتاب فنری (Physics-Driven Spring Easings) */
+  /* Physics-driven spring easings */
   --ease-out: cubic-bezier(0.23, 1, 0.32, 1);
   --ease-drawer: cubic-bezier(0.32, 0.72, 0, 1);
   --ease-spring: cubic-bezier(0.22, 1, 0.36, 1);
   --ease-cinematic: cubic-bezier(0.32, 0.72, 0, 1);
   --ease-bounce: cubic-bezier(0.34, 1.56, 0.64, 1);
 
-  /* سیستم سایه‌ها و سطوح عمق‌دار آژانسی (Multi-Layered Ambient Shadows) */
+  /* Multi-layered ambient shadow elevations */
   --shadow: 0 2px 4px rgba(36, 33, 32, 0.03), 0 14px 32px -4px rgba(36, 33, 32, 0.07);
   --shadow-sm: 0 2px 4px rgba(36, 33, 32, 0.03), 0 6px 16px -2px rgba(36, 33, 32, 0.05);
   --shadow-luxury: 0 2px 6px rgba(36, 33, 32, 0.04), 0 20px 48px -8px rgba(36, 33, 32, 0.1);
@@ -126,17 +126,17 @@
   --shadow-inner-glow: inset 0 1px 1.5px rgba(255, 255, 255, 0.85), inset 0 -1px 2px rgba(121, 82, 57, 0.06);
 
   --page-gutter: 60px;
-  /* فاصله‌ی چپ و راست محتوا */
+  /* Content horizontal gutters */
   --section-gap: 80px;
-  /* فاصله‌ی بین سکشن‌ها */
+  /* Section vertical spacing */
 
-  /* توکن‌های باتم‌شیت جزئیات منو (Menu Detail Bottom Sheet Tokens) */
+  /* Menu Detail Bottom Sheet design tokens */
   --sheet-bg: #FAF7F2;
   --sheet-border: rgba(140, 94, 60, 0.16);
   --sheet-backdrop: rgba(20, 16, 14, 0.48);
   --sheet-radius: 28px;
 
-  /* توکن‌های تجربه موبایل و PWA */
+  /* Mobile experience & PWA safe area tokens */
   --app-height: 100dvh;
   --safe-top: env(safe-area-inset-top, 0px);
   --safe-bottom: env(safe-area-inset-bottom, 12px);
@@ -176,7 +176,7 @@ body {
   position: relative;
 }
 
-/* بافت دانه‌ای مات کاغذ و کتان کهن (Physical Paper Noise Texture Overlay) */
+/* Tactile paper texture noise overlay */
 body::before {
   content: "";
   position: fixed;
@@ -216,7 +216,7 @@ button {
   color: var(--ivory);
 }
 
-/* چیدمان کلی: ۶۰ پیکسل چپ و راست، ۸۰ پیکسل بین همه‌ی سکشن‌ها */
+/* Base page layout: 60px gutters, 80px section spacing */
 main {
   display: flex;
   flex-direction: column;
@@ -224,7 +224,7 @@ main {
   padding: var(--section-gap) var(--page-gutter);
 }
 
-/* فاصله از بالا هنگام اسکرول به بخش‌ها (به‌خاطر هدر چسبان) */
+/* Scroll margin offset for sticky header navigation */
 #home,
 #menu,
 #about-soren,
@@ -431,7 +431,7 @@ main {
     visibility 0.16s var(--ease-out, ease-out);
 }
 
-/* پل نامرئی بین دکمه و منو تا با حرکت ماوس، منو بسته نشود */
+/* Invisible bridge preventing dropdown closure on mouse transit */
 .dropdown-menu::before {
   content: "";
   position: absolute;
@@ -479,7 +479,6 @@ main {
   min-width: 0;
 }
 
-/* ----- جست‌وجوی دسکتاپ ----- */
 
 .search-box {
   position: relative;
@@ -489,7 +488,6 @@ main {
   height: 44px;
 }
 
-/* دکمه آیکون ذره‌بین */
 .search-toggle {
   position: relative;
   z-index: 2;
@@ -522,7 +520,6 @@ main {
   pointer-events: none;
 }
 
-/* کادر جست‌وجو: در حالت بسته عرض صفر */
 .search-box input {
   position: absolute;
   top: 50%;
@@ -557,7 +554,6 @@ main {
   color: #8a8177;
 }
 
-/* حالت باز */
 .search-box.active input {
   width: 250px;
   padding: 0 14px;
@@ -573,7 +569,6 @@ main {
   box-shadow: 0 0 0 3px rgba(121, 82, 57, 0.1);
 }
 
-/* ----- دکمه‌های آیکونی ----- */
 
 .icon-button {
   position: relative;
@@ -705,11 +700,11 @@ main {
 .hero-title-accent::after {
   content: "";
   position: absolute;
-  bottom: 2px;
+  bottom: 0;
   right: 0;
   width: 100%;
   height: 5px;
-  border-radius: 999px;
+  border-radius: 50%;
   background: var(--sage);
   opacity: 0.4;
 }
@@ -770,7 +765,7 @@ main {
   transform: scale(0.97);
 }
 
-/* کپسول دایره‌ای آیکون دکمه اصلی (Button-in-Button Island Architecture) */
+/* Primary CTA button-in-button icon capsule */
 .hero-arrow-capsule {
   width: 36px;
   height: 36px;
@@ -791,7 +786,7 @@ main {
   transform-origin: center center;
 }
 
-/* هنگامی که کاربر روی مشاهده منو هاور می‌کند: فلش به سمت مقصد اسکرول (منوی پایین صفحه) اشاره می‌کند */
+/* Dynamic scroll hint: arrow rotates downward toward menu destination on hover */
 .hero-btn-primary:hover .hero-arrow-capsule {
   transform: translateY(2px) scale(1.06);
   background: rgba(255, 255, 255, 0.28);
@@ -881,7 +876,7 @@ main {
   overflow-wrap: break-word;
 }
 
-/* معماری دو لایه‌ای سخت‌افزاری قاب هیرو (Double-Bezel Hardware Architecture) */
+/* Double-bezel hardware frame architecture for hero visual */
 .hero-image-wrapper {
   min-width: 0;
   position: relative;
@@ -1283,7 +1278,6 @@ main {
   align-items: stretch;
   width: 100%;
   max-width: 1120px;
-  /* اندازه‌ی کارت‌ها */
   margin-inline: auto;
 }
 
@@ -1473,7 +1467,6 @@ main {
   gap: 22px;
   width: 100%;
   max-width: 1120px;
-  /* اندازه‌ی کارت‌ها */
   margin-inline: auto;
 }
 
@@ -1925,7 +1918,6 @@ main {
    13. ریسپانسیو (از بزرگ به کوچک)
 ======================================== */
 
-/* ----- تا 1180px ----- */
 @media (max-width: 1180px) {
   .header-inner {
     width: min(100% - 32px, 1440px);
@@ -1962,7 +1954,6 @@ main {
   }
 }
 
-/* ----- تا 1024px ----- */
 @media (max-width: 1024px) {
   .featured-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -1987,7 +1978,6 @@ main {
   }
 }
 
-/* ----- تا 960px: منوی موبایل ----- */
 @media (max-width: 960px) {
   .header-inner {
     min-height: 82px;
@@ -2129,7 +2119,6 @@ main {
   }
 }
 
-/* ----- تا 950px: فوتر ----- */
 @media (max-width: 950px) {
   .site-footer {
     padding: 42px 28px 18px;
@@ -2149,13 +2138,11 @@ main {
   }
 }
 
-/* ----- تا 900px: تبلت ----- */
 @media (max-width: 900px) {
   :root {
     --page-gutter: 40px;
   }
 
-  /* هیرو */
   .hero-container {
     grid-template-columns: 1fr;
     gap: 36px;
@@ -2177,7 +2164,6 @@ main {
     font-size: clamp(32px, 6vw, 46px);
   }
 
-  /* درباره ما */
   .about-container {
     grid-template-columns: 1fr;
     gap: 36px;
@@ -2195,7 +2181,6 @@ main {
     font-size: 34px;
   }
 
-  /* دسته‌بندی محصولات */
   .categories-grid {
     gap: 18px;
   }
@@ -2224,10 +2209,8 @@ main {
   }
 }
 
-/* ----- تا 640px: موبایل ----- */
 @media (max-width: 640px) {
 
-  /* دسته‌بندی محصولات */
   .categories-heading {
     margin-bottom: 30px;
   }
@@ -2269,7 +2252,6 @@ main {
     font-size: 13px;
   }
 
-  /* منتخب‌های سورن */
   .featured-heading {
     margin-bottom: 28px;
   }
@@ -2336,7 +2318,7 @@ main {
     border-radius: 0 !important;
   }
 
-    /* تک‌بج تصویری روی موبایل جهت حفظ وضوح عکس نوشیدنی (FR-016) */
+    /* Single visual badge limit on mobile viewports to prevent hero crowding (FR-016) */
   .featured-top > :nth-child(n+2) {
     display: none !important;
   }
@@ -2379,7 +2361,7 @@ main {
     min-width: 0 !important;
   }
 
-  /* حذف اطلاعات مازاد و غیرخوانا از روی کارت موبایل جهت حفظ وضوح عکاسی و خوانایی */
+  /* Declutter secondary metadata on mobile cards to preserve photography visibility */
   .featured-category {
     display: none !important;
   }
@@ -2472,7 +2454,6 @@ main {
   }
 }
 
-/* ----- تا 560px: فوتر ----- */
 @media (max-width: 560px) {
   .site-footer {
     padding: 34px 20px 16px;
@@ -2536,13 +2517,11 @@ main {
   }
 }
 
-/* ----- تا 480px: موبایل کوچک ----- */
 @media (max-width: 480px) {
   :root {
     --page-gutter: 16px;
   }
 
-  /* هیرو */
   .hero-container {
     gap: 28px;
   }
@@ -2615,7 +2594,6 @@ main {
     font-size: 10px;
   }
 
-  /* درباره ما */
   .about-container {
     gap: 24px;
   }
@@ -2645,7 +2623,6 @@ main {
   }
 }
 
-/* ----- تا 360px: فوتر ----- */
 @media (max-width: 360px) {
   .hero-buttons {
     flex-direction: column;
@@ -2725,7 +2702,7 @@ main {
    1. اجزای مشترک
 ======================================== */
 
-/* برچسب‌های کوچک بالای عنوان */
+/* Section eyebrow badges */
 .pill {
   display: inline-flex;
   align-items: center;
@@ -2758,7 +2735,7 @@ main {
   animation: dot-pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
 }
 
-/* دکمه‌ی بنر پایانی */
+/* Closing call-to-action button */
 .cta-button {
   display: inline-flex;
   align-items: center;
@@ -2792,7 +2769,7 @@ main {
   transform: translateX(-4px);
 }
 
-/* قاب عکس‌ها */
+/* Image frame containers */
 .photo-frame {
   position: relative;
 }
@@ -3463,7 +3440,6 @@ main {
    7. ریسپانسیو
 ======================================== */
 
-/* ----- تا 1023px: تبلت ----- */
 @media (max-width: 1023px) {
 
   .page-hero-grid,
@@ -3479,7 +3455,7 @@ main {
     grid-column: auto;
   }
 
-  /* در تبلت و موبایل: تصویر بالای متن */
+  /* Column layout on tablet & mobile: visual above copy */
   .page-hero-media {
     order: -1;
   }
@@ -3512,7 +3488,6 @@ main {
   }
 }
 
-/* ----- تا 900px ----- */
 @media (max-width: 900px) {
   .story {
     padding: 40px 32px;
@@ -3528,7 +3503,6 @@ main {
   }
 }
 
-/* ----- تا 639px: موبایل ----- */
 @media (max-width: 639px) {
   .page-hero-title {
     font-size: 30px;
@@ -3581,7 +3555,6 @@ main {
   }
 }
 
-/* ----- تا 480px: موبایل کوچک ----- */
 @media (max-width: 480px) {
   .story {
     padding: 28px 20px;
@@ -3633,7 +3606,7 @@ main {
   --auth-radius-input: 10px;
   --font-latin: Arial, sans-serif;
 
-  /* قانون عمومی main در بالای فایل را برای این صفحه خنثی می‌کند */
+  /* Reset global main padding for dedicated auth layout */
   display: flex;
   flex-direction: row;
   align-items: center;
@@ -3658,7 +3631,6 @@ main {
 }
 
 
-/* ----- ستون تصویر ----- */
 
 .auth-visual {
   position: relative;
@@ -3700,7 +3672,7 @@ main {
       rgba(36, 33, 32, 0.15));
 }
 
-/* --- متن‌های تصویر صفحه‌ی ورود --- */
+/* Login visual typography */
 
 .cafe-brand {
   display: flex;
@@ -3766,7 +3738,7 @@ main {
   line-height: 2;
 }
 
-/* --- متن‌های تصویر صفحه‌ی ثبت‌نام --- */
+/* Registration visual typography */
 
 .visual-badge {
   display: flex;
@@ -3858,7 +3830,6 @@ main {
 }
 
 
-/* ----- ستون فرم ----- */
 
 .auth-form-section {
   display: flex;
@@ -3926,7 +3897,7 @@ main {
   margin: auto;
 }
 
-/* صفحه‌ی ثبت‌نام فیلدهای دوستونه دارد و عرض بیشتری می‌خواهد */
+/* Wider container for two-column registration fields */
 .form-content--wide {
   max-width: none;
 }
@@ -3951,7 +3922,6 @@ main {
 }
 
 
-/* ----- فیلدها ----- */
 
 .auth-form {
   display: flex;
@@ -4023,7 +3993,7 @@ main {
   color: var(--coffee);
 }
 
-/* آیکون ابتدای فیلد (سمت راست) */
+/* Leading input field icon */
 .input-wrapper--start input {
   padding: 0 38px 0 12px;
 }
@@ -4033,7 +4003,7 @@ main {
   left: auto;
 }
 
-/* فیلد رمز عبور با دکمه‌ی چشم (سمت چپ) */
+/* Password field visibility toggle button */
 .input-wrapper--toggle input {
   padding-left: 42px;
 }
@@ -4090,7 +4060,6 @@ main {
 }
 
 
-/* ----- قدرت رمز عبور (ثبت‌نام) ----- */
 
 .strength {
   display: flex;
@@ -4144,7 +4113,6 @@ main {
 }
 
 
-/* ----- گزینه‌ها و لینک‌های متنی ----- */
 
 .form-options {
   display: flex;
@@ -4189,7 +4157,6 @@ main {
 }
 
 
-/* ----- دکمه‌ی اصلی ----- */
 
 .auth-button {
   display: flex;
@@ -4228,7 +4195,6 @@ main {
 }
 
 
-/* ----- جداکننده و ورود با گوگل ----- */
 
 .form-divider {
   position: relative;
@@ -4282,7 +4248,6 @@ main {
 }
 
 
-/* ----- لینک جابه‌جایی ورود/ثبت‌نام و فوتر فرم ----- */
 
 .auth-switch {
   margin: 20px 0 0;
@@ -4327,7 +4292,6 @@ main {
 }
 
 
-/* ----- فوکوس کیبورد (فقط داخل این صفحه‌ها) ----- */
 
 .auth-page a:focus-visible,
 .auth-page button:focus-visible,
@@ -4337,7 +4301,6 @@ main {
 }
 
 
-/* ----- ریسپانسیو ----- */
 
 @media (max-width: 900px) {
   .auth-page {
@@ -4425,7 +4388,7 @@ main {
   }
 }
 
-/* صفحه‌نمایش‌های کوتاه: فرم بدون اسکرول جا شود */
+/* Short viewports: ensure form fits within screen height */
 @media (max-height: 760px) and (min-width: 651px) {
   .auth-page {
     padding-block: 12px;
@@ -4498,7 +4461,7 @@ main {
   stroke-linejoin: round;
 }
 
-/* آیکون سبد خرید در هدر وقتی در همین صفحه‌ایم */
+/* Active cart icon state when viewing cart page */
 .icon-button[aria-current="page"] {
   background: rgba(121, 82, 57, 0.08);
   border-color: rgba(121, 82, 57, 0.15);
@@ -4514,7 +4477,6 @@ main {
 }
 
 
-/* ----- عنوان صفحه ----- */
 
 .cart-header {
   display: flex;
@@ -4574,7 +4536,7 @@ main {
   line-height: 1.9;
 }
 
-/* کلید تغییر حالت (فقط برای نمایش نمونه) */
+/* Demo mode switcher */
 .mode-switch {
   display: inline-flex;
   gap: 4px;
@@ -4606,7 +4568,6 @@ main {
 }
 
 
-/* ----- دکمه‌های اصلی و فرعی ----- */
 
 .primary-btn,
 .secondary-btn {
@@ -4661,7 +4622,6 @@ main {
 }
 
 
-/* ----- سبد خالی ----- */
 
 .empty-cart {
   display: flex;
@@ -4761,7 +4721,6 @@ main {
 }
 
 
-/* ----- سبد پر ----- */
 
 .cart-content {
   display: grid;
@@ -4963,7 +4922,6 @@ main {
 }
 
 
-/* ----- خلاصه‌ی سفارش ----- */
 
 .order-summary {
   position: sticky;
@@ -5144,7 +5102,6 @@ main {
 }
 
 
-/* ----- ریسپانسیو ----- */
 
 @media (max-width: 1024px) {
   .cart-content {
@@ -5269,7 +5226,6 @@ main {
    (هدر و فوتر در style.css هستند).
    ========================================================================== */
 
-/* ---------- متغیرها ---------- */
 .menu-page,
 .cart-toast {
   --m-bg: #f7f4ee;
@@ -5289,7 +5245,6 @@ main {
   --m-radius-lg: 1.5rem;
 }
 
-/* ---------- آیکون ---------- */
 .menu-page .icon,
 .cart-toast .icon {
   width: 1.25rem;
@@ -5300,7 +5255,6 @@ main {
   stroke-width: 1.8;
 }
 
-/* ---------- چیدمان ---------- */
 .menu-page {
   padding: 3rem 1rem;
   background: var(--m-bg);
@@ -5354,7 +5308,6 @@ main {
   }
 }
 
-/* ---------- سربرگ صفحه ---------- */
 .menu-page .menu-head {
   display: flex;
   flex-direction: column;
@@ -5421,7 +5374,7 @@ main {
   }
 }
 
-/* برچسب‌های گرد */
+/* Rounded provenance badges */
 .menu-page .pill {
   display: inline-flex;
   align-items: center;
@@ -5445,7 +5398,7 @@ main {
   fill: currentColor;
 }
 
-/* نشانه‌های اعتماد */
+/* Quality trust marks */
 .menu-page .trust {
   display: flex;
   flex-wrap: wrap;
@@ -5472,7 +5425,6 @@ main {
   color: var(--m-sage);
 }
 
-/* ---------- فیلتر و مرتب‌سازی ---------- */
 .menu-page .toolbar {
   display: flex;
   flex-direction: column;
@@ -5563,7 +5515,6 @@ main {
   pointer-events: none;
 }
 
-/* ---------- شبکه محصولات ---------- */
 .menu-page .product-grid {
   display: grid;
   grid-template-columns: 1fr;
@@ -5588,7 +5539,6 @@ main {
   }
 }
 
-/* ---------- کارت محصول ---------- */
 .menu-page .product-card {
   position: relative;
   display: flex;
@@ -5623,7 +5573,7 @@ main {
   transform: scale(1.05);
 }
 
-/* گرادیان تیره برای خوانایی متن */
+/* Legibility scrim gradient */
 .menu-page .product-card::before {
   content: "";
   position: absolute;
@@ -5714,7 +5664,6 @@ main {
   border-top: 1px solid rgba(255, 255, 255, 0.15);
 }
 
-/* ---------- نشان‌ها ---------- */
 .menu-page .badge {
   padding: 0.375rem 0.75rem;
   border: 1px solid rgba(255, 255, 255, 0.12);
@@ -5756,7 +5705,6 @@ main {
   font-weight: 600;
 }
 
-/* ---------- قیمت ---------- */
 .menu-page .price {
   display: flex;
   flex-direction: column;
@@ -5779,7 +5727,6 @@ main {
   font-weight: 400;
 }
 
-/* ---------- دکمه افزودن ---------- */
 .menu-page .btn-add {
   display: inline-flex;
   align-items: center;
@@ -5826,7 +5773,6 @@ main {
   display: block;
 }
 
-/* ---------- پیام افزوده‌شدن به سبد ---------- */
 .cart-toast {
   position: fixed;
   right: 1.5rem;
@@ -5868,7 +5814,6 @@ main {
   }
 }
 
-/* ---------- کاهش حرکت ---------- */
 @media (prefers-reduced-motion: reduce) {
 
   .menu-page *,
@@ -5882,7 +5827,6 @@ main {
   }
 }
 
-/* ---------- واکنش‌گرایی موبایل صفحات منو ---------- */
 @media (max-width: 640px) {
   .menu-page {
     padding: 1.5rem 0.75rem;
@@ -6029,7 +5973,7 @@ main {
   display: none;
 }
 
-/* مودال تسویه‌حساب و نقشه تعاملی میزها */
+/* Interactive table reservation modal and floor plan */
 .soren-modal-backdrop {
   position: fixed;
   inset: 0;
@@ -6115,7 +6059,7 @@ main {
   flex: 1;
 }
 
-/* تب‌های تفکیک زون‌های کافه */
+/* Café zone selection tabs with kinetic horizontal touch scrolling */
 .zone-tabs-bar {
   display: flex;
   gap: 8px;
@@ -6164,7 +6108,7 @@ main {
   box-shadow: 0 2px 8px rgba(121, 82, 57, 0.25);
 }
 
-/* گرید کارت‌های میز با معماری لایه‌ای */
+/* Responsive table cards grid with capacity & live availability */
 .table-selection-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
@@ -6324,7 +6268,7 @@ main {
   color: #6E665E;
 }
 
-/* فرم تحویل‌گیرنده و پرداخت */
+/* Customer dining & order preferences form */
 .order-details-section {
   border-top: 1px solid var(--border);
   padding-top: 20px;
@@ -6371,7 +6315,7 @@ main {
   background: #fff;
 }
 
-/* انتخابگر شیک روش پرداخت */
+/* Payment method selector cards */
 .payment-methods-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -6429,7 +6373,7 @@ main {
   color: var(--muted);
 }
 
-/* فوتر چسبان مودال */
+/* Sticky checkout modal footer */
 .soren-modal-footer {
   padding: 16px 24px;
   border-top: 1px solid var(--border);
@@ -6505,7 +6449,7 @@ main {
   }
 }
 
-/* ترکر زنده وضعیت سفارش */
+/* Real-time order progress tracker */
 .order-tracking-card {
   margin-top: 24px;
   padding: 20px;
@@ -6763,7 +6707,7 @@ main {
   background: var(--white);
 }
 
-/* هدر و فریم وکتور لوگو */
+/* Header branding and vector emblem container */
 .brand-logo-frame {
   width: 58px;
   height: 58px;
@@ -6797,7 +6741,7 @@ main {
    کشوی اطلاعات کافه (Mobile Off-Canvas Drawer) و نوار بالای موبایل
    ======================================================== */
 
-/* پس‌زمینه محو کشو */
+/* Backdrop blur filter for off-canvas drawer */
 .soren-drawer-backdrop {
   position: fixed;
   inset: 0;
@@ -6815,7 +6759,7 @@ main {
   pointer-events: auto;
 }
 
-/* ساختار بدنه کشوی آف‌کانواس */
+/* Off-canvas mobile navigation drawer */
 .soren-offcanvas-drawer {
   position: fixed;
   top: 0;
@@ -6843,7 +6787,7 @@ main {
   visibility: visible;
 }
 
-/* سربرگ کشو */
+/* Drawer header container */
 .drawer-header {
   display: flex;
   align-items: center;
@@ -6900,7 +6844,7 @@ main {
   outline: none;
 }
 
-/* محتوای داخلی کشو */
+/* Drawer internal scrollable content */
 .drawer-body {
   display: flex;
   flex-direction: column;
@@ -6908,7 +6852,7 @@ main {
   flex: 1 1 auto;
 }
 
-/* وضعیت زنده باریستا */
+/* Real-time barista station connectivity badge */
 .drawer-barista-status {
   display: flex;
   align-items: center;
@@ -6961,7 +6905,7 @@ main {
   line-height: 1.4;
 }
 
-/* ناوبری ثانویه کشو */
+/* Drawer secondary navigation */
 .drawer-nav {
   display: flex;
   flex-direction: column;
@@ -7001,7 +6945,7 @@ main {
   text-align: center;
 }
 
-/* بلوک‌های اطلاعاتی و تماس */
+/* Contact information blocks */
 .drawer-info-block {
   padding: 14px;
   background: rgba(255, 255, 255, 0.65);
@@ -7099,7 +7043,7 @@ main {
     display: none;
   }
 
-  /* پنهان‌سازی عناصر ناوبری افقی و پنل قدیمی */
+  /* Hide horizontal desktop nav elements on mobile */
   .desktop-nav,
   .desktop-search,
   .account-button,
@@ -7281,7 +7225,7 @@ main {
   animation: badge-pop 0.35s cubic-bezier(0.175, 0.885, 0.32, 1.275);
 }
 
-/* فاصله پایینی بدنه برای جلوگیری از پوشیده شدن محتوا توسط نوار پایینی در موبایل */
+/* Bottom gutter to prevent sticky navigation bar from obscuring content on mobile */
 @media (max-width: 767px) {
   body {
     padding-bottom: 0 !important;
@@ -7493,7 +7437,7 @@ main {
   text-shadow: 0 1px 3px rgba(0, 0, 0, 0.5);
 }
 
-/* نشانگر کوچک تعداد در سبد بعد از محو شدن استپر */
+/* Compact badge pill showing cart quantity after stepper collapses */
 .card-in-cart-pill {
   display: inline-flex;
   align-items: center;
@@ -7523,7 +7467,7 @@ main {
   transform: scale(0.96);
 }
 
-/* انیمیشن فیلتر ملایم کارت‌ها */
+/* Soft fade transition during catalog filtering */
 .featured-card {
   transition: opacity 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease;
 }
@@ -8182,7 +8126,7 @@ main {
   text-decoration: underline;
 }
 
-/* صراحت کامل برای پنهان بودن در نمایشگرهای تبلت و دسکتاپ */
+/* Enforce desktop concealment for mobile-only drawer elements */
 @media (min-width: 768px) {
   .floating-order-bar,
   .cart-bottom-sheet,
@@ -8196,7 +8140,7 @@ main {
    ======================================================== */
 
 
-/* ----- 2. ارتقای کارت‌های محصولات به معماری دو لایه‌ای لوکس (Doppelrand Cards) ----- */
+/* Dual-border card elevation */
 .featured-card {
   border: 1px solid rgba(255, 255, 255, 0.12) !important;
   border-radius: 24px !important;
@@ -8210,7 +8154,7 @@ main {
   border-color: rgba(200, 157, 102, 0.45) !important;
 }
 
-/* فونت بهینه‌سازی شده برای تمام قیمت‌ها، مبالغ و شمارنده‌ها با اعداد فارسی یکدست */
+/* Tabular lining Persian numerals for monetary amounts */
 .featured-prices,
 .featured-prices strong,
 .featured-prices del,
@@ -8256,7 +8200,7 @@ main {
   transform: scale(0.95) !important;
 }
 
-/* تگ‌های دسته‌بندی منو (Category Chips) با ترنزیشن فیزیکی */
+/* Physical spring transition for category filter chips */
 .category-chip {
   transition: transform 0.25s var(--ease-spring), background-color 0.25s ease, border-color 0.25s ease, color 0.25s ease, box-shadow 0.25s ease !important;
 }
@@ -8269,7 +8213,7 @@ main {
   box-shadow: 0 4px 14px rgba(121, 82, 57, 0.25) !important;
 }
 
-/* رعایت تنظیمات کاربر برای کاهش انیمیشن (Prefers Reduced Motion) */
+/* Honor user reduced-motion preferences */
 @media (prefers-reduced-motion: reduce) {
   .hero-btn,
   .featured-card,
@@ -8292,7 +8236,7 @@ main {
    SOREN CAFÉ — CONTEXTUAL CART UPSELL SHELF & ORDER PILL PULSE
    ======================================================== */
 
-/* شلف هوشمند مکمل قهوه در سبد خرید (Contextual Cart Upsell Shelf) */
+/* Contextual cart coffee upsell shelf */
 .cart-upsell-shelf {
   background: linear-gradient(135deg, rgba(247, 243, 238, 0.95) 0%, rgba(240, 232, 222, 0.95) 100%);
   border: 1.5px solid rgba(121, 82, 57, 0.18);
@@ -8395,7 +8339,7 @@ main {
   transform: scale(0.95);
 }
 
-/* انیمیشن تپش فنری پیل شناور سفارش جاری (Floating Order Pill Pulse) */
+/* Spring pulse animation for floating order pill */
 .order-pill-pulse {
   animation: pillSpringPulse 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
 }
@@ -8791,7 +8735,7 @@ main {
     touch-action: none;
   }
 
-  /* نوار کشیدن به سمت پایین به سبک دراورهای iOS (Drag Handle Bar) */
+  /* iOS-style drag handle bar for bottom sheet dismissal */
   .soren-modal-header::before {
     content: "";
     display: block;
@@ -8855,7 +8799,7 @@ main {
     min-height: 44px !important;
   }
 
-  /* هدر و ناچ ایمن آیفون و موبایل */
+  /* Safe area insets for notched displays */
   .site-header {
     height: auto !important;
     min-height: calc(56px + env(safe-area-inset-top, 0px)) !important;
@@ -8868,7 +8812,7 @@ main {
     top: calc(56px + env(safe-area-inset-top, 0px)) !important;
   }
 
-  /* حاشیه ایمن پایین صفحه برای بدنه و جلوگیری از همپوشانی دکمه هوم آیفون */
+  /* Bottom safe area gutter to prevent home indicator overlap */
   body {
     padding-bottom: calc(var(--bottom-nav-height, 64px) + max(16px, env(safe-area-inset-bottom, 16px)) + 24px);
   }

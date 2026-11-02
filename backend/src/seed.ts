@@ -1,7 +1,7 @@
 import { db } from "./db.ts";
 
 export const initialProducts = [
-  // --- دسته اول: قهوه‌ها (Coffees — ۶ محصول) ---
+  // Category 1: Coffees (6 specialty products)
   {
     id: "prd_doppio",
     name: "اسپرسو دوپیو سورن (Soren Doppio)",
@@ -63,7 +63,7 @@ export const initialProducts = [
     image_url: "/assets/products/matcha.png",
   },
 
-  // --- دسته دوم: کیک و شیرینی‌ها (Cakes & Bakes — ۶ محصول) ---
+  // Category 2: Cakes & Bakes (6 artisanal bakery products)
   {
     id: "prd_basque",
     name: "چیزکیک سن‌سباستین پسته (Pistachio Basque)",
@@ -125,7 +125,7 @@ export const initialProducts = [
     image_url: "/assets/products/banana-bread.png",
   },
 
-  // --- دسته سوم: شیک‌ها و نوشیدنی‌های خنک (Shakes & Frappes — ۶ محصول) ---
+  // Category 3: Shakes & Frappes (6 signature cold beverages)
   {
     id: "prd_pistachio_shake",
     name: "شیک پسته و کارامل نمکی (Salted Caramel Pistachio)",
@@ -187,8 +187,8 @@ export const initialProducts = [
     image_url: "/assets/products/berry-shake.png",
   },
 
-  // --- منوی اصلی فرانت‌اند (۱۸ محصول با قیمت‌های دقیق فرانت‌اند) ---
-  // قهوه‌ها
+  // Frontend landing page catalog sync (18 products with authoritative menu pricing)
+  // Coffees
   {
     id: "prd_latte",
     name: "لاته (Latte)",
@@ -259,7 +259,7 @@ export const initialProducts = [
     is_available: 1,
     image_url: "/images/products/coffee/iced-latte.png",
   },
-  // کیک و دسرها
+  // Cakes & Desserts
   {
     id: "prd_cheesecake",
     name: "چیزکیک نیویورکی (New York Cheesecake)",
@@ -320,7 +320,7 @@ export const initialProducts = [
     is_available: 1,
     image_url: "/images/products/cake/chocolate-chunk-cookie.png",
   },
-  // شیک‌ها
+  // Shakes & Cold Beverages
   {
     id: "prd_shake_choc",
     name: "شیک شکلات (Chocolate Shake)",

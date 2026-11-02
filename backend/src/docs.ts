@@ -5,13 +5,13 @@ export const openApiSpec = {
     title: "Soren Café — Real-Time POS, KDS & Telemetry API",
     version: "1.4.0",
     description: `
-### مستندات رسمی معماری و API کافه سورن (Soren Café)
+### Soren Café Architecture & REST API Documentation
 
-این مستندات مشخصات کامل اندپوینت‌های RESTful و پروتکل سوکت زنده سیستم را پوشش می‌دهد:
-* **Real-Time Order & Kitchen Display (KDS):** ثبت سفارش مشتری و تغییر وضعیت آنی برای تبلت باریستا.
-* **Table Occupancy & Hold Management:** رزرو و هولد موقت میزهای ۸ گانه سالن (انقضای ۱۵ دقیقه‌ای).
-* **Distributed Telemetry & Cluster Theatre:** تریس میکروثانیه‌ای اسپان‌ها، شیلد WAF و سوئیچ فیل‌اور بین ورکرها.
-* **Live WebSocket Bus:** پروتکل اشتراک کلاینت‌ها روی \`ws://localhost:4000/ws\`.
+This specification covers the RESTful HTTP endpoints and live WebSocket telemetry bus:
+* **Real-Time Order & Kitchen Display (KDS):** Customer order placement and real-time status dispatch for the barista station tablet.
+* **Table Occupancy & Hold Management:** Table lifecycle and temporary 15-minute hold reservations across all 8 café tables.
+* **Distributed Telemetry & Cluster Theatre:** Microsecond span telemetry, zero-trust WAF shield, and worker failover tracking.
+* **Live WebSocket Bus:** Client event subscription bus over \`ws://localhost:4000/ws\`.
     `,
     contact: {
       name: "Soren Engineering Team",

@@ -12,7 +12,7 @@
     <link rel="icon" type="image/svg+xml" href="../images/brand/favicon.svg" />
     <link rel="apple-touch-icon" href="../images/brand/favicon.svg" />
 
-    <!-- فونت‌های اختصاصی لوکس: وزیرمتن و پلاس جاکارتا سانس -->
+    <!-- Typography: Vazirmatn & Plus Jakarta Sans -->
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
@@ -20,15 +20,13 @@
       rel="stylesheet"
     />
 
-    <!-- استایل -->
-        <!-- پیش‌لود پرسرعت فونت‌های محلی پیدا -->
+        <!-- Preload critical local font weights -->
     <link rel="preload" href="../fonts/Peyda-Regular.woff2" as="font" type="font/woff2" crossorigin />
     <link rel="preload" href="../fonts/Peyda-Bold.woff2" as="font" type="font/woff2" crossorigin />
     <link rel="stylesheet" href="../css/style.css?v=2.1-peyda-fix" />
   </head>
 
   <body>
-    <!-- آیکون‌های مشترک صفحه -->
     <svg width="0" height="0" style="position: absolute" aria-hidden="true">
       <symbol id="i-snow" viewBox="0 0 24 24">
         <path
@@ -87,7 +85,6 @@
     <!-- ==================== Header ==================== -->
     <header class="site-header">
       <div class="header-inner">
-        <!-- لوگو و نام کافه -->
         <a class="brand" href="../index.html" aria-label="صفحه اصلی کافه سورن">
           <img
             src="../images/brand/soren-logo.svg"
@@ -102,7 +99,7 @@
           </span>
         </a>
 
-        <!-- منوی اصلی -->
+        <!-- Main navigation bar -->
         <nav class="desktop-nav" aria-label="منوی اصلی">
           <a class="nav-link" href="../index.html">خانه</a>
 
@@ -141,9 +138,7 @@
           <a class="nav-link" href="#site-footer">تماس با ما</a>
         </nav>
 
-        <!-- جست‌وجو و آیکون‌ها -->
         <div class="header-actions">
-          <!-- جست‌وجوی دسکتاپ -->
           <form class="search-box desktop-search" role="search">
             <button
               class="search-toggle"
@@ -171,7 +166,6 @@
             />
           </form>
 
-          <!-- جست‌وجوی موبایل -->
           <button
             class="icon-button mobile-search"
             type="button"
@@ -189,7 +183,6 @@
             </svg>
           </button>
 
-          <!-- حساب کاربری -->
           <a
             href="./login.html"
             class="icon-button account-button"
@@ -210,7 +203,6 @@
             </svg>
           </a>
 
-          <!-- سبد خرید -->
           <a
             href="./cart.html"
             class="icon-button cart-button"
@@ -228,7 +220,6 @@
             </svg>
           </a>
 
-          <!-- دکمه منوی موبایل -->
           <button
             class="icon-button mobile-menu-button"
             type="button"
@@ -249,10 +240,8 @@
         </div>
       </div>
 
-      <!-- پنل منوی موبایل -->
       <div class="mobile-panel" id="mobile-panel">
         <div class="mobile-panel-inner">
-          <!-- جست‌وجوی موبایل -->
           <form class="mobile-search-form" role="search">
             <svg
               class="search-icon"
@@ -274,7 +263,6 @@
             />
           </form>
 
-          <!-- لینک‌های منوی موبایل -->
           <nav class="mobile-links" aria-label="منوی موبایل">
             <a href="../index.html">خانه</a>
 
@@ -299,7 +287,7 @@
     <!-- ==================== Main ==================== -->
     <main class="menu-page">
       <div class="menu-inner">
-        <!-- معرفی صفحه -->
+        <!-- Category header banner -->
         <header class="menu-head">
           <div class="menu-intro">
             <span class="pill">
@@ -334,7 +322,7 @@
           </ul>
         </header>
 
-        <!-- فیلتر و مرتب‌سازی -->
+        <!-- Filter & sort controls -->
         <div class="toolbar">
           <div class="filters" role="group" aria-label="فیلتر محصولات">
             <button
@@ -387,13 +375,12 @@
           </div>
         </div>
 
-        <!-- محصولات -->
+        <!-- Product catalog grid -->
         <section
           class="product-grid"
           id="products-grid"
           aria-label="لیست شیک‌ها"
         >
-          <!-- شیک شکلات -->
           <article
             class="product-card"
             data-category="chocolate"
@@ -437,7 +424,6 @@
             </div>
           </article>
 
-          <!-- شیک وانیل -->
           <article
             class="product-card"
             data-category="classic"
@@ -481,7 +467,6 @@
             </div>
           </article>
 
-          <!-- شیک توت‌فرنگی -->
           <article
             class="product-card"
             data-category="fruit"
@@ -529,7 +514,6 @@
             </div>
           </article>
 
-          <!-- شیک اورئو -->
           <article
             class="product-card"
             data-category="chocolate"
@@ -573,7 +557,6 @@
             </div>
           </article>
 
-          <!-- شیک موز -->
           <article
             class="product-card"
             data-category="fruit"
@@ -618,7 +601,6 @@
             </div>
           </article>
 
-          <!-- شیک کارامل -->
           <article
             class="product-card"
             data-category="chocolate"
@@ -666,7 +648,7 @@
         
     </main>
 
-    <!-- پیام افزوده‌شدن به سبد -->
+    <!-- Add-to-cart toast notification -->
     <div class="cart-toast" id="cart-toast" role="status" aria-live="polite">
       <svg class="icon cart-toast-icon" aria-hidden="true">
         <use href="#i-check-circle" />
@@ -678,7 +660,6 @@
     <footer class="site-footer" id="site-footer">
       <div class="footer-container">
         <div class="footer-main">
-          <!-- معرفی کافه -->
           <div class="footer-brand">
             <a
               href="../index.html"
@@ -701,7 +682,7 @@
             </p>
           </div>
 
-          <!-- لینک‌های سریع -->
+          <!-- Quick navigation links -->
           <nav class="footer-links" aria-label="لینک‌های سریع">
             <h3 class="footer-title">دسترسی سریع</h3>
             <ul>
@@ -711,7 +692,7 @@
             </ul>
           </nav>
 
-          <!-- منوی کافه -->
+          <!-- Menu links -->
           <nav class="footer-links" aria-label="دسته‌بندی محصولات">
             <h3 class="footer-title">منوی کافه</h3>
             <ul>
@@ -721,7 +702,7 @@
             </ul>
           </nav>
 
-          <!-- شبکه‌های اجتماعی -->
+          <!-- Social media links -->
           <div class="footer-social">
             <h3 class="footer-title">همراه سورن باشید</h3>
 
@@ -778,14 +759,12 @@
           </div>
         </div>
 
-        <!-- جداکننده -->
         <div class="footer-divider">
           <span></span>
           <span class="footer-divider-icon" aria-hidden="true">✦</span>
           <span></span>
         </div>
 
-        <!-- کپی‌رایت -->
         <div class="footer-bottom">
           <p>© ۱۴۰۵ کافه سورن؛ تمام حقوق محفوظ است.</p>
 
