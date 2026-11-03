@@ -2,6 +2,7 @@ import http from "node:http";
 import fs from "node:fs";
 import path from "node:path";
 import { spawn } from "node:child_process";
+import os from "node:os";
 import { fileURLToPath } from "node:url";
 
 const __filename = fileURLToPath(import.meta.url);
@@ -271,11 +272,13 @@ class SimpleCDP {
 
 // Helper to launch Chrome and get WebSocket URL
 async function launchChrome(port = 9222) {
+  const tmpProfile = fs.mkdtempSync(path.join(os.tmpdir(), "soren-resp-"));
   const chromeProcess = spawn(
     CHROME_PATH,
     [
       "--headless=new",
       `--remote-debugging-port=${port}`,
+      `--user-data-dir=${tmpProfile}`,
       "--no-sandbox",
       "--disable-setuid-sandbox",
       "--disable-dev-shm-usage",

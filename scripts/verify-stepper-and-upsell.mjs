@@ -2,6 +2,7 @@ import http from "node:http";
 import fs from "node:fs";
 import path from "node:path";
 import { spawn } from "node:child_process";
+import os from "node:os";
 import { fileURLToPath } from "node:url";
 
 const __filename = fileURLToPath(import.meta.url);
@@ -129,11 +130,13 @@ async function run() {
   console.log("========================================================");
 
   const server = await startServer();
+  const tmpProfile = fs.mkdtempSync(path.join(os.tmpdir(), "soren-stepper-"));
   const chromeProcess = spawn(
     CHROME_PATH,
     [
       "--headless=new",
       `--remote-debugging-port=${CHROME_PORT}`,
+      `--user-data-dir=${tmpProfile}`,
       "--no-sandbox",
       "--disable-setuid-sandbox",
       "--disable-dev-shm-usage",
@@ -146,11 +149,25 @@ async function run() {
     { stdio: "ignore" }
   );
 
-  await new Promise((r) => setTimeout(r, 1200));
+  let tabInfo = null;
+  for (let i = 0; i < 30; i++) {
+    try {
+      const res = await fetch(`http://127.0.0.1:${CHROME_PORT}/json/new?about:blank`, { method: "PUT" });
+      if (res.ok) {
+        tabInfo = await res.json();
+        break;
+      }
+    } catch (_) {}
+    await new Promise((r) => setTimeout(r, 200));
+  }
+
+  if (!tabInfo || !tabInfo.webSocketDebuggerUrl) {
+    chromeProcess.kill();
+    server.close();
+    throw new Error(`Failed to connect to headless Chrome on port ${CHROME_PORT}`);
+  }
 
   try {
-    const newTabRes = await fetch(`http://127.0.0.1:${CHROME_PORT}/json/new?about:blank`, { method: "PUT" });
-    const tabInfo = await newTabRes.json();
     const cdp = new SimpleCDP(tabInfo.webSocketDebuggerUrl);
     await cdp.connect();
 
