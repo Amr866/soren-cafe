@@ -9059,21 +9059,63 @@ a.brand,
 
   .hero-buttons {
     width: 100% !important;
-    gap: 10px !important;
+    gap: 12px !important;
     display: flex !important;
     flex-direction: row !important;
     flex-wrap: nowrap !important;
-    margin-bottom: 16px !important;
+    align-items: center !important;
+    margin-bottom: 20px !important;
   }
 
   .hero-btn {
     flex: 1 1 50% !important;
     min-width: 0 !important;
-    min-height: 48px !important;
-    padding: 10px 14px !important;
-    font-size: 13px !important;
-    border-radius: 12px !important;
+    min-height: 50px !important;
+    height: 50px !important;
+    padding: 0 14px !important;
+    font-size: 15.5px !important;
+    font-weight: 700 !important;
+    letter-spacing: -0.2px !important;
+    border-radius: 14px !important;
+    display: inline-flex !important;
+    align-items: center !important;
     justify-content: center !important;
+    box-sizing: border-box !important;
+    text-decoration: none !important;
+    transition: transform 0.15s ease, box-shadow 0.15s ease !important;
+  }
+
+  .hero-btn-primary {
+    background: #795239 !important;
+    color: #ffffff !important;
+    box-shadow: 0 4px 14px rgba(121, 82, 57, 0.22) !important;
+    gap: 8px !important;
+    padding: 0 12px 0 14px !important;
+  }
+
+  .hero-btn-secondary {
+    border: 1.5px solid rgba(140, 94, 60, 0.22) !important;
+    background: #ffffff !important;
+    color: #242120 !important;
+    box-shadow: 0 2px 8px rgba(36, 33, 32, 0.04) !important;
+  }
+
+  .hero-arrow-capsule {
+    width: 28px !important;
+    height: 28px !important;
+    min-width: 28px !important;
+    min-height: 28px !important;
+    border-radius: 50% !important;
+    background: rgba(255, 255, 255, 0.22) !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    flex-shrink: 0 !important;
+  }
+
+  .hero-arrow {
+    font-size: 13px !important;
+    line-height: 1 !important;
   }
 
   .hero-highlights {
@@ -9107,7 +9149,7 @@ a.brand,
   }
 
   .highlight-label {
-    font-size: 11px !important;
+    font-size: 12px !important;
     line-height: 1.4 !important;
     color: #7b7266 !important;
     margin-top: 2px !important;
@@ -9172,7 +9214,7 @@ a.brand,
   }
 
   .feature-card h3 {
-    font-size: 11.5px !important;
+    font-size: 13px !important;
     font-weight: 700 !important;
     color: #242120 !important;
     margin: 0 !important;
@@ -9181,11 +9223,11 @@ a.brand,
   }
 
   .feature-card p {
-    font-size: 9.5px !important;
+    font-size: 11.5px !important;
     color: #7b7266 !important;
     margin: 0 !important;
     white-space: nowrap !important;
-    line-height: 1.25 !important;
+    line-height: 1.35 !important;
   }
 
   /* اسلایدر متمرکز دسته‌بندی‌ها در موبایل (Single-Card Focused Snap) */
