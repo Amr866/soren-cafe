@@ -1036,23 +1036,53 @@ function initSingleSurfaceCatalog() {
   window.addEventListener("hashchange", () => checkUrlCategory(false));
   checkUrlCategory(false);
 
-  // ۲. مدیریت استپر کارت‌های محصول (حفظ استپر پایدار هنگام وجود آیتم در سبد خرید بدون پرش و لود مجدد)
-  function showCardStepper(id) {
+  // ۲. مدیریت هوشمند استپر موقت (+ / تعداد / -) با ناپدید شدن خودکار پس از ۵۰۰ میلی‌ثانیه عدم تغییر
+  const activeStepperTimers = new Map();
+
+  function showCardStepper(id, duration = 500) {
     if (!id) return;
-    renderSingleCardAction(id);
+    if (activeStepperTimers.has(id)) {
+      clearTimeout(activeStepperTimers.get(id));
+    }
+
+    activeStepperTimers.set(
+      id,
+      setTimeout(() => {
+        activeStepperTimers.delete(id);
+        dismissCardStepper(id);
+      }, duration)
+    );
+
+    renderSingleCardAction(id, true);
   }
 
   function dismissCardStepper(id) {
     if (!id) return;
-    renderSingleCardAction(id);
+    const cards = document.querySelectorAll(
+      `.featured-card[data-id="${id}"], .featured-card[data-product-id="${id}"], .product-card[data-id="${id}"]`
+    );
+    cards.forEach((card) => {
+      const stepper = card.querySelector(".card-stepper");
+      if (stepper) {
+        stepper.classList.add("is-collapsing");
+        setTimeout(() => {
+          renderSingleCardAction(id, false);
+        }, 180);
+      } else {
+        renderSingleCardAction(id, false);
+      }
+    });
   }
 
   function dismissCardStepperImmediately(id) {
-    if (!id) return;
-    renderSingleCardAction(id);
+    if (activeStepperTimers.has(id)) {
+      clearTimeout(activeStepperTimers.get(id));
+      activeStepperTimers.delete(id);
+    }
+    renderSingleCardAction(id, false);
   }
 
-  function renderSingleCardAction(id) {
+  function renderSingleCardAction(id, isStepperActive = false) {
     if (!id) return;
     const cards = document.querySelectorAll(
       `.featured-card[data-id="${id}"], .featured-card[data-product-id="${id}"], .product-card[data-id="${id}"]`
@@ -1072,10 +1102,10 @@ function initSingleSurfaceCatalog() {
       if (!actionBox) return;
 
       const name = card.dataset.name || card.querySelector("h3, .product-title")?.textContent.trim() || "محصول";
-      const currentState = actionBox.dataset.renderedState || (actionBox.querySelector(".card-stepper") ? "stepper" : "empty");
+      const currentState = actionBox.dataset.renderedState || (actionBox.querySelector(".card-stepper") ? "stepper" : (actionBox.querySelector(".card-in-cart-pill") ? "pill" : "empty"));
       const currentQty = parseInt(actionBox.dataset.renderedQty || "0", 10);
 
-      if (qty > 0) {
+      if (qty > 0 && isStepperActive) {
         if (currentState === "stepper") {
           if (currentQty !== qty) {
             const countEl = actionBox.querySelector(".stepper-count");
@@ -1092,6 +1122,32 @@ function initSingleSurfaceCatalog() {
             <span class="stepper-count" aria-live="polite">${toFaDigits(qty)}</span>
             <button type="button" class="stepper-btn stepper-plus" data-id="${id}" aria-label="افزایش تعداد ${name}">+</button>
           </div>
+        `;
+      } else if (qty > 0) {
+        if (currentState === "pill" && currentQty === qty) return;
+        actionBox.dataset.renderedState = "pill";
+        actionBox.dataset.renderedQty = String(qty);
+        actionBox.innerHTML = `
+          <button
+            class="featured-order card-add-btn has-items"
+            type="button"
+            data-product="${name}"
+            data-id="${id}"
+            aria-label="افزودن ${name} به سبد (${toFaDigits(qty)} عدد در سبد)"
+          >
+            <svg
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="1.8"
+              aria-hidden="true"
+            >
+              <path d="M5 8h14l1 12H4L5 8Z" stroke-linejoin="round" />
+              <path d="M9 9V6a3 3 0 0 1 6 0v3" stroke-linecap="round" />
+            </svg>
+            <span>افزودن به سبد</span>
+            <span class="card-in-cart-pill" aria-hidden="true">${toFaDigits(qty)}</span>
+          </button>
         `;
       } else {
         if (currentState === "empty") return;
@@ -1129,7 +1185,8 @@ function initSingleSurfaceCatalog() {
     cards.forEach((card) => {
       const id = card.dataset.id || card.dataset.productId;
       if (!id) return;
-      renderSingleCardAction(id);
+      const isStepperActive = activeStepperTimers.has(id);
+      renderSingleCardAction(id, isStepperActive);
     });
   }
 
@@ -2653,6 +2710,11 @@ if (document.readyState === "loading") {
         desc: card.querySelector(".product-desc, p")?.textContent.trim() || "",
       };
 
+      // فعال‌سازی استپر موقت با ناپدید شدن خودکار پس از ۵۰۰ میلی‌ثانیه
+      if (id && typeof window.showCardStepper === "function") {
+        window.showCardStepper(id, 500);
+      }
+
       // اجرای میکرو-انیمیشن پرواز آیتم و توست قبل از رندر استپر
       if (addBtn) {
         animateFlyToCart(addBtn);
@@ -2670,6 +2732,16 @@ if (document.readyState === "loading") {
       const id = minusBtn.dataset.id || card?.dataset.id || card?.dataset.productId;
       if (id) {
         SorenCartStore.updateQuantity(id, -1);
+        const newQty = SorenCartStore.getItemQuantity(id);
+        if (newQty > 0) {
+          if (typeof window.showCardStepper === "function") {
+            window.showCardStepper(id, 500);
+          }
+        } else {
+          if (typeof window.dismissCardStepperImmediately === "function") {
+            window.dismissCardStepperImmediately(id);
+          }
+        }
       }
     }
   });
