@@ -577,9 +577,14 @@ if (typeof window !== "undefined") {
         const matched = title.includes(query) || desc.includes(query);
         card.hidden = !matched;
       });
+      const emptyState = document.getElementById("catalog-empty-state");
+      if (emptyState) {
+        const visible = Array.from(cards).some((c) => !c.hidden);
+        emptyState.hidden = visible;
+      }
     } else {
       const isPagesDir = window.location.pathname.includes("/pages/");
-      const target = isPagesDir ? "./coffee.html" : "./pages/coffee.html";
+      const target = isPagesDir ? "./products.html" : "./pages/products.html";
       window.location.href = `${target}?q=${encodeURIComponent(query)}`;
     }
   });
@@ -774,6 +779,11 @@ if (typeof window !== "undefined") {
           const title = card.querySelector(".product-title")?.textContent.toLowerCase() || "";
           card.hidden = !title.includes(query);
         });
+        const emptyState = document.getElementById("catalog-empty-state");
+        if (emptyState) {
+          const visible = Array.from(cards).some((c) => !c.hidden);
+          emptyState.hidden = visible;
+        }
         if (panel) panel.classList.remove("open");
         if (menuBtn) menuBtn.setAttribute("aria-expanded", "false");
       }
@@ -2475,11 +2485,20 @@ if (document.readyState === "loading") {
   if (grid) {
     const filterButtons = document.querySelectorAll(".menu-page .filter-btn");
     const cards = Array.from(grid.querySelectorAll(".product-card"));
+    const emptyState = document.getElementById("catalog-empty-state");
+
+    function updateEmptyState() {
+      if (emptyState) {
+        const visibleCount = cards.filter((c) => !c.hidden).length;
+        emptyState.hidden = visibleCount > 0;
+      }
+    }
 
     function filterCards(category) {
       cards.forEach((card) => {
         card.hidden = category !== "all" && card.dataset.category !== category;
       });
+      updateEmptyState();
     }
 
     filterButtons.forEach((button) => {
@@ -2492,6 +2511,45 @@ if (document.readyState === "loading") {
         filterCards(button.dataset.category);
       });
     });
+
+    const resetBtn = document.getElementById("reset-filter-btn");
+    if (resetBtn) {
+      resetBtn.addEventListener("click", () => {
+        const allBtn = Array.from(filterButtons).find((btn) => btn.dataset.category === "all");
+        if (allBtn) {
+          allBtn.click();
+        } else {
+          cards.forEach((c) => { c.hidden = false; });
+          updateEmptyState();
+        }
+        const searchInputs = document.querySelectorAll(".desktop-search input, #mobile-search-input");
+        searchInputs.forEach((inp) => { inp.value = ""; });
+      });
+    }
+
+    // Support URL parameters on load (e.g. ?category=coffee or ?q=لاته)
+    try {
+      const urlParams = new URLSearchParams(window.location.search);
+      const catParam = urlParams.get("category");
+      if (catParam) {
+        const targetBtn = Array.from(filterButtons).find(
+          (btn) => btn.dataset.category === catParam || (catParam === "shakes" && btn.dataset.category === "shake")
+        );
+        if (targetBtn) targetBtn.click();
+      }
+      const qParam = urlParams.get("q");
+      if (qParam) {
+        const query = qParam.trim().toLowerCase();
+        cards.forEach((card) => {
+          const title = card.querySelector(".product-title")?.textContent.toLowerCase() || "";
+          const desc = card.querySelector(".product-desc")?.textContent.toLowerCase() || "";
+          card.hidden = !(title.includes(query) || desc.includes(query));
+        });
+        const searchInputs = document.querySelectorAll(".desktop-search input, #mobile-search-input");
+        searchInputs.forEach((inp) => { inp.value = qParam; });
+        updateEmptyState();
+      }
+    } catch (_) {}
 
     const sorters = {
       popular: (a, b) => Number(b.dataset.popularity || 0) - Number(a.dataset.popularity || 0),
