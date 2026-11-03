@@ -173,24 +173,32 @@ server.listen(PORT, '127.0.0.1', async () => {
     console.log('✅ Task 1: Mobile Category Card Scale & Proportions verified successfully!');
 
     // ============================================
-    // Task 2: Check Academic Demo Hospitality Footer HTML
+    // Task 2: Check Hospitality Footer & Restored Bottom Elements
     // ============================================
-    console.log('--- Verifying Task 2: Academic Demo Hospitality Footer HTML ---');
+    console.log('--- Verifying Task 2: Mobile Hospitality Footer & Restored Bottom Elements ---');
     const footerCheck = await cdp.send('Runtime.evaluate', {
       expression: `(() => {
         const liveStatus = document.querySelector('.footer-live-status');
         const callBtn = document.querySelector('a[href^="tel:"]');
         const mapBtn = document.querySelector('.footer-action-btn[href*="maps"]');
-        const sitemapLinks = document.querySelectorAll('.footer-links');
-        const academicNote = document.querySelector('.footer-academic-badge');
+        const footerMain = document.querySelector('.footer-main');
+        const hospitalityCard = document.querySelector('.footer-hospitality-card');
+        const footerCopy = document.querySelector('.footer-copy');
+        const footerNote = document.querySelector('.footer-bottom-note');
+        const dividerIcon = document.querySelector('.footer-divider-icon');
         return {
           hasLiveStatus: !!liveStatus,
           liveStatusText: liveStatus ? liveStatus.textContent.trim() : null,
           hasCallBtn: !!callBtn,
           callHref: callBtn ? callBtn.getAttribute('href') : null,
           hasMapBtn: !!mapBtn,
-          sitemapCount: sitemapLinks.length,
-          hasAcademicNote: !!academicNote
+          footerMainHidden: footerMain ? window.getComputedStyle(footerMain).display === 'none' : false,
+          hospitalityVisible: hospitalityCard ? window.getComputedStyle(hospitalityCard).display !== 'none' : false,
+          hasFooterCopy: !!footerCopy,
+          copyText: footerCopy ? footerCopy.textContent.trim() : '',
+          hasFooterNote: !!footerNote,
+          noteText: footerNote ? footerNote.textContent.trim() : '',
+          dividerGlyph: dividerIcon ? dividerIcon.textContent.trim() : ''
         };
       })()`,
       returnByValue: true
@@ -201,9 +209,12 @@ server.listen(PORT, '127.0.0.1', async () => {
     assert.ok(fRes.liveStatusText.includes('هم‌اکنون باز است'), 'Live status must show cafe is open');
     assert.ok(fRes.hasCallBtn, 'Footer must contain direct call action button with tel: protocol');
     assert.ok(fRes.hasMapBtn, 'Footer must contain direct map navigation action button');
-    assert.strictEqual(fRes.sitemapCount, 0, 'Redundant sitemap link columns must be removed from mobile footer');
-    assert.ok(fRes.hasAcademicNote, 'Footer must contain academic demo note for professor grading');
-    console.log('✅ Task 2: Academic Demo Hospitality Footer HTML verified successfully!');
+    assert.ok(fRes.footerMainHidden, 'Desktop footer .footer-main must be hidden on mobile viewport');
+    assert.ok(fRes.hospitalityVisible, 'Mobile hospitality card must be visible on mobile viewport');
+    assert.ok(fRes.hasFooterCopy && fRes.copyText.includes('کافه سورن'), 'Footer must contain restored copyright');
+    assert.ok(fRes.hasFooterNote && fRes.noteText.includes('عطر قهوه'), 'Footer must contain restored love/coffee note');
+    assert.strictEqual(fRes.dividerGlyph, '✦', 'Footer divider must contain diamond glyph ✦');
+    console.log('✅ Task 2: Mobile Hospitality Footer & Restored Bottom Elements verified successfully!');
 
     // ============================================
     // Task 3: Check Hospitality Footer Styling

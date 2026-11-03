@@ -9408,6 +9408,24 @@ a.brand,
    کارت جامع میزبانی کافه و فوتر مدرن آکادمیک
    (Academic Demo Hospitality Card & Modern Footer)
    ======================================================== */
+@media (min-width: 641px) {
+  .footer-hospitality-card {
+    display: none !important;
+  }
+  .footer-main {
+    display: grid !important;
+  }
+}
+
+@media (max-width: 640px) {
+  .footer-main {
+    display: none !important;
+  }
+  .footer-hospitality-card {
+    display: block !important;
+  }
+}
+
 .footer-hospitality-card {
   background: rgba(255, 255, 255, 0.03);
   border: 1px solid rgba(255, 255, 255, 0.08);
@@ -9544,19 +9562,33 @@ a.brand,
   font-weight: 600;
 }
 
-.footer-academic-badge {
-  font-size: 12px;
-  color: #b9aea3 !important;
-  margin: 0 0 4px;
-  text-align: center;
-  font-weight: 500;
+.footer-bottom {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  gap: 15px !important;
+  padding-top: 14px !important;
+}
+
+.footer-bottom-note {
+  margin: 0 !important;
+  color: #c4b8aa !important;
+  font-size: 12.5px !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 6px !important;
+}
+
+.footer-brand-glyph {
+  color: var(--footer-terracotta, #c86d51) !important;
+  font-size: 13px !important;
 }
 
 .footer-copy {
-  font-size: 11px;
-  color: #8c8278 !important;
-  margin: 0;
-  text-align: center;
+  margin: 0 !important;
+  color: #a99d92 !important;
+  font-size: 12px !important;
+  font-variant-numeric: tabular-nums !important;
 }
 
 @media (max-width: 640px) {
