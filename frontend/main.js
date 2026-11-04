@@ -4,7 +4,7 @@
    SOREN CAFÉ — Unified Interactive Client & Backend Bridge
    ======================================================== */
 
-// Fast-path check: suppress splash preloader if already seen in current session
+// بررسی سریع و فوری وضعیت مشاهده پری‌لودر در سشن جاری (Zero Flash)
 (function checkEarlyPreloaderSeen() {
   if (typeof window === "undefined" || typeof document === "undefined") return;
   try {
@@ -128,13 +128,14 @@ const SorenWS = {
   },
 };
 
-// Global WebSocket connection initialization
+// راه‌اندازی سراسری وب‌سوکت در زمان لود صفحه
 if (typeof window !== "undefined") {
   SorenWS.init();
 }
 
-// Authoritative 37-product catalog synchronized with backend SQLite database
+// کاتالوگ تطبیقی کامل ۳۷ محصول کافه سورن با شناسه‌های دیتابیس بک‌اند
 const PRODUCT_CATALOG = {
+  // قهوه‌های منوی اصلی
   "لاته": { id: "prd_latte", name: "لاته", price: 150000, image: "../images/products/coffee/latte.png", category: "coffee", desc: "قهوه تخصصی · ۲۵۰ میلی‌لیتر" },
   "کاپوچینو": { id: "prd_cappuccino", name: "کاپوچینو", price: 140000, image: "../images/products/coffee/cappuccino.png", category: "coffee", desc: "نوشیدنی گرم · ۳۰۰ میلی‌لیتر" },
   "اسپرسو": { id: "prd_espresso", name: "اسپرسو", price: 90000, image: "../images/products/coffee/espresso.png", category: "coffee", desc: "شات دوبل اصیل · ۴۰ میلی‌لیتر" },
@@ -145,12 +146,14 @@ const PRODUCT_CATALOG = {
   "موکا": { id: "prd_mocha", name: "موکا", price: 160000, image: "../images/products/coffee/mocha.png", category: "coffee", desc: "اسپرسو با شکلات فرانسوی · ۲۸۰ میلی‌لیتر" },
   "آیس لاته": { id: "prd_iced_latte", name: "آیس لاته", price: 170000, image: "../images/products/coffee/iced-latte.png", category: "coffee", desc: "سرو خنک با یخ قالبی · ۳۰۰ میلی‌لیتر" },
 
+  // قهوه‌های تخصصی (Specialty Coffee Bar)
   "کورتادو": { id: "prd_cortado", name: "کورتادو پارسه", price: 95000, image: "../images/products/coffee/espresso.png", category: "coffee", desc: "اسپرسو با شیر بخارپز مخملی (۱:۱)" },
   "فلت وایت": { id: "prd_flatwhite", name: "فلت‌وایت عسل و دارچین", price: 115000, image: "../images/products/coffee/latte.png", category: "coffee", desc: "شیر جو دوسر، عسل طبیعی کوهستان" },
   "پوراوور V60": { id: "prd_geisha_v60", name: "پوراوور V60 کلمبیا", price: 140000, image: "../images/products/coffee/americano.png", category: "coffee", desc: "دم‌آوری دستی چکه‌ای، نت هلو و فینیش شفاف" },
   "کلد برو": { id: "prd_coldbrew", name: "کلد برو دودی زعفرانی", price: 125000, image: "../images/products/coffee/iced-latte.png", category: "coffee", desc: "۱۸ ساعت دم‌آوری سرد با زعفران قائنات" },
   "ماچا لاته": { id: "prd_matcha_latte", name: "ماچا لاته تشریفاتی", price: 135000, image: "../images/products/coffee/latte.png", category: "coffee", desc: "ماچای خالص اوجی کیوتو با شیر بادام" },
 
+  // کیک و دسرها
   "چیزکیک نیویورکی": { id: "prd_cheesecake", name: "چیزکیک نیویورکی", price: 180000, image: "../images/products/cake/cheesecake.png", category: "cake", desc: "بافت خامه‌ای کاراملیزه دست‌ساز" },
   "چیز‌کیک": { id: "prd_cheesecake", name: "چیزکیک نیویورکی", price: 180000, image: "../images/products/cake/cheesecake.png", category: "cake", desc: "بافت خامه‌ای کاراملیزه دست‌ساز" },
   "براونی شکلاتی فاج": { id: "prd_brownie", name: "براونی شکلاتی فاج", price: 130000, image: "../images/products/cake/chocolate-fudge-brownie.png", category: "cake", desc: "براونی غلیظ با مغز شکلات مذاب" },
@@ -167,6 +170,7 @@ const PRODUCT_CATALOG = {
   "کروسان": { id: "prd_croissant", name: "کروسان بادام و بهارنارنج", price: 110000, image: "../images/products/cake/chocolate-chunk-cookie.png", category: "cake", desc: "لایه‌لایه کره‌ای با عطر بهارنارنج شیراز" },
   "نان موزی": { id: "prd_banana_bread", name: "نان موزی برشته با کره قهوه", price: 95000, image: "../images/products/cake/carrot-walnut-cake.png", category: "cake", desc: "نان موزی گردویی برشته با کره اسپرسو" },
 
+  // شیک‌ها و نوشیدنی‌های خنک
   "شیک شکلات": { id: "prd_shake_choc", name: "شیک شکلات", price: 180000, image: "../images/products/shakes/chocolate-shake.png", category: "shake", desc: "بستنی شکلاتی و سس کاکائو هلندی" },
   "شیک وانیل": { id: "prd_shake_vanilla", name: "شیک وانیل", price: 160000, image: "../images/products/shakes/vanilla-shake.png", category: "shake", desc: "وانیل ماداگاسکار و شیر تازه" },
   "شیک توت‌فرنگی": { id: "prd_shake_strawberry", name: "شیک توت‌فرنگی", price: 170000, image: "../images/products/shakes/strawberry-shake.png", category: "shake", desc: "پوره طبیعی توت‌فرنگی تازه" },
@@ -181,7 +185,7 @@ const PRODUCT_CATALOG = {
   "شیک دارک چاکلت": { id: "prd_berry_dark", name: "شیک دارک چاکلت و تمشک وحشی", price: 175000, image: "../images/products/shakes/chocolate-shake.png", category: "shake", desc: "شکلات تلخ بلژیکی با پوره ملس تمشک جنگلی" },
 };
 
-// Expose core catalog entities on window for global client access
+// انتشار متغیرهای کلیدی روی شیء window برای دسترسی کامل کلاینت
 if (typeof window !== "undefined") {
   window.PRODUCT_CATALOG = PRODUCT_CATALOG;
   window.SorenWS = SorenWS;
@@ -205,7 +209,7 @@ const SorenAudio = {
     // Audio and haptics remain enabled by default across navigation and interactions
     this.enabled = true;
 
-    // Synthesize acoustic feedback for navigation tabs, chips, and controls
+    // بازخورد صوتی روی دکمه‌های ناوبری، تب‌ها، چیپ‌ها و دکمه‌های کنترلی
     document.addEventListener("click", (e) => {
       const target = e.target.closest(
         ".category-chip, .hero-btn-primary, .sheet-checkout-btn, .order-bar-btn, .cart-button, .bottom-nav-cart, .filter-btn, .mobile-nav-item, #drawer-close-btn, #sheet-close-btn"
@@ -281,17 +285,17 @@ const SorenAudio = {
     } catch (e) {}
   },
 
-  // Ascending acoustic chime for item increment / add-to-cart
+  // صدای افزایش و افزودن به سبد (صدای زنگوله گرم و صعودی)
   playAdd() {
     this.playTone(340, 560, 0.09, 0.05, "sine");
   },
 
-  // Gentle descending tone for decrement / item removal
+  // صدای کاهش یا حذف آیتم (صدای ملایم نزولی)
   playRemove() {
     this.playTone(420, 240, 0.08, 0.04, "sine");
   },
 
-  // Subtle organic wood-tap acoustic response
+  // صدای لمس سبک چوب و کلیک ارگانیک
   playWarmTap() {
     this.playTone(380, 160, 0.07, 0.04, "sine");
   },
@@ -430,7 +434,7 @@ const SorenCartStore = {
   },
 };
 
-// Backward compatibility bridge for legacy cart interactions
+// پل سازگاری رو به عقب برای کدهای پیشین سبد خرید (Backward Compatibility Bridge)
 const SorenCart = {
   KEY: "soren_cart_v1",
 
@@ -497,24 +501,24 @@ const SorenCart = {
   },
 };
 
-// Expose cart store API on window and attach event listeners
+// انتشار روی window و گوش‌دادن به رویدادها
 if (typeof window !== "undefined") {
   window.SorenCartStore = SorenCartStore;
   window.SorenCart = SorenCart;
 
-  // Synchronize UI badge counts with cart state changes
+  // همگام‌سازی نشانگرها با تغییرات سبد خرید
   window.addEventListener("soren:cart-changed", () => {
     SorenCart.syncBadges();
   });
 
-  // Cross-tab state synchronization via storage events
+  // همگام‌سازی بین تب‌های مختلف مرورگر با storage event
   window.addEventListener("storage", (e) => {
     if (e.key === "soren_cart_v1") {
       SorenCartStore.init();
     }
   });
 
-  // Real-time WebSocket synchronization across client sessions
+  // همگام‌سازی بلادرنگ وب‌سوکت با دیگر نشست‌ها
   if (typeof SorenWS !== "undefined" && SorenWS.on) {
     SorenWS.on("cart:sync", (data) => {
       if (data && Array.isArray(data.items)) {
@@ -528,7 +532,7 @@ if (typeof window !== "undefined") {
     });
   }
 
-  // Cart initialization on DOM ready
+  // راه‌اندازی اولیه فروشگاه
   SorenCartStore.init();
 }
 
@@ -577,14 +581,9 @@ if (typeof window !== "undefined") {
         const matched = title.includes(query) || desc.includes(query);
         card.hidden = !matched;
       });
-      const emptyState = document.getElementById("catalog-empty-state");
-      if (emptyState) {
-        const visible = Array.from(cards).some((c) => !c.hidden);
-        emptyState.hidden = visible;
-      }
     } else {
       const isPagesDir = window.location.pathname.includes("/pages/");
-      const target = isPagesDir ? "./products.html" : "./pages/products.html";
+      const target = isPagesDir ? "./coffee.html" : "./pages/coffee.html";
       window.location.href = `${target}?q=${encodeURIComponent(query)}`;
     }
   });
@@ -666,7 +665,7 @@ if (typeof window !== "undefined") {
       }
     });
 
-    // Swipe-to-dismiss gesture on touch devices (horizontal swipe >= 50px)
+    // بستن کشو با کشیدن به سمت راست در نمایشگرهای لمسی (Swipe to Dismiss)
     let touchStartX = 0;
     let touchStartY = 0;
     drawer.addEventListener(
@@ -683,7 +682,7 @@ if (typeof window !== "undefined") {
       (e) => {
         const deltaX = e.changedTouches[0].clientX - touchStartX;
         const deltaY = Math.abs(e.changedTouches[0].clientY - touchStartY);
-        // Require horizontal swipe >= 50px with vertical variance < 40px
+        // حرکت افقی به راست حداقل ۵۰ پیکسل با انحراف عمودی کمتر از ۴۰ پیکسل
         if (deltaX > 50 && deltaY < 40) {
           closeDrawer();
         }
@@ -692,7 +691,7 @@ if (typeof window !== "undefined") {
     );
   }
 
-  // Dismiss on Escape keypress
+  // بستن با کلید Escape
   document.addEventListener("keydown", (e) => {
     if (e.key === "Escape") {
       if (drawer && drawer.classList.contains("is-open")) {
@@ -704,7 +703,7 @@ if (typeof window !== "undefined") {
     }
   });
 
-  // Auto-dismiss off-canvas drawer when viewport resizes to desktop (>= 768px)
+  // بستن خودکار در صورت تغییر اندازه پنجره به ابعاد دسکتاپ (>= 768px)
   window.addEventListener(
     "resize",
     () => {
@@ -715,7 +714,7 @@ if (typeof window !== "undefined") {
     { passive: true }
   );
 
-  // Mobile search trigger in header navigation
+  // دکمه جست‌وجوی سریع موبایل در هدر
   if (searchBtn) {
     searchBtn.addEventListener("click", (e) => {
       e.preventDefault();
@@ -741,14 +740,14 @@ if (typeof window !== "undefined") {
     });
   }
 
-  // Barista station telemetry dispatcher via WebSocket
+  // مدیریت وضعیت زنده باریستا از طریق وب‌سوکت
   if (typeof SorenWS !== "undefined" && drawerBaristaText) {
     SorenWS.on("connection:open", () => {
-      drawerBaristaText.textContent = "باریستا: آماده پذیرش سفارش حضوری و بیرون‌بر ☕";
+      drawerBaristaText.textContent = "باریستا: آماده پذیرش سفارش حضوری و بیرون‌بر";
     });
 
     SorenWS.on("connection:close", () => {
-      drawerBaristaText.textContent = "باریستا: ثبت آفلاین و همگام‌سازی ☕";
+      drawerBaristaText.textContent = "باریستا: ثبت آفلاین و همگام‌سازی";
     });
 
     SorenWS.on("barista:status", (data) => {
@@ -758,7 +757,7 @@ if (typeof window !== "undefined") {
     });
   }
 
-  // Gracefully support legacy search input if present in DOM
+  // پشتیبانی از فرم جست‌وجوی منوی قدیم در صورت وجود
   if (panel) {
     panel.addEventListener("click", (e) => {
       if (e.target.closest("a")) {
@@ -779,11 +778,6 @@ if (typeof window !== "undefined") {
           const title = card.querySelector(".product-title")?.textContent.toLowerCase() || "";
           card.hidden = !title.includes(query);
         });
-        const emptyState = document.getElementById("catalog-empty-state");
-        if (emptyState) {
-          const visible = Array.from(cards).some((c) => !c.hidden);
-          emptyState.hidden = visible;
-        }
         if (panel) panel.classList.remove("open");
         if (menuBtn) menuBtn.setAttribute("aria-expanded", "false");
       }
@@ -818,7 +812,7 @@ if (typeof window !== "undefined") {
     });
   }
 
-  // Dynamic bottom nav visibility with headroom scroll tracking
+  // ۱. کنترل اسکرول هوشمند هدروم (Headroom Auto-Hide)
   let lastScrollY = typeof window !== "undefined" ? (window.scrollY || window.pageYOffset || 0) : 0;
   let scrollTicking = false;
 
@@ -835,7 +829,7 @@ if (typeof window !== "undefined") {
           const maxScroll = Math.max(0, docHeight - window.innerHeight);
           const isNearFooter = maxScroll - curr < 220;
 
-          // Keep bottom navigation anchored above footer to prevent clipping
+          // جلوگیری از رفتن دک ناوبری به زیر فوتر و ناپدید شدن در انتهای صفحه
           if (isNearFooter) {
             bottomNav.classList.remove("nav-hidden");
           } else if (curr > lastScrollY && curr > 80 && curr - lastScrollY > 12) {
@@ -852,7 +846,7 @@ if (typeof window !== "undefined") {
     { passive: true }
   );
 
-  // Bottom navigation tab selection and smooth scrolling
+  // ۲. مدیریت کلیک روی تب‌ها
   if (homeItem) {
     homeItem.addEventListener("click", (e) => {
       setActiveTab(homeItem);
@@ -891,7 +885,7 @@ if (typeof window !== "undefined") {
     });
   }
 
-  // Scroll spy to highlight active bottom nav tab based on scroll position
+  // ۳. پایش اسکرول برای تغییر وضعیت تب فعال (Scroll Spy)
   if ("IntersectionObserver" in window) {
     const homeEl = document.getElementById("home");
     const menuEl = document.getElementById("menu");
@@ -918,7 +912,7 @@ if (typeof window !== "undefined") {
     }
   }
 
-  // Cart badge synchronization with elastic scale pop animation
+  // ۴. همگام‌سازی نشانگر سبد خرید با انیمیشن جهش (Badge Pop)
   function updateCartBadge(count) {
     if (!bottomBadge) return;
     const num = typeof count === "number" ? count : (window.SorenCartStore ? window.SorenCartStore.getTotalCount() : 0);
@@ -941,13 +935,13 @@ if (typeof window !== "undefined") {
     });
   }
 
-  // Listen for global cart store updates
+  // گوش دادن به تغییرات سبد خرید
   window.addEventListener("soren:cart-changed", (e) => {
     const count = e.detail && typeof e.detail.totalCount === "number" ? e.detail.totalCount : 0;
     updateCartBadge(count);
   });
 
-  // Initialize badge counts on initial load
+  // مقداردهی اولیه نشانگر
   if (typeof SorenCartStore !== "undefined") {
     updateCartBadge(SorenCartStore.getTotalCount());
   }
@@ -974,11 +968,12 @@ function initSingleSurfaceCatalog() {
     return String(num).replace(/[0-9]/g, (d) => fa[d]);
   }
 
-  // Instant client-side category filtering with soft fade transitions
+  // ۱. فیلتر کلاینت‌ساید آنی دسته‌بندی با انیمیشن Fade ملایم
   function setCategory(cat, shouldPushState = true) {
+    if (typeof window !== "undefined") window.setCatalogCategory = setCategory;
     if (!cat) cat = "all";
 
-    // Update active chip state
+    // به‌روزرسانی وضعیت تراشه‌ها
     chips.forEach((chip) => {
       const match = chip.dataset.category === cat;
       chip.classList.toggle("active", match);
@@ -990,7 +985,7 @@ function initSingleSurfaceCatalog() {
       }
     });
 
-    // Filter product cards visibility by category
+    // فیلتر کارت‌های کاتالوگ
     const cards = document.querySelectorAll("#catalog-products-grid .featured-card, .featured-grid .featured-card");
     cards.forEach((card) => {
       const cardCat = card.dataset.category;
@@ -1009,14 +1004,14 @@ function initSingleSurfaceCatalog() {
       }
     });
 
-    // Synchronize browser URL hash without full page reload
+    // همگام‌سازی تاریخچه مرورگر بدون بارگذاری مجدد
     if (shouldPushState && typeof history !== "undefined" && history.pushState) {
       const newHash = cat === "all" ? "#menu" : `#menu?cat=${cat}`;
       history.pushState({ category: cat }, "", newHash);
     }
   }
 
-  // Category chip click delegation
+  // کلیک روی هر یک از تراشه‌ها
   chips.forEach((chip) => {
     chip.addEventListener("click", () => {
       triggerHaptic();
@@ -1025,7 +1020,7 @@ function initSingleSurfaceCatalog() {
     });
   });
 
-  // Hydrate category from URL hash and observe history navigation events
+  // خواندن اولیه دسته‌بندی از روی URL و شنیدن تغییرات تاریخچه (Popstate / Hashchange)
   function checkUrlCategory(shouldPushState = false) {
     if (typeof window === "undefined") return;
     const hash = window.location.hash || "";
@@ -1041,23 +1036,53 @@ function initSingleSurfaceCatalog() {
   window.addEventListener("hashchange", () => checkUrlCategory(false));
   checkUrlCategory(false);
 
-  // Stable card stepper controls preserved while item remains in cart
-  function showCardStepper(id) {
+  // ۲. مدیریت هوشمند استپر موقت (+ / تعداد / -) با ناپدید شدن خودکار پس از ۵۰۰ میلی‌ثانیه عدم تغییر
+  const activeStepperTimers = new Map();
+
+  function showCardStepper(id, duration = 500) {
     if (!id) return;
-    renderSingleCardAction(id);
+    if (activeStepperTimers.has(id)) {
+      clearTimeout(activeStepperTimers.get(id));
+    }
+
+    activeStepperTimers.set(
+      id,
+      setTimeout(() => {
+        activeStepperTimers.delete(id);
+        dismissCardStepper(id);
+      }, duration)
+    );
+
+    renderSingleCardAction(id, true);
   }
 
   function dismissCardStepper(id) {
     if (!id) return;
-    renderSingleCardAction(id);
+    const cards = document.querySelectorAll(
+      `.featured-card[data-id="${id}"], .featured-card[data-product-id="${id}"], .product-card[data-id="${id}"]`
+    );
+    cards.forEach((card) => {
+      const stepper = card.querySelector(".card-stepper");
+      if (stepper) {
+        stepper.classList.add("is-collapsing");
+        setTimeout(() => {
+          renderSingleCardAction(id, false);
+        }, 180);
+      } else {
+        renderSingleCardAction(id, false);
+      }
+    });
   }
 
   function dismissCardStepperImmediately(id) {
-    if (!id) return;
-    renderSingleCardAction(id);
+    if (activeStepperTimers.has(id)) {
+      clearTimeout(activeStepperTimers.get(id));
+      activeStepperTimers.delete(id);
+    }
+    renderSingleCardAction(id, false);
   }
 
-  function renderSingleCardAction(id) {
+  function renderSingleCardAction(id, isStepperActive = false) {
     if (!id) return;
     const cards = document.querySelectorAll(
       `.featured-card[data-id="${id}"], .featured-card[data-product-id="${id}"], .product-card[data-id="${id}"]`
@@ -1077,10 +1102,10 @@ function initSingleSurfaceCatalog() {
       if (!actionBox) return;
 
       const name = card.dataset.name || card.querySelector("h3, .product-title")?.textContent.trim() || "محصول";
-      const currentState = actionBox.dataset.renderedState || (actionBox.querySelector(".card-stepper") ? "stepper" : "empty");
+      const currentState = actionBox.dataset.renderedState || (actionBox.querySelector(".card-stepper") ? "stepper" : (actionBox.querySelector(".card-in-cart-pill") ? "pill" : "empty"));
       const currentQty = parseInt(actionBox.dataset.renderedQty || "0", 10);
 
-      if (qty > 0) {
+      if (qty > 0 && isStepperActive) {
         if (currentState === "stepper") {
           if (currentQty !== qty) {
             const countEl = actionBox.querySelector(".stepper-count");
@@ -1097,6 +1122,32 @@ function initSingleSurfaceCatalog() {
             <span class="stepper-count" aria-live="polite">${toFaDigits(qty)}</span>
             <button type="button" class="stepper-btn stepper-plus" data-id="${id}" aria-label="افزایش تعداد ${name}">+</button>
           </div>
+        `;
+      } else if (qty > 0) {
+        if (currentState === "pill" && currentQty === qty) return;
+        actionBox.dataset.renderedState = "pill";
+        actionBox.dataset.renderedQty = String(qty);
+        actionBox.innerHTML = `
+          <button
+            class="featured-order card-add-btn has-items"
+            type="button"
+            data-product="${name}"
+            data-id="${id}"
+            aria-label="افزودن ${name} به سبد (${toFaDigits(qty)} عدد در سبد)"
+          >
+            <svg
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="1.8"
+              aria-hidden="true"
+            >
+              <path d="M5 8h14l1 12H4L5 8Z" stroke-linejoin="round" />
+              <path d="M9 9V6a3 3 0 0 1 6 0v3" stroke-linecap="round" />
+            </svg>
+            <span>افزودن به سبد</span>
+            <span class="card-in-cart-pill" aria-hidden="true">${toFaDigits(qty)}</span>
+          </button>
         `;
       } else {
         if (currentState === "empty") return;
@@ -1134,24 +1185,102 @@ function initSingleSurfaceCatalog() {
     cards.forEach((card) => {
       const id = card.dataset.id || card.dataset.productId;
       if (!id) return;
-      renderSingleCardAction(id);
+      const isStepperActive = activeStepperTimers.has(id);
+      renderSingleCardAction(id, isStepperActive);
     });
   }
 
-  // Listen for global cart store updates to immediately re-render steppers
+  // گوش دادن به تغییرات سبد خرید جهت بازنشانی آنی استپرها
   window.addEventListener("soren:cart-changed", () => {
     syncCardSteppers();
   });
 
+  // اجرای اولیه
   syncCardSteppers();
 
-  // Expose catalog helpers on window
+  // قرار دادن توابع روی شیء window برای دسترسی همگانی
   window.showCardStepper = showCardStepper;
   window.dismissCardStepper = dismissCardStepper;
   window.dismissCardStepperImmediately = dismissCardStepperImmediately;
   window.renderSingleCardAction = renderSingleCardAction;
   window.syncCardSteppers = syncCardSteppers;
   window.setMenuCategory = setCategory;
+  window.setCatalogCategory = setCategory;
+}
+
+/* ========================================================
+   2.3 اسلایدر متمرکز دسته‌بندی‌ها و همگام‌سازی با کاتالوگ منو
+   (Category Carousel Scroll-Snap & Catalog Sync Engine)
+   ======================================================== */
+function initCategoryCarouselSync() {
+  const container = document.querySelector(".categories-grid");
+  const dotsBar = document.getElementById("category-dots");
+  if (!container || !dotsBar) return;
+
+  const cards = Array.from(container.querySelectorAll(".category-card"));
+  const dots = Array.from(dotsBar.querySelectorAll(".carousel-dot"));
+  if (cards.length === 0 || dots.length === 0) return;
+
+  let isProgrammaticScroll = false;
+  let scrollTimeout = null;
+
+  function updateActiveState(catId, index) {
+    dots.forEach((dot, i) => {
+      const match = i === index || dot.dataset.category === catId;
+      dot.classList.toggle("active", match);
+      dot.setAttribute("aria-selected", String(match));
+    });
+
+    if (catId && typeof window.setCatalogCategory === "function") {
+      window.setCatalogCategory(catId, false);
+    }
+  }
+
+  // 1. کلیک روی هر یک از نشانگرهای گرد (Dots Tap)
+  dots.forEach((dot, index) => {
+    dot.addEventListener("click", () => {
+      const targetCard = cards[index];
+      if (targetCard) {
+        isProgrammaticScroll = true;
+        targetCard.scrollIntoView({ behavior: "smooth", block: "nearest", inline: "center" });
+        updateActiveState(dot.dataset.category, index);
+        clearTimeout(scrollTimeout);
+        scrollTimeout = setTimeout(() => {
+          isProgrammaticScroll = false;
+        }, 600);
+      }
+    });
+  });
+
+  // 2. همگام‌سازی خودکار حین ورق‌زدن با IntersectionObserver
+  if ("IntersectionObserver" in window) {
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (isProgrammaticScroll) return;
+        entries.forEach((entry) => {
+          if (entry.isIntersecting && entry.intersectionRatio >= 0.55) {
+            const catId = entry.target.dataset.category;
+            const index = cards.indexOf(entry.target);
+            if (index !== -1) {
+              updateActiveState(catId, index);
+            }
+          }
+        });
+      },
+      {
+        root: container,
+        threshold: [0.55, 0.75],
+      }
+    );
+
+    cards.forEach((card) => observer.observe(card));
+  }
+}
+
+if (document.readyState === "loading") {
+  document.addEventListener("DOMContentLoaded", initCategoryCarouselSync);
+} else {
+  initCategoryCarouselSync();
 }
 
 /* ========================================================
@@ -1187,19 +1316,19 @@ function initCartBottomSheetAndFloatingBar() {
   const noteInput = document.getElementById("sheet-order-note");
   const bottomNavCart = document.getElementById("bottom-nav-cart");
 
-  // Convert ASCII digits to localized Persian tabular digits
+  // تابع کمکی تبدیل ارقام به فارسی
   function toFaDigits(num) {
     const fa = ["۰", "۱", "۲", "۳", "۴", "۵", "۶", "۷", "۸", "۹"];
     return String(num).replace(/[0-9]/g, (d) => fa[d]);
   }
 
-  // Format price in Toman with localized Persian digits
+  // تابع کمکی قالب‌بندی قیمت به تومان با ارقام فارسی
   function formatPriceFa(num) {
     const formatted = new Intl.NumberFormat("fa-IR").format(Number(num) || 0);
     return toFaDigits(formatted).replace(/['\u0027\u2019]/g, "٬") + " تومان";
   }
 
-  // Resolve asset path relative to root or nested /pages/ directory
+  // تصحیح مسیر نسبی تصاویر برای کارکرد یکدست در ریشه و پوشه pages
   function resolveItemImage(img) {
     if (!img) return "./images/brand/favicon.svg";
     const isPagesDir = typeof window !== "undefined" && window.location.pathname.includes("/pages/");
@@ -1211,7 +1340,7 @@ function initCartBottomSheetAndFloatingBar() {
     return img;
   }
 
-  // Open cart bottom sheet drawer with locked background scrolling
+  // باز کردن برگه کشویی سبد خرید
   function openCartBottomSheet() {
     if (!sheet || !backdrop) return;
     sheet.classList.add("is-open");
@@ -1232,7 +1361,7 @@ function initCartBottomSheetAndFloatingBar() {
     }
   }
 
-  // Close cart bottom sheet drawer and restore page scroll
+  // بستن برگه کشویی سبد خرید
   function closeCartBottomSheet() {
     if (!sheet || !backdrop) return;
     sheet.classList.remove("is-open");
@@ -1248,7 +1377,7 @@ function initCartBottomSheetAndFloatingBar() {
     document.body.style.overflow = "";
   }
 
-  // Render live cart items inside bottom sheet with 2-tier responsive grid
+  // رندر اقلام زنده در سبد خرید کشویی
   function renderCartBottomSheet(items) {
     if (!itemsList) return;
 
@@ -1322,12 +1451,12 @@ function initCartBottomSheetAndFloatingBar() {
     renderCartUpsellShelf(validItems);
   }
 
-  // Contextual coffee upsell shelf recommendation inside cart drawer
+  // رندر شلف هوشمند مکمل قهوه داخل سبد خرید (Contextual Upsell Shelf - AOV Booster)
   function renderCartUpsellShelf(validItems) {
     const upsellContainer = document.getElementById("cart-upsell-shelf-container");
     if (!upsellContainer) return;
 
-    // Check if any coffee product is currently in cart
+    // تشخیص وجود آیتم قهوه در سبد خرید
     const hasCoffee = validItems.some((it) => {
       const cat = (it.category || "").toLowerCase();
       const id = (it.productId || it.id || "").toLowerCase();
@@ -1346,7 +1475,7 @@ function initCartBottomSheetAndFloatingBar() {
       );
     });
 
-    // Skip upsell if Basque cheesecake is already in cart
+    // بررسی آیا چیزکیک سن سباستین پسته در سبد وجود دارد
     const hasBasque = validItems.some((it) => (it.productId || it.id) === "prd_basque");
 
     if (hasCoffee && !hasBasque) {
@@ -1355,7 +1484,7 @@ function initCartBottomSheetAndFloatingBar() {
         <div class="cart-upsell-shelf" role="complementary" aria-label="پیشنهاد ویژه باریستا">
           <div class="upsell-shelf-header">
             <h5 class="upsell-shelf-title">
-              <span>☕ پیشنهاد باریستا؛ ترکیب بی‌نظیر با قهوه:</span>
+              <span>پیشنهاد باریستا؛ ترکیب مکمل با قهوه:</span>
             </h5>
             <span class="upsell-badge">AOV +۲۵٪</span>
           </div>
@@ -1401,7 +1530,7 @@ function initCartBottomSheetAndFloatingBar() {
     }
   }
 
-  // Synchronize floating order pill with spring pulse and haptic feedback
+  // همگام‌سازی نوار شناور سفارش جاری با انیمیشن تپش فنری و لرزش هپتیک
   let lastPillCount = 0;
   function syncFloatingOrderBar() {
     if (!floatingBar) return;
@@ -1414,7 +1543,7 @@ function initCartBottomSheetAndFloatingBar() {
       if (orderBarCount) orderBarCount.textContent = `${toFaDigits(count)} آیتم`;
       if (orderBarPrice) orderBarPrice.textContent = formatPriceFa(price);
 
-      // Trigger spring pulse animation on quantity increment
+      // اجرای انیمیشن تپش فنری در صورت افزایش تعداد اقلام
       if (count > lastPillCount) {
         floatingBar.classList.remove("order-pill-pulse");
         void floatingBar.offsetWidth; // ریفلو
@@ -1435,7 +1564,7 @@ function initCartBottomSheetAndFloatingBar() {
     }
   }
 
-  // Cart drawer event delegation for stepper controls and item removal
+  // پایش تغییرات تعداد و حذف در لیست اقلام برگه کشویی (Event Delegation)
   if (itemsList) {
     itemsList.addEventListener("click", (e) => {
       const plusBtn = e.target.closest(".sheet-plus-btn");
@@ -1467,7 +1596,7 @@ function initCartBottomSheetAndFloatingBar() {
     });
   }
 
-  // Drawer open / close event bindings
+  // رویدادهای باز و بسته کردن دراور
   if (orderBarOpenBtn) {
     orderBarOpenBtn.addEventListener("click", (e) => {
       e.preventDefault();
@@ -1503,7 +1632,7 @@ function initCartBottomSheetAndFloatingBar() {
     }
   });
 
-  // Vertical swipe-to-dismiss drawer gesture with physics tracking
+  // ژست لمسی بستن کشویی با کشیدن به پایین (Swipe-to-Dismiss Gesture)
   function attachDragGesture(element) {
     if (!element || !sheet) return;
     let startY = 0;
@@ -1564,7 +1693,7 @@ function initCartBottomSheetAndFloatingBar() {
   const sheetHeader = sheet ? sheet.querySelector(".sheet-header") : null;
   if (sheetHeader) attachDragGesture(sheetHeader);
 
-  // Persist optional barista preparation notes in localStorage
+  // یادداشت اختیاری برای باریستا
   if (noteInput) {
     try {
       const savedNote = localStorage.getItem("soren_barista_note");
@@ -1578,7 +1707,7 @@ function initCartBottomSheetAndFloatingBar() {
     });
   }
 
-  // Checkout trigger: opens unified reservation and payment modal
+  // دکمه تکمیل سفارش و هدایت به تسویه
   if (checkoutBtn) {
     checkoutBtn.addEventListener("click", () => {
       const totalCount = window.SorenCartStore ? window.SorenCartStore.getTotalCount() : 0;
@@ -1601,7 +1730,7 @@ function initCartBottomSheetAndFloatingBar() {
     });
   }
 
-  // Maintain drawer positioning when virtual keyboard opens
+  // هماهنگی با کیبورد مجازی در نمایشگرهای لمسی (Visual Viewport Handling)
   if (typeof window !== "undefined" && window.visualViewport) {
     const handleViewportChange = () => {
       if (!sheet || !sheet.classList.contains("is-open")) return;
@@ -1612,12 +1741,12 @@ function initCartBottomSheetAndFloatingBar() {
     window.visualViewport.addEventListener("scroll", handleViewportChange);
   }
 
-  // Subscribe to global cart updates
+  // اشتراک روی رویداد سراسری تغییرات سبد خرید
   window.addEventListener("soren:cart-changed", () => {
     syncFloatingOrderBar();
   });
 
-  // Auto-dismiss mobile drawer on desktop resize to avoid scroll lock
+  // بستن خودکار برگه در صورت چرخش یا تغییر اندازه صفحه به دسکتاپ (رفع قفل اسکرول)
   if (typeof window !== "undefined" && window.matchMedia) {
     const desktopQuery = window.matchMedia("(min-width: 768px)");
     desktopQuery.addEventListener("change", (e) => {
@@ -1627,12 +1756,13 @@ function initCartBottomSheetAndFloatingBar() {
     });
   }
 
+  // توابع در دسترس همگانی
   window.openCartBottomSheet = openCartBottomSheet;
   window.closeCartBottomSheet = closeCartBottomSheet;
   window.renderCartBottomSheet = renderCartBottomSheet;
   window.syncFloatingOrderBar = syncFloatingOrderBar;
 
-  // Initial sync of floating order bar
+  // اجرای اولیه همگام‌سازی نوار شناور
   syncFloatingOrderBar();
 }
 
@@ -1830,7 +1960,7 @@ if (document.readyState === "loading") {
     emptyState.hidden = true;
     filledState.hidden = false;
 
-    // Populate cart items container
+    // رندر آیتم‌ها در کانتینر
     const shippingNotice = itemsContainer.querySelector(".shipping-notice");
     itemsContainer.innerHTML = "";
     if (shippingNotice) itemsContainer.appendChild(shippingNotice);
@@ -1899,6 +2029,7 @@ if (document.readyState === "loading") {
       itemsContainer.appendChild(card);
     });
 
+    // تخفیف‌ها
     const clubDiscount = Math.round((subtotal * CLUB_DISCOUNT_RATE) / CLUB_DISCOUNT_STEP) * CLUB_DISCOUNT_STEP;
     const couponDiscount = Math.round(subtotal * couponRate);
     const total = Math.max(subtotal - clubDiscount - couponDiscount, 0);
@@ -1910,6 +2041,7 @@ if (document.readyState === "loading") {
     if (totalEl) totalEl.textContent = format(total);
   }
 
+  // کوپن تخفیف
   if (couponButton && couponInput) {
     couponButton.addEventListener("click", () => {
       const code = couponInput.value.trim().toUpperCase();
@@ -1935,13 +2067,13 @@ if (document.readyState === "loading") {
     couponMessage.hidden = false;
   }
 
-  // Initial render and cart change subscription
+  // اجرای رندر اولیه و اتصال به تغییرات سبد
   renderCart();
   window.addEventListener("soren:cart-changed", () => {
     renderCart();
   });
 
-  // Check for active stored order in localStorage
+  // چک کردن سفارش فعال از قبل
   checkActiveOrder();
 
   /* ========================================
@@ -2080,7 +2212,7 @@ if (document.readyState === "loading") {
       if (e.target === modalBackdrop) closeModal();
     });
 
-    // Attach iOS-style vertical swipe-to-dismiss gesture on modal header
+    // اتصال ژست لمسی کشیدن به پایین به سبک دراورهای iOS (Swipe-to-Dismiss Drawer Gesture)
     const modalHeader = modalBackdrop.querySelector(".soren-modal-header");
     const modalCard = modalBackdrop.querySelector(".soren-modal-card");
     if (modalHeader && modalCard && !modalHeader.dataset.dragAttached) {
@@ -2146,7 +2278,7 @@ if (document.readyState === "loading") {
     const zoneTabs = modalBackdrop.querySelectorAll(".zone-tab-btn");
     const payOptions = modalBackdrop.querySelectorAll(".pay-card-option");
 
-    // Payment method selection radio cards
+    // مدیریت روش پرداخت
     payOptions.forEach((opt) => {
       opt.addEventListener("click", () => {
         payOptions.forEach((o) => o.classList.remove("is-active"));
@@ -2244,12 +2376,12 @@ if (document.readyState === "loading") {
       });
     }
 
-    // Fetch live table occupancy and status from backend API
+    // لود دیتا از API
     try {
       const res = await fetch(`${API_BASE}/tables`);
       if (res.ok) {
         allTablesData = await res.json();
-        // Auto-select first available table if none selected
+        // انتخاب خودکار اولین میز آزاد
         const firstFree = allTablesData.find((t) => t.status === "FREE");
         if (firstFree) {
           selectedTable = firstFree;
@@ -2271,7 +2403,7 @@ if (document.readyState === "loading") {
       renderTables("all");
     }
 
-    // Zone filter tab click delegation
+    // تب‌های فیلتر زون
     zoneTabs.forEach((tab) => {
       tab.addEventListener("click", () => {
         zoneTabs.forEach((b) => b.classList.remove("is-active"));
@@ -2280,7 +2412,7 @@ if (document.readyState === "loading") {
       });
     });
 
-    // Order submission with server-authoritative pricing validation
+    // سابمیت سفارش
     const submitBtn = modalBackdrop.querySelector("#submit-order-btn");
     submitBtn.addEventListener("click", async () => {
       if (!selectedTable) {
@@ -2351,7 +2483,7 @@ if (document.readyState === "loading") {
     });
   }
 
-  // Live order status tracker with step progress
+  // رهگیری زنده سفارش فعال
   function checkActiveOrder() {
     const raw = localStorage.getItem("soren_active_order");
     if (!raw) return;
@@ -2408,7 +2540,7 @@ if (document.readyState === "loading") {
       });
     }
 
-    // Animate active tracker step using GSAP spring easing if loaded
+    // انیمیشن فنری مرحله فعال در صورت بارگذاری GSAP
     if (typeof gsap !== "undefined" && !window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
       const activeDot = card.querySelector(".order-step.is-active .order-step-dot");
       if (activeDot) {
@@ -2420,7 +2552,7 @@ if (document.readyState === "loading") {
       }
     }
 
-    // Subscribe to WebSocket order status updates without client polling
+    // اتصال بی‌درنگ به وب‌سوکت برای رهگیری لحظه‌ای سفارش بدون پولینگ
     if (!window._sorenWsOrderSubscribed) {
       window._sorenWsOrderSubscribed = true;
       SorenWS.init();
@@ -2438,7 +2570,7 @@ if (document.readyState === "loading") {
       });
     }
 
-    // Single fallback HTTP check on page load if browser was closed during order
+    // بررسی اولیه یک‌باره فقط هنگام لود صفحه (در صورت تغییر وضعیت حین بسته بودن مرورگر)
     if (stepIndex < 3 && !window._sorenInitialOrderChecked) {
       window._sorenInitialOrderChecked = true;
       fetch(`${API_BASE}/orders/${order.id}`)
@@ -2481,24 +2613,15 @@ if (document.readyState === "loading") {
     toastMessage = toast.querySelector("#toast-message");
   }
 
-  // Initialize menu sorting and category filtering if grid is present
+  // فیلتر و مرتب‌سازی تنها در صورت وجود شبکه منو
   if (grid) {
     const filterButtons = document.querySelectorAll(".menu-page .filter-btn");
     const cards = Array.from(grid.querySelectorAll(".product-card"));
-    const emptyState = document.getElementById("catalog-empty-state");
-
-    function updateEmptyState() {
-      if (emptyState) {
-        const visibleCount = cards.filter((c) => !c.hidden).length;
-        emptyState.hidden = visibleCount > 0;
-      }
-    }
 
     function filterCards(category) {
       cards.forEach((card) => {
         card.hidden = category !== "all" && card.dataset.category !== category;
       });
-      updateEmptyState();
     }
 
     filterButtons.forEach((button) => {
@@ -2511,45 +2634,6 @@ if (document.readyState === "loading") {
         filterCards(button.dataset.category);
       });
     });
-
-    const resetBtn = document.getElementById("reset-filter-btn");
-    if (resetBtn) {
-      resetBtn.addEventListener("click", () => {
-        const allBtn = Array.from(filterButtons).find((btn) => btn.dataset.category === "all");
-        if (allBtn) {
-          allBtn.click();
-        } else {
-          cards.forEach((c) => { c.hidden = false; });
-          updateEmptyState();
-        }
-        const searchInputs = document.querySelectorAll(".desktop-search input, #mobile-search-input");
-        searchInputs.forEach((inp) => { inp.value = ""; });
-      });
-    }
-
-    // Support URL parameters on load (e.g. ?category=coffee or ?q=لاته)
-    try {
-      const urlParams = new URLSearchParams(window.location.search);
-      const catParam = urlParams.get("category");
-      if (catParam) {
-        const targetBtn = Array.from(filterButtons).find(
-          (btn) => btn.dataset.category === catParam || (catParam === "shakes" && btn.dataset.category === "shake")
-        );
-        if (targetBtn) targetBtn.click();
-      }
-      const qParam = urlParams.get("q");
-      if (qParam) {
-        const query = qParam.trim().toLowerCase();
-        cards.forEach((card) => {
-          const title = card.querySelector(".product-title")?.textContent.toLowerCase() || "";
-          const desc = card.querySelector(".product-desc")?.textContent.toLowerCase() || "";
-          card.hidden = !(title.includes(query) || desc.includes(query));
-        });
-        const searchInputs = document.querySelectorAll(".desktop-search input, #mobile-search-input");
-        searchInputs.forEach((inp) => { inp.value = qParam; });
-        updateEmptyState();
-      }
-    } catch (_) {}
 
     const sorters = {
       popular: (a, b) => Number(b.dataset.popularity || 0) - Number(a.dataset.popularity || 0),
@@ -2578,7 +2662,7 @@ if (document.readyState === "loading") {
     toastTimer = setTimeout(() => toast.classList.remove("is-visible"), 3000);
   }
 
-  // Global event delegation for card steppers and add-to-cart actions
+  // رویداد افزودن به سبد خرید و تعامل با استپرها (Event Delegation لمسی سراسری با لرزش هپتیک)
   document.addEventListener("click", (e) => {
     const addBtn = e.target.closest(".btn-add, .featured-order, .card-add-btn");
     const plusBtn = e.target.closest(".stepper-plus");
@@ -2589,7 +2673,7 @@ if (document.readyState === "loading") {
       const card = button.closest(".product-card, .featured-card");
       if (!card) return;
 
-      // Physical haptic tap vibration (10ms) on mobile
+      // لرزش هپتیک ۱۰ میلی‌ثانیه برای فیدبک فیزیکی
       if (typeof navigator !== "undefined" && navigator.vibrate) {
         try { navigator.vibrate(12); } catch (err) {}
       }
@@ -2604,7 +2688,7 @@ if (document.readyState === "loading") {
       const imgEl = card.querySelector(".product-image, .featured-image, img");
       const imgSrc = imgEl?.getAttribute("src") || "";
 
-      // Resolve product metadata from authoritative database catalog
+      // استخراج هوشمند یا تطبیقی محصول بر اساس کاتالوگ معتبر دیتابیس
       let catalogItem = PRODUCT_CATALOG[productName];
       if (!catalogItem && id) {
         catalogItem = Object.values(PRODUCT_CATALOG).find((it) => it.id === id);
@@ -2626,7 +2710,12 @@ if (document.readyState === "loading") {
         desc: card.querySelector(".product-desc, p")?.textContent.trim() || "",
       };
 
-      // Trigger particle fly-to-cart micro-animation before stepper render
+      // فعال‌سازی استپر موقت با ناپدید شدن خودکار پس از ۵۰۰ میلی‌ثانیه
+      if (id && typeof window.showCardStepper === "function") {
+        window.showCardStepper(id, 500);
+      }
+
+      // اجرای میکرو-انیمیشن پرواز آیتم و توست قبل از رندر استپر
       if (addBtn) {
         animateFlyToCart(addBtn);
         showToast(`«${product.name}» به سبد خرید شما اضافه شد.`);
@@ -2634,7 +2723,7 @@ if (document.readyState === "loading") {
 
       SorenCart.addItem(product);
     } else if (minusBtn) {
-      // Physical haptic tap vibration (10ms) on quantity decrement
+      // لرزش هپتیک ۱۰ میلی‌ثانیه برای کاهش تعداد
       if (typeof navigator !== "undefined" && navigator.vibrate) {
         try { navigator.vibrate(12); } catch (err) {}
       }
@@ -2643,6 +2732,16 @@ if (document.readyState === "loading") {
       const id = minusBtn.dataset.id || card?.dataset.id || card?.dataset.productId;
       if (id) {
         SorenCartStore.updateQuantity(id, -1);
+        const newQty = SorenCartStore.getItemQuantity(id);
+        if (newQty > 0) {
+          if (typeof window.showCardStepper === "function") {
+            window.showCardStepper(id, 500);
+          }
+        } else {
+          if (typeof window.dismissCardStepperImmediately === "function") {
+            window.dismissCardStepperImmediately(id);
+          }
+        }
       }
     }
   });
@@ -2652,7 +2751,7 @@ if (document.readyState === "loading") {
    8. مجموعه انیمیشن و فیزیک حرکتی (Animation Lab Suite)
    ======================================================== */
 
-// Particle fly-to-cart animation toward header icon with physics acceleration
+// میکرو-انیمیشن پرواز ذره به سمت سبد خرید در هدر با فیزیک شتاب‌دار
 function animateFlyToCart(button) {
   if (typeof gsap === "undefined") return;
   const prefersReduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
@@ -2711,7 +2810,7 @@ function animateFlyToCart(button) {
   });
 }
 
-// Interactive 3D perspective tilt on hero frame following pointer coords
+// انیمیشن سه‌بعدی تعاملی ماوس بر روی هیرو (Hero 3D Perspective Tilt)
 function initHero3DMotion() {
   if (typeof gsap === "undefined") return;
   const prefersReduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
@@ -2781,7 +2880,7 @@ function initHero3DMotion() {
   });
 }
 
-// ScrollTrigger choreography and progressive SVG drawing
+// رقص محتوایی با اسکرول (ScrollTrigger Choreography & SVG Drawing)
 function initScrollChoreography() {
   if (typeof gsap === "undefined" || typeof ScrollTrigger === "undefined") return;
   const prefersReduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
@@ -2789,7 +2888,7 @@ function initScrollChoreography() {
 
   gsap.registerPlugin(ScrollTrigger);
 
-  // 1. Progressive SVG stroke dash offset draw for hero brand accent
+  // ۱. ترسیم تدریجی خط تأکید SVG داستان سورن (DrawSVG / stroke-dashoffset)
   const underlineSvg = document.querySelector(".underline-svg path");
   if (underlineSvg) {
     const len = underlineSvg.getTotalLength ? underlineSvg.getTotalLength() : 110;
@@ -2805,7 +2904,7 @@ function initScrollChoreography() {
     });
   }
 
-  // 2. Staggered reveal for featured catalog product cards
+  // ۲. استگر کارتهای منتخب سورن (Featured Cards Stagger)
   const featuredCards = document.querySelectorAll(".featured-card");
   if (featuredCards.length > 0) {
     gsap.from(featuredCards, {
@@ -2821,7 +2920,7 @@ function initScrollChoreography() {
     });
   }
 
-  // 3. Staggered reveal for home category grid
+  // ۳. استگر دسته‌بندی‌های صفحه اصلی (Categories Stagger)
   const categoryCards = document.querySelectorAll(".category-card");
   if (categoryCards.length > 0) {
     gsap.from(categoryCards, {
@@ -2837,7 +2936,7 @@ function initScrollChoreography() {
     });
   }
 
-  // 4. Soft entrance for about page feature cards
+  // ۴. ورود نرم کارت‌های ویژگی‌های درباره ما (Features Grid)
   const featureCards = document.querySelectorAll(".feature-card");
   if (featureCards.length > 0) {
     gsap.from(featureCards, {
@@ -2854,7 +2953,7 @@ function initScrollChoreography() {
   }
 }
 
-// Global WebSocket listener for real-time stock and availability broadcasts
+// شنونده سراسری بروزرسانی موجودی محصولات از طریق وب‌سوکت بک‌اند
 if (typeof SorenWS !== "undefined") {
   SorenWS.on("product:stock_updated", (data) => {
     if (!data || !data.productId) return;
@@ -2889,7 +2988,7 @@ const SorenCatalog = {
         "color: #795239; font-weight: bold;"
       );
 
-      // 1. Synchronize and enrich local catalog cache
+      // ۱. همگام‌سازی و غنی‌سازی کاتالوگ
       this.products.forEach((p) => {
         PRODUCT_CATALOG[p.name] = {
           id: p.id,
@@ -2903,7 +3002,7 @@ const SorenCatalog = {
         };
       });
 
-      // 2. Update availability badges and button states on rendered DOM cards
+      // ۲. به‌روزرسانی زنده وضعیت موجودی و شناسه‌ها روی کارت‌های DOM
       this.syncDOMCards();
     } catch (e) {
       console.warn("[SOREN CATALOG] Hydration running in offline fallback mode:", e);
@@ -2916,16 +3015,16 @@ const SorenCatalog = {
       const name = card.querySelector(".product-title, h3")?.textContent.trim();
       if (!name) return;
 
-      // 1. Exact ID match
+      // ۱. تطبیق دقیق
       let product = this.products.find((p) => p.name === name);
 
-      // 2. Match by canonical catalog product key
+      // ۲. تطبیق از طریق کاتالوگ استاتیک در صورت وجود شناسه یکتا
       if (!product && PRODUCT_CATALOG[name]) {
         const catId = PRODUCT_CATALOG[name].id;
         product = this.products.find((p) => p.id === catId);
       }
 
-      // 3. Fuzzy match by name tokens and normalized prefix
+      // ۳. تطبیق دقیق‌تر با واژه‌ها و پیشوند
       if (!product) {
         product = this.products.find((p) => p.name.startsWith(name)) ||
                   this.products.find((p) => p.name === name + " سورن" || name === p.name + " سورن") ||
@@ -2962,7 +3061,7 @@ function initSorenLogoExperience() {
   const brandContainer = document.getElementById("header-logo-container");
   const prefersReduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
-  // 1. Interactive header logo hover physics
+  // ۱. انیمیشن تعاملی هاور لوگوی هدر
   const brandLink = document.getElementById("main-brand-logo") || brandContainer;
   if (brandLink && typeof gsap !== "undefined") {
     brandLink.addEventListener("mouseenter", () => {
@@ -2988,7 +3087,7 @@ function initSorenLogoExperience() {
     });
   }
 
-  // 2. Cinematic brand preloader reveal with session caching and touch dismissal
+  // ۲. انیمیشن پرده‌برداری سینمایی پری‌لودر با کش سشن و بستن لمسی
   if (!preloader) return;
 
   let isIntroSeen = false;
@@ -3038,7 +3137,7 @@ function initSorenLogoExperience() {
     }, 700);
   };
 
-  // Touch or click listener to skip preloader immediately
+  // بستن لمسی با کلیک یا لمس دکمه رد کردن یا پس‌زمینه
   if (skipBtn) {
     skipBtn.addEventListener("click", bypassPreloader);
     skipBtn.addEventListener("pointerdown", bypassPreloader);
@@ -3061,7 +3160,7 @@ function initSorenLogoExperience() {
     return;
   }
 
-  // GSAP timeline animating Simurgh logo vector paths
+  // تایم‌لاین شکوهمند ترسیم اجزای سیمرغ با GSAP
   const tl = gsap.timeline({
     onComplete: closePreloader,
   });
@@ -3210,7 +3309,7 @@ const SorenMenuDetail = {
       this.dragHandle.addEventListener("touchend", () => this.onTouchEnd(), { passive: true });
     }
 
-    // Catalog card click delegation opening detail sheet (isolating steppers)
+    // واگذاری رویداد کلیک روی کارت‌های کاتالوگ با ایزوله‌سازی استپرها
     document.addEventListener("click", (e) => {
       if (e.target.closest(".card-action-box, .card-stepper, .card-add-btn, .featured-order, .btn-stepper-touch, .stepper-btn, .stepper-count")) {
         return;
@@ -3409,7 +3508,7 @@ if (typeof window !== "undefined") {
   window.initSorenLogoExperience = initSorenLogoExperience;
 }
 
-// Initialize on DOM ready
+// راه‌اندازی اولیه در زمان لود صفحه
 document.addEventListener("DOMContentLoaded", () => {
   if (typeof SorenCartStore !== "undefined") {
     SorenCartStore.init();
@@ -3421,6 +3520,9 @@ document.addEventListener("DOMContentLoaded", () => {
   }
   if (typeof initSingleSurfaceCatalog === "function") {
     initSingleSurfaceCatalog();
+  }
+  if (typeof initCategoryCarouselSync === "function") {
+    initCategoryCarouselSync();
   }
   if (typeof initCartBottomSheetAndFloatingBar === "function") {
     initCartBottomSheetAndFloatingBar();

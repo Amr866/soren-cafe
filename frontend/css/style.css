@@ -1278,6 +1278,12 @@ main {
   line-height: 2;
 }
 
+
+/* نشانگرهای اسلایدر دسته‌بندی در دسکتاپ مخفی است */
+.category-carousel-dots {
+  display: none;
+}
+
 .categories-grid {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
@@ -8830,3 +8836,763 @@ main {
     padding-bottom: calc(var(--bottom-nav-height, 64px) + max(16px, env(safe-area-inset-bottom, 16px)) + 24px);
   }
 }
+
+/* ========================================================
+   ریدیزاین و آن‌اسلاپ کامل صفحه اصلی در ابعاد موبایل (Unslop Mobile Landing Refinement)
+   Disciplines: Unslop, UI/UX Pro Max, Design Taste Frontend
+   ======================================================== */
+
+/* 1. نشانگرهای آرام و حذف انیمیشن‌های بی‌پایان */
+.tag-dot {
+  animation: none !important;
+  opacity: 0.85 !important;
+}
+
+.status-pulse-dot {
+  animation: none !important;
+  opacity: 0.9 !important;
+}
+
+.about-divider {
+  background: rgba(140, 94, 60, 0.14) !important;
+}
+
+/* 2. آیکون‌های SVG ویژگی‌های داستان سورن و دکمه‌های بستن */
+.feature-icon-svg {
+  width: 40px;
+  height: 40px;
+  flex-shrink: 0;
+  border-radius: 10px;
+  background: var(--ivory, #f7f4ee);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--coffee, #795239);
+}
+
+.drawer-close-btn,
+.sheet-close-btn {
+  min-width: 44px;
+  min-height: 44px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: #5e554a;
+  border-radius: 50%;
+  background: transparent;
+  transition: background-color 0.15s ease, color 0.15s ease;
+  touch-action: manipulation;
+}
+
+.drawer-close-btn:active,
+.sheet-close-btn:active {
+  background: rgba(140, 94, 60, 0.12);
+  color: #242120;
+}
+
+.category-chip .chip-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.category-chip.active .chip-icon svg {
+  stroke: #ffffff;
+}
+
+.drawer-contact-link {
+  min-height: 44px;
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 12px;
+  border-radius: 10px;
+  color: #5e554a;
+  text-decoration: none;
+  font-size: 14px;
+  transition: background-color 0.15s ease, color 0.15s ease;
+}
+
+.drawer-contact-link:active {
+  background: rgba(140, 94, 60, 0.08);
+  color: #242120;
+}
+
+.footer-social-links {
+  display: flex !important;
+  align-items: center !important;
+  gap: 12px !important;
+  margin-top: 14px !important;
+}
+
+.footer-social-links a {
+  width: 44px !important;
+  height: 44px !important;
+  min-width: 44px !important;
+  min-height: 44px !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  border-radius: 12px !important;
+  background: rgba(247, 244, 238, 0.05) !important;
+  border: 1px solid rgba(247, 244, 238, 0.16) !important;
+  color: #e4d8cc !important;
+  transition: background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease, transform 0.2s ease !important;
+  touch-action: manipulation !important;
+}
+
+.footer-social-links a:hover,
+.footer-social-links a:active {
+  background: rgba(121, 82, 57, 0.35) !important;
+  border-color: rgba(200, 109, 81, 0.65) !important;
+  color: #ffffff !important;
+  transform: translateY(-2px) !important;
+}
+
+a.brand,
+.footer-logo {
+  min-height: 44px !important;
+  display: inline-flex !important;
+  align-items: center !important;
+}
+
+/* 3. ترکیب‌بندی هیرو، درباره ما، دسته‌ها و کاتالوگ در موبایل */
+@media (max-width: 640px) {
+  /* ریتم هیرو در موبایل (ترتیب منطقی خوانش: عنوان و دکمه‌ها در بالا، تصویر در زیر) */
+  .hero {
+    padding-top: clamp(16px, 4vw, 24px) !important;
+    padding-bottom: 24px !important;
+  }
+
+  .hero-container {
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 20px !important;
+  }
+
+  .hero-content {
+    order: 1 !important;
+    width: 100% !important;
+  }
+
+  .hero-image-wrapper {
+    order: 2 !important;
+    width: 100% !important;
+    margin-top: 4px !important;
+  }
+
+  .hero-badge {
+    margin-bottom: 14px !important;
+    padding: 6px 12px !important;
+    font-size: 13px !important;
+    background: #ffffff !important;
+    border: 1px solid rgba(140, 94, 60, 0.14) !important;
+    color: #5e554a !important;
+  }
+
+  .hero-title {
+    font-size: clamp(26px, 7vw, 32px) !important;
+    line-height: 1.35 !important;
+    font-weight: 800 !important;
+    margin-bottom: 14px !important;
+    color: #242120 !important;
+  }
+
+  .hero-title-accent {
+    color: #795239 !important;
+  }
+
+  .hero-title-accent::after {
+    display: none !important;
+  }
+
+  .hero-description {
+    font-size: 14px !important;
+    line-height: 1.7 !important;
+    margin-bottom: 18px !important;
+    color: #5e554a !important;
+    max-width: 100% !important;
+  }
+
+  .hero-buttons {
+    width: 100% !important;
+    gap: 12px !important;
+    display: flex !important;
+    flex-direction: row !important;
+    flex-wrap: nowrap !important;
+    align-items: center !important;
+    margin-bottom: 20px !important;
+  }
+
+  .hero-btn {
+    flex: 1 1 50% !important;
+    min-width: 0 !important;
+    min-height: 50px !important;
+    height: 50px !important;
+    padding: 0 14px !important;
+    font-size: 15.5px !important;
+    font-weight: 700 !important;
+    letter-spacing: -0.2px !important;
+    border-radius: 14px !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    box-sizing: border-box !important;
+    text-decoration: none !important;
+    transition: transform 0.15s ease, box-shadow 0.15s ease !important;
+  }
+
+  .hero-btn-primary {
+    background: #795239 !important;
+    color: #ffffff !important;
+    box-shadow: 0 4px 14px rgba(121, 82, 57, 0.22) !important;
+    gap: 8px !important;
+    padding: 0 12px 0 14px !important;
+  }
+
+  .hero-btn-secondary {
+    border: 1.5px solid rgba(140, 94, 60, 0.22) !important;
+    background: #ffffff !important;
+    color: #242120 !important;
+    box-shadow: 0 2px 8px rgba(36, 33, 32, 0.04) !important;
+  }
+
+  .hero-arrow-capsule {
+    width: 28px !important;
+    height: 28px !important;
+    min-width: 28px !important;
+    min-height: 28px !important;
+    border-radius: 50% !important;
+    background: rgba(255, 255, 255, 0.22) !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    flex-shrink: 0 !important;
+  }
+
+  .hero-arrow {
+    font-size: 13px !important;
+    line-height: 1 !important;
+  }
+
+  .hero-highlights {
+    width: 100% !important;
+    display: grid !important;
+    grid-template-columns: repeat(3, 1fr) !important;
+    gap: 8px !important;
+    margin-top: 14px !important;
+    padding-top: 14px !important;
+    border-top: 1px solid rgba(140, 94, 60, 0.12) !important;
+  }
+
+  .highlight-item {
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: center !important;
+    text-align: center !important;
+    padding: 0 4px !important;
+  }
+
+  .highlight-item + .highlight-item {
+    padding-right: 4px !important;
+    border-right: 1px solid rgba(140, 94, 60, 0.12) !important;
+  }
+
+  .highlight-value {
+    font-size: 15px !important;
+    font-weight: 700 !important;
+    font-variant-numeric: tabular-nums !important;
+    color: #242120 !important;
+  }
+
+  .highlight-label {
+    font-size: 12px !important;
+    line-height: 1.4 !important;
+    color: #7b7266 !important;
+    margin-top: 2px !important;
+  }
+
+  .hero-image-frame,
+  .artwork-reveal {
+    border-radius: 18px !important;
+    border: 1px solid rgba(140, 94, 60, 0.14) !important;
+    box-shadow: 0 4px 16px -2px rgba(36, 33, 32, 0.06) !important;
+  }
+
+  .hero-image {
+    height: 220px !important;
+    object-fit: cover !important;
+    width: 100% !important;
+  }
+
+  /* ریتم متعادل ۳ ستونه کارت‌های ویژگی درباره ما */
+  .about-section {
+    padding-block: 40px !important;
+  }
+
+  .features-grid {
+    display: grid !important;
+    grid-template-columns: repeat(3, 1fr) !important;
+    gap: 8px !important;
+    margin-top: 20px !important;
+    width: 100% !important;
+  }
+
+  .feature-card {
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: center !important;
+    text-align: center !important;
+    gap: 8px !important;
+    padding: 14px 6px 12px !important;
+    background: #ffffff !important;
+    border: 1px solid rgba(140, 94, 60, 0.12) !important;
+    border-radius: 14px !important;
+    box-shadow: 0 2px 8px -2px rgba(36, 33, 32, 0.04) !important;
+    box-sizing: border-box !important;
+  }
+
+  .feature-card .feature-icon {
+    width: 36px !important;
+    height: 36px !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    border-radius: 10px !important;
+    background: #f7f4ee !important;
+    color: #795239 !important;
+    margin: 0 !important;
+    flex-shrink: 0 !important;
+  }
+
+  .feature-card .feature-icon svg {
+    width: 20px !important;
+    height: 20px !important;
+  }
+
+  .feature-card h3 {
+    font-size: 13px !important;
+    font-weight: 700 !important;
+    color: #242120 !important;
+    margin: 0 !important;
+    white-space: nowrap !important;
+    letter-spacing: -0.2px !important;
+  }
+
+  .feature-card p {
+    font-size: 11.5px !important;
+    color: #7b7266 !important;
+    margin: 0 !important;
+    white-space: nowrap !important;
+    line-height: 1.35 !important;
+  }
+
+  /* اسلایدر متمرکز دسته‌بندی‌ها در موبایل (Single-Card Focused Snap) */
+  .categories-section {
+    padding-block: 36px !important;
+  }
+
+  .categories-heading {
+    margin-bottom: 20px !important;
+  }
+
+  .categories-heading h2 {
+    font-size: clamp(22px, 5.5vw, 26px) !important;
+  }
+
+  .categories-grid {
+    display: flex !important;
+    grid-template-columns: none !important;
+    overflow-x: auto !important;
+    scroll-snap-type: x mandatory !important;
+    -webkit-overflow-scrolling: touch !important;
+    scrollbar-width: none !important;
+    gap: 16px !important;
+    padding-bottom: 4px !important;
+    margin-inline: 0 !important;
+    padding-inline: 0 !important;
+    width: 100% !important;
+  }
+
+  .categories-grid::-webkit-scrollbar {
+    display: none !important;
+  }
+
+  .category-card {
+    flex: 0 0 100% !important;
+    min-width: 100% !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    aspect-ratio: 4 / 5 !important;
+    min-height: 350px !important;
+    max-height: 420px !important;
+    box-shadow: 0 12px 30px -10px rgba(36, 33, 32, 0.22) !important;
+    scroll-snap-align: center !important;
+    scroll-snap-stop: always !important;
+    border-radius: 18px !important;
+    border: 1px solid rgba(140, 94, 60, 0.16) !important;
+    overflow: hidden !important;
+    position: relative !important;
+    box-sizing: border-box !important;
+  }
+
+  .category-content {
+    padding: 16px 18px !important;
+  }
+
+  .category-content h3 {
+    font-size: 26px !important;
+    margin-bottom: 4px !important;
+    font-weight: 800 !important;
+  }
+
+  .category-content p {
+    font-size: 14px !important;
+    margin-bottom: 12px !important;
+    line-height: 1.4 !important;
+  }
+
+  .category-button {
+    min-height: 44px !important;
+    padding-inline: 16px !important;
+    font-size: 12.5px !important;
+    border-radius: 999px !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+  }
+
+  /* نشانگرهای ورق‌زدن دسته‌بندی در موبایل */
+  .category-carousel-dots {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: 8px !important;
+    margin-top: 14px !important;
+    padding-block: 4px !important;
+  }
+
+  .carousel-dot {
+    width: 8px !important;
+    height: 8px !important;
+    min-width: 8px !important;
+    min-height: 8px !important;
+    padding: 0 !important;
+    border-radius: 999px !important;
+    background: rgba(140, 94, 60, 0.22) !important;
+    border: none !important;
+    cursor: pointer !important;
+    transition: width 0.28s cubic-bezier(0.16, 1, 0.3, 1), background-color 0.25s ease !important;
+    touch-action: manipulation !important;
+  }
+
+  .carousel-dot.active {
+    width: 24px !important;
+    background: var(--terracotta, #c86d51) !important;
+  }
+
+  /* دکمه‌های کاتالوگ و ارگونومی لمسی ۴۴ پیکسلی */
+  .card-action-box {
+    width: 100% !important;
+    min-height: 44px !important;
+    height: 44px !important;
+  }
+
+  .featured-order,
+  .card-add-btn {
+    width: 100% !important;
+    min-height: 44px !important;
+    height: 44px !important;
+    padding: 8px 12px !important;
+    font-size: 13px !important;
+    font-weight: 600 !important;
+    justify-content: center !important;
+    border-radius: 12px !important;
+    overflow-wrap: anywhere !important;
+    touch-action: manipulation !important;
+  }
+
+  .card-stepper {
+    width: 100% !important;
+    max-width: 100% !important;
+    box-sizing: border-box !important;
+    justify-content: space-between !important;
+    min-height: 44px !important;
+    height: 44px !important;
+    padding: 4px 6px !important;
+    border-radius: 12px !important;
+  }
+
+  .card-stepper .stepper-btn {
+    flex-shrink: 0 !important;
+    min-width: 36px !important;
+    width: 36px !important;
+    height: 36px !important;
+    border-radius: 8px !important;
+  }
+
+  .featured-prices strong,
+  .detail-price {
+    font-variant-numeric: tabular-nums !important;
+    font-feature-settings: "tnum" 1 !important;
+  }
+
+  /* فوتر متوازن و متمرکز در موبایل */
+  .footer-bottom {
+    flex-direction: column !important;
+    align-items: center !important;
+    text-align: center !important;
+    gap: 6px !important;
+    padding-top: 8px !important;
+  }
+
+  .footer-bottom p {
+    font-size: 11px !important;
+    color: #a99d92 !important;
+    font-variant-numeric: tabular-nums !important;
+    text-align: center !important;
+    line-height: 1.6 !important;
+  }
+
+  .footer-bottom-note {
+    color: #c4b8aa !important;
+    font-size: 11px !important;
+    text-align: center !important;
+  }
+}
+
+/* ========================================================
+   کارت جامع میزبانی کافه و فوتر مدرن آکادمیک
+   (Academic Demo Hospitality Card & Modern Footer)
+   ======================================================== */
+@media (min-width: 641px) {
+  .footer-hospitality-card {
+    display: none !important;
+  }
+  .footer-main {
+    display: grid !important;
+  }
+}
+
+@media (max-width: 640px) {
+  .footer-main {
+    display: none !important;
+  }
+  .footer-hospitality-card {
+    display: block !important;
+  }
+}
+
+.footer-hospitality-card {
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 20px;
+  padding: 28px 24px;
+  box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.3);
+  box-sizing: border-box;
+  width: 100%;
+}
+
+.footer-header-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.footer-live-status {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 14px;
+  border-radius: 999px;
+  background: rgba(46, 125, 50, 0.16);
+  border: 1px solid rgba(76, 175, 80, 0.35);
+  color: #c8e6c9 !important;
+  font-size: 12.5px;
+  font-weight: 700 !important;
+  background: rgba(46, 125, 50, 0.3) !important;
+  border: 1px solid rgba(129, 199, 132, 0.5) !important;
+}
+
+.status-indicator {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #4caf50;
+  box-shadow: 0 0 0 2px rgba(76, 175, 80, 0.25);
+  animation: statusPulse 2s infinite ease-in-out;
+}
+
+@keyframes statusPulse {
+  0%, 100% { transform: scale(1); opacity: 1; }
+  50% { transform: scale(1.18); opacity: 0.75; }
+}
+
+.footer-hospitality-desc {
+  margin: 14px 0 20px;
+  color: var(--footer-muted, #b9aea3);
+  font-size: 13.5px;
+  line-height: 1.7;
+  max-width: 620px;
+}
+
+.footer-actions-row {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 12px;
+  margin-bottom: 20px;
+}
+
+.footer-action-btn {
+  min-height: 46px;
+  padding: 10px 18px;
+  border-radius: 12px;
+  font-size: 13.5px;
+  font-weight: 700;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  text-decoration: none;
+  box-sizing: border-box;
+  transition: transform 160ms cubic-bezier(0.23, 1, 0.32, 1), background 160ms ease, border-color 160ms ease;
+}
+
+.footer-action-btn:active {
+  transform: scale(0.97);
+}
+
+.footer-btn-call {
+  background: var(--footer-terracotta, #c86d51);
+  color: #ffffff !important;
+  border: 1px solid transparent;
+}
+
+.footer-btn-call:hover {
+  background: #b75e43;
+}
+
+.footer-btn-map {
+  background: rgba(255, 255, 255, 0.06);
+  color: #f7f4ee !important;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+}
+
+.footer-btn-map:hover {
+  background: rgba(255, 255, 255, 0.12);
+  border-color: rgba(255, 255, 255, 0.2);
+}
+
+.footer-social-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.footer-social-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 16px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.09);
+  color: #f7f4ee;
+  font-size: 12.5px;
+  text-decoration: none;
+  transition: transform 160ms cubic-bezier(0.23, 1, 0.32, 1), background 160ms ease;
+}
+
+.footer-social-pill:active {
+  transform: scale(0.97);
+}
+
+.footer-social-pill:hover {
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.footer-social-pill .social-handle {
+  color: var(--footer-terracotta, #c86d51);
+  font-family: monospace, sans-serif;
+  font-weight: 600;
+}
+
+.footer-bottom {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  gap: 15px !important;
+  padding-top: 14px !important;
+}
+
+.footer-bottom-note {
+  margin: 0 !important;
+  color: #c4b8aa !important;
+  font-size: 12.5px !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 6px !important;
+}
+
+.footer-brand-glyph {
+  color: var(--footer-terracotta, #c86d51) !important;
+  font-size: 13px !important;
+}
+
+.footer-copy {
+  margin: 0 !important;
+  color: #a99d92 !important;
+  font-size: 12px !important;
+  font-variant-numeric: tabular-nums !important;
+}
+
+@media (max-width: 640px) {
+  .site-footer {
+    padding: 32px 16px calc(var(--bottom-nav-height, 68px) + var(--safe-bottom, 12px) + 24px) !important;
+  }
+
+  .footer-hospitality-card {
+    padding: 20px 16px !important;
+    border-radius: 16px !important;
+  }
+
+  .footer-header-row {
+    flex-direction: column !important;
+    align-items: flex-start !important;
+    gap: 12px !important;
+  }
+
+  .footer-actions-row {
+    grid-template-columns: 1fr !important;
+    gap: 10px !important;
+  }
+
+  .footer-action-btn {
+    width: 100% !important;
+    min-height: 48px !important;
+  }
+
+  .footer-social-row {
+    flex-direction: column !important;
+    width: 100% !important;
+    gap: 8px !important;
+  }
+
+  .footer-social-pill {
+    width: 100% !important;
+    min-height: 42px !important;
+    box-sizing: border-box !important;
+    justify-content: center !important;
+  }
+
+  .footer-bottom {
+    flex-direction: column !important;
+    align-items: center !important;
+    text-align: center !important;
+    gap: 4px !important;
+  }
+}
+
+.footer-live-status .status-text { color: #c8e6c9 !important; font-weight: 700 !important; }
