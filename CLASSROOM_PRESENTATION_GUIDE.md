@@ -17,17 +17,15 @@ This guide prepares you to present [`backend/public/dashboard.html`](file:///D:/
 
 ---
 
-## 2. Classroom & Projector Setup
+## 2. Classroom & Projector High-Visibility Architecture
 
-Projectors in lecture halls often suffer from low contrast, washed-out black levels, and students sitting 20–30 feet away.
+Projectors in lecture halls often suffer from low contrast, washed-out black levels, and students sitting 20–30 feet away. The console incorporates high-visibility presentation readability directly by default across the entire dashboard (no toggle needed).
 
-### 📽️ How to Activate Projector Mode:
-1. In the top navigation HUD (top right), click the **`📽️ Projector`** button.
-2. **What Changes Automatically:**
-   * **Typography Scaled:** Node titles, status badges, and telemetry numbers scale up by 1.25x for instant readability from the 10th row.
-   * **Conduits & SVG Paths:** Connection line strokes increase from `1px` to `2.75px` with boosted contrast.
-   * **Animated Packet Pulses:** Particle radiuses expand from `3px` to `6px` with a luminous glowing halo (`drop-shadow(0 0 10px #38BDF8)`), making the flow trajectory impossible to miss.
-   * **High-Contrast Cards:** Node cards receive deep dark-slate backgrounds and elevated borders.
+### Built-In Readability Invariants:
+* **Typography Scaled & Bold:** Node titles (13–14px bold), status badges (12px bold), and telemetry tags are configured for instant readability from the 10th row.
+* **Solid 2.5px Conduits:** Connection line strokes are rendered with solid 2.5px stroke width and high-contrast boundaries.
+* **Luminous Request Packets:** Travelling request packets feature clear luminous glowing halos (`drop-shadow(0 0 8px rgba(6, 182, 212, 0.9))`), making the trajectory clearly visible across lecture hall screens.
+* **Instrument-Grade Contrast:** Node cards use `#0E1015` cards with hairline slate borders and deep shadow elevation.
 
 ---
 
@@ -51,7 +49,7 @@ Follow this 4-step script for a stellar presentation:
 
 ### Step 1: The Zero-Trust Perimeter (1 minute)
 > *"Most web applications are taught as just 'Client talks to Server talks to Database'. In production, this is dangerously incomplete. Today, I'm demonstrating Soren's distributed observability architecture across 5 distinct trust boundaries: Untrusted Client, Edge WAF, API Middleware, ORM AST, and Storage."*
-* **Action:** Toggle **Projector Mode** on. Point out the top physical network topology and the bottom 5-stage Security Pipeline.
+* **Action:** Point out the top physical network topology and the 5-stage Security Pipeline with high-visibility conduits.
 
 ### Step 2: The Caching & Failover Demo (1.5 minutes)
 > *"Notice the latency sparkline at the top right: steady-state L1 in-memory cache hits take under 5 microseconds."*
