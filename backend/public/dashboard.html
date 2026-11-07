@@ -119,6 +119,29 @@
       background: rgba(255, 255, 255, 0.15);
       border-radius: 4px;
     }
+
+    /* Presentation / Projector Mode for Classroom Lecture Halls */
+    body.projector-mode {
+      font-size: 112%;
+    }
+    body.projector-mode .hairline-border {
+      border-color: rgba(255, 255, 255, 0.22) !important;
+    }
+    body.projector-mode #pipeline-svg-canvas path {
+      stroke-width: 2.75px !important;
+    }
+    body.projector-mode #svg-animated-packet {
+      r: 6px !important;
+      filter: drop-shadow(0 0 10px rgba(56, 189, 248, 0.95));
+    }
+    body.projector-mode #node-card-client,
+    body.projector-mode #node-card-waf,
+    body.projector-mode #node-card-middleware,
+    body.projector-mode #node-card-orm,
+    body.projector-mode #node-card-database {
+      box-shadow: 0 12px 30px rgba(0, 0, 0, 0.6) !important;
+      border-color: rgba(255, 255, 255, 0.20) !important;
+    }
   </style>
 </head>
 <body class="min-h-screen grid-pattern antialiased text-zinc-300 flex flex-col justify-between selection:bg-white/10 selection:text-white">
@@ -190,6 +213,21 @@
             <path d="M19.07 4.93a10 10 0 0 1 0 14.14"></path>
           </svg>
           <span id="sound-label" class="text-[11px]">Audio</span>
+        </button>
+
+        <!-- Projector Presentation Mode Toggle -->
+        <button 
+          id="btn-projector" 
+          onclick="toggleProjectorMode()" 
+          title="Toggle Large-Format High-Contrast Projector Mode for Classroom Presentations"
+          class="h-8 px-2.5 rounded-md bg-white/[0.03] hover:bg-white/[0.07] hairline-border text-zinc-300 hover:text-white text-xs font-mono transition-colors flex items-center gap-1.5 btn-tactile"
+        >
+          <svg class="w-3.5 h-3.5 text-signal-cyan" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <rect x="2" y="3" width="20" height="14" rx="2" ry="2"></rect>
+            <line x1="8" y1="21" x2="16" y2="21"></line>
+            <line x1="12" y1="17" x2="12" y2="21"></line>
+          </svg>
+          <span id="projector-label" class="text-[11px] hidden sm:inline">Projector</span>
         </button>
 
         <!-- Threat Simulator Quick Jump -->
@@ -1351,6 +1389,19 @@
         pathSegments.push({ from: 'client', to: 'gateway' });
       }
 
+      // Smart Bypass Routing: If L1 cache is offline/bypassed, bypass the dead cache node directly to storage
+      if (!nodes.cache.active) {
+        for (let i = 0; i < pathSegments.length; i++) {
+          if (pathSegments[i].to === 'cache') {
+            const nextSeg = pathSegments[i + 1];
+            if (nextSeg && nextSeg.from === 'cache') {
+              pathSegments.splice(i, 2, { from: pathSegments[i].from, to: nextSeg.to });
+              i--;
+            }
+          }
+        }
+      }
+
       let color = '#38BDF8'; // Subtle cyan
       if (trace.isAudience) color = '#F59E0B'; // Amber
       if (trace.outcome === 'cache_hit') color = '#10B981'; // Emerald
@@ -1588,13 +1639,117 @@
       displayJsonInspect(`NODE:${nodeKey.toUpperCase()}`, data);
     }
 
-    // --- WebSocket Telemetry Stream ---
+    // --- Projector Mode Toggle for Classroom / Lecture Displays ---
+    let isProjectorMode = false;
+    function toggleProjectorMode() {
+      isProjectorMode = !isProjectorMode;
+      document.body.classList.toggle('projector-mode', isProjectorMode);
+      const btn = document.getElementById('btn-projector');
+      const label = document.getElementById('projector-label');
+      if (isProjectorMode) {
+        btn.classList.add('bg-cyan-500/20', 'text-signal-cyan', 'border-cyan-500/40');
+        btn.classList.remove('text-zinc-300');
+        label.innerText = 'Projector: ON';
+        AudioEngine.play('click');
+      } else {
+        btn.classList.remove('bg-cyan-500/20', 'text-signal-cyan', 'border-cyan-500/40');
+        btn.classList.add('text-zinc-300');
+        label.innerText = 'Projector';
+      }
+      if (window.SecurityEngine) SecurityEngine.updateSvgConduits();
+    }
+
+    // --- WebSocket Telemetry Stream & Standalone Simulation Engine ---
     let ws;
+    let isStandaloneSim = false;
+    let simInterval = null;
+
+    function startStandaloneSimulation() {
+      if (isStandaloneSim) return;
+      isStandaloneSim = true;
+      console.log("[RUNTIME LOG] Activating Standalone Presentation / Offline Simulation Engine");
+
+      // Initial realistic cluster state
+      updateClusterState({
+        worker1: true,
+        worker2: true,
+        cacheEnabled: true,
+        p95LatencyUs: 320
+      });
+
+      // Simulation heartbeat: every 1200ms
+      simInterval = setInterval(() => {
+        const simRps = Math.floor(180 + Math.random() * 140);
+        const p95 = nodes.cache.active ? Math.floor(220 + Math.random() * 180) : Math.floor(2400 + Math.random() * 800);
+        const rpsEl = document.getElementById('stat-rps');
+        const p95El = document.getElementById('stat-p95');
+        const wsEl = document.getElementById('stat-ws');
+        if (rpsEl) rpsEl.innerText = simRps.toLocaleString();
+        if (p95El) p95El.innerText = `${p95.toLocaleString()} µs`;
+        if (wsEl) wsEl.innerText = `Demo Mode`;
+
+        // Spawn 2-4 normal background particles across topology
+        const burstCount = Math.floor(2 + Math.random() * 3);
+        const simTraces = [];
+        for (let i = 0; i < burstCount; i++) {
+          const isCacheHit = nodes.cache.active && Math.random() > 0.35;
+          const targetWorker = (nodes.worker_1.active && nodes.worker_2.active) 
+            ? (Math.random() > 0.5 ? 'worker_1' : 'worker_2')
+            : (nodes.worker_1.active ? 'worker_1' : (nodes.worker_2.active ? 'worker_2' : null));
+          
+          if (!targetWorker) continue;
+
+          const steps = [
+            { node: 'client' },
+            { node: 'gateway' },
+            { node: targetWorker }
+          ];
+
+          if (isCacheHit) {
+            steps.push({ node: 'cache' });
+          } else {
+            steps.push({ node: 'cache' });
+            steps.push({ node: 'database' });
+          }
+
+          simTraces.push({
+            id: `trc_${Math.random().toString(36).substring(2, 8)}`,
+            clientLabel: `Client_${Math.floor(Math.random() * 90 + 10)}`,
+            endpoint: '/api/v1/products',
+            outcome: isCacheHit ? 'cache_hit' : 'db_query',
+            durationUs: isCacheHit ? Math.floor(2 + Math.random() * 6) : Math.floor(1200 + Math.random() * 1400),
+            steps
+          });
+        }
+        handleTraceBatch({ count: burstCount, traces: simTraces });
+      }, 1200);
+    }
+
     function connectWs() {
+      // If hosted on GitHub Pages or file: protocol, immediately engage standalone simulation
+      if (window.location.protocol === 'file:' || window.location.hostname.includes('github.io')) {
+        startStandaloneSimulation();
+        return;
+      }
+
       const proto = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
-      ws = new WebSocket(`${proto}//${window.location.host}/ws`);
+      let wsConnected = false;
+      const timeout = setTimeout(() => {
+        if (!wsConnected) {
+          startStandaloneSimulation();
+        }
+      }, 2500);
+
+      try {
+        ws = new WebSocket(`${proto}//${window.location.host}/ws`);
+      } catch (err) {
+        startStandaloneSimulation();
+        return;
+      }
 
       ws.onopen = () => {
+        wsConnected = true;
+        clearTimeout(timeout);
         ws.send(JSON.stringify({ action: "subscribe_dashboard" }));
         console.log("[RUNTIME LOG] Attached to live telemetry socket");
       };
@@ -1608,8 +1763,16 @@
         }
       };
 
+      ws.onerror = () => {
+        if (!wsConnected) startStandaloneSimulation();
+      };
+
       ws.onclose = () => {
-        setTimeout(connectWs, 2000);
+        if (!wsConnected) {
+          startStandaloneSimulation();
+        } else {
+          setTimeout(connectWs, 3000);
+        }
       };
     }
     connectWs();
@@ -1845,7 +2008,15 @@
         updateClusterState(data.state);
         console.log(`[STAGE RUNTIME] Worker-1 state toggled:`, data);
       } catch (e) {
-        console.error(e);
+        // Standalone offline presentation fallback
+        nodes.worker_1.active = !isAlive;
+        updateClusterState({
+          worker1: nodes.worker_1.active,
+          worker2: nodes.worker_2.active,
+          cacheEnabled: nodes.cache.active,
+          p95LatencyUs: nodes.worker_1.active ? 320 : 880
+        });
+        AudioEngine.play('click');
       }
     }
 
@@ -1856,7 +2027,15 @@
         nodes.cache.active = data.cacheEnabled;
         console.log(`[STAGE RUNTIME] Cache mode toggled:`, data);
       } catch (e) {
-        console.error(e);
+        // Standalone offline presentation fallback
+        nodes.cache.active = !nodes.cache.active;
+        updateClusterState({
+          worker1: nodes.worker_1.active,
+          worker2: nodes.worker_2.active,
+          cacheEnabled: nodes.cache.active,
+          p95LatencyUs: nodes.cache.active ? 280 : 2600
+        });
+        AudioEngine.play('click');
       }
     }
 
@@ -1868,18 +2047,56 @@
         const data = await res.json();
         console.log("[STAGE RUNTIME] SQLi Response:", res.status, data);
       } catch (e) {
-        console.error(e);
+        // Standalone offline presentation fallback
+        if (window.SecurityEngine) {
+          SecurityEngine.switchVector('sqli');
+          SecurityEngine.simulateCurrentAttack();
+        } else {
+          spawnParticleFromTrace({
+            id: `sqli_${Math.random().toString(36).substring(2, 6)}`,
+            clientLabel: 'SQLi_Attacker',
+            endpoint: "/api/v1/products?filter=' OR 1=1--",
+            outcome: 'waf_blocked',
+            durationUs: 420,
+            steps: [{ node: 'client' }, { node: 'gateway' }]
+          });
+        }
       }
     }
 
     async function fireTrafficBurst() {
+      AudioEngine.play('click');
       for (let i = 0; i < 50; i++) {
         fetch(`/api/v1/products?burst=${i+1}`, {
           headers: {
             'X-Audience-Name': `BurstWorker_${(i % 5) + 1}`,
             'X-Burst-Index': String(i + 1)
           }
-        }).catch(() => {});
+        }).catch(() => {
+          // Standalone presentation fallback particle
+          const targetWorker = (nodes.worker_1.active && nodes.worker_2.active)
+            ? (i % 2 === 0 ? 'worker_1' : 'worker_2')
+            : (nodes.worker_1.active ? 'worker_1' : (nodes.worker_2.active ? 'worker_2' : null));
+          
+          if (!targetWorker) return;
+          const isHit = nodes.cache.active && (i % 3 !== 0);
+          const steps = [{ node: 'client' }, { node: 'gateway' }, { node: targetWorker }];
+          if (isHit) {
+            steps.push({ node: 'cache' });
+          } else {
+            steps.push({ node: 'cache' });
+            steps.push({ node: 'database' });
+          }
+
+          spawnParticleFromTrace({
+            id: `burst_${i+1}`,
+            clientLabel: `BurstWorker_${(i % 5) + 1}`,
+            endpoint: '/api/v1/products',
+            outcome: isHit ? 'cache_hit' : 'db_query',
+            durationUs: isHit ? 4 : 1450,
+            steps
+          });
+        });
         if (i % 6 === 0) await new Promise(r => setTimeout(r, 15));
       }
     }
@@ -1900,7 +2117,17 @@
           if (res.status === 429) {
             console.log(`[STAGE RUNTIME] 429 Shield Blocked order #${i + 1}`);
           }
-        }).catch(() => {});
+        }).catch(() => {
+          // Standalone presentation fallback
+          spawnParticleFromTrace({
+            id: `flood_${i+1}`,
+            clientLabel: `FloodBot_${i + 1}`,
+            endpoint: '/api/v1/orders',
+            outcome: 'waf_blocked',
+            durationUs: 310,
+            steps: [{ node: 'client' }, { node: 'gateway' }]
+          });
+        });
         if (i % 5 === 0) await new Promise(r => setTimeout(r, 10));
       }
     }
