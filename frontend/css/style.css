@@ -1,7 +1,5 @@
 /* ========================================
-   0. تعریف فونت لوکس و مدرن پیدا (Peyda Modern Font Family)
-   و فونت پشتیبان وزیرمتن (Vazirmatn Fallback)
-======================================== */
+   0. Modern Font Family: Peyda with Vazirmatn Fallback *//
 @font-face {
   font-family: "Peyda";
   src: url("../fonts/Peyda-Regular.woff2") format("woff2");
@@ -91,8 +89,8 @@
 }
 
 /* ========================================
-   1. متغیرها و تنظیمات عمومی
-   (فونت وزیرمتن محلی و گوگلی پشتیبانی می‌شود)
+   1. CSS Custom Properties & Base Configuration
+   (Peyda & Vazirmatn typography stack)
 ======================================== */
 
 :root {
@@ -234,7 +232,7 @@ main {
 
 
 /* ========================================
-   2. هدر اصلی
+   2. Primary Site Header
 ======================================== */
 
 .site-header {
@@ -263,7 +261,7 @@ main {
 
 
 /* ========================================
-   3. لوگو و نام برند
+   3. Brand Identity & Logo
 ======================================== */
 
 .brand {
@@ -326,7 +324,7 @@ main {
 
 
 /* ========================================
-   4. منوی دسکتاپ
+   4. Desktop Navigation Bar
 ======================================== */
 
 .desktop-nav {
@@ -389,7 +387,7 @@ main {
 
 
 /* ========================================
-   5. منوی کشویی محصولات
+   5. Products Dropdown Menu
 ======================================== */
 
 .dropdown {
@@ -475,7 +473,7 @@ main {
 
 
 /* ========================================
-   6. جست‌وجو و آیکون‌های هدر
+   6. Header Search & Action Controls
 ======================================== */
 
 .header-actions {
@@ -620,7 +618,7 @@ main {
 
 
 /* ========================================
-   7. عناصر مخصوص موبایل (پیش‌فرض: مخفی)
+   7. Mobile Navigation Controls (Hidden by Default)
 ======================================== */
 
 .mobile-menu-button,
@@ -631,7 +629,7 @@ main {
 
 
 /* ========================================
-   8. هیرو
+   8. Hero Section
 ======================================== */
 
 .hero {
@@ -1014,7 +1012,7 @@ main {
 
 
 /* ========================================
-   9. درباره سورن
+   9. About Soren Story & Heritage
 ======================================== */
 
 .about-section {
@@ -1206,7 +1204,7 @@ main {
 
 
 /* ========================================
-   10. دسته‌بندی محصولات
+   10. Menu Categories
 ======================================== */
 
 .categories-section {
@@ -1279,7 +1277,7 @@ main {
 }
 
 
-/* نشانگرهای اسلایدر دسته‌بندی در دسکتاپ مخفی است */
+/* Category carousel indicators hidden on desktop */
 .category-carousel-dots {
   display: none;
 }
@@ -1428,7 +1426,7 @@ main {
 
 
 /* ========================================
-   11. منتخب‌های سورن
+   11. Featured Selection
 ======================================== */
 
 .featured-products {
@@ -1725,7 +1723,7 @@ main {
 
 
 /* ========================================
-   12. فوتر
+   12. Site Footer
 ======================================== */
 
 .site-footer {
@@ -1925,7 +1923,7 @@ main {
 
 
 /* ========================================
-   13. ریسپانسیو (از بزرگ به کوچک)
+   13. Responsive Media Queries
 ======================================== */
 
 @media (max-width: 1180px) {
@@ -2662,7 +2660,7 @@ main {
 
 
 /* ========================================
-   14. دسترس‌پذیری و کاهش حرکت
+   14. Accessibility & Reduced Motion
 ======================================== */
 
 @media (prefers-reduced-motion: reduce) {
@@ -2696,9 +2694,7 @@ main {
 
 
 /* ========================================
-   صفحه «درباره ما»
-   (متغیرها، هدر، فوتر و چیدمان کلی <main> از style.css می‌آیند:
-   ۶۰px فاصله از چپ و راست، ۸۰px بین سکشن‌ها)
+   About Us Page Layout (60px lateral gutter, 80px section spacing)
 ======================================== */
 
 @keyframes dot-pulse {
@@ -2709,7 +2705,7 @@ main {
 
 
 /* ========================================
-   1. اجزای مشترک
+   1. Shared Page Components
 ======================================== */
 
 /* Section eyebrow badges */
@@ -2895,7 +2891,7 @@ main {
 
 
 /* ========================================
-   2. هیرو
+   2. Hero Section
 ======================================== */
 
 .page-hero-grid {
@@ -2981,7 +2977,7 @@ main {
 
 
 /* ========================================
-   3. داستان سورن
+   3. Soren Heritage Story
 ======================================== */
 
 .story {
@@ -3066,7 +3062,7 @@ main {
 
 
 /* ========================================
-   4. ارزش‌ها
+   4. Core Values Grid
 ======================================== */
 
 .values-header {
@@ -3204,7 +3200,7 @@ main {
 
 
 /* ========================================
-   5. بنر پایانی (بزرگ‌تر از قبل)
+   5. Closing Callout Banner
 ======================================== */
 
 .cta-banner {
@@ -3288,7 +3284,7 @@ main {
 
 
 /* ========================================
-   6. تیم توسعه
+   6. Development Team
 ======================================== */
 
 .team-header {
@@ -3447,7 +3443,7 @@ main {
 
 
 /* ========================================
-   7. ریسپانسیو
+   7. Responsive Breakpoints
 ======================================== */
 
 @media (max-width: 1023px) {
@@ -3588,8 +3584,7 @@ main {
 
 
 /* ========================================
-   8. کاهش حرکت
-   (انیمیشن‌ها و transition‌ها در style.css خاموش می‌شوند)
+   8. Reduced Motion Preferences
 ======================================== */
 
 @media (prefers-reduced-motion: reduce) {
@@ -3604,9 +3599,7 @@ main {
 
 
 /* ==========================================================================
-   صفحه‌های ورود و ثبت‌نام
-   (هر دو صفحه از یک چیدمان مشترک با کلاس‌های auth-* استفاده می‌کنند،
-   پس اندازه‌ی کارت‌ها همیشه با هم برابر است)
+   Auth Pages (Login & Registration shared card metrics)
 ========================================================================== */
 
 .auth-page {
@@ -4452,8 +4445,7 @@ main {
 }
 
 /* ==========================================================================
-   صفحه‌ی سبد خرید
-   (متغیرها، هدر، فوتر و فاصله‌ی ۶۰px کناری <main> از style.css می‌آیند)
+   Cart Page Layout
 ========================================================================== */
 
 [hidden] {
@@ -5228,12 +5220,7 @@ main {
 }
 
 /* ==========================================================================
-  صفحه قهوه ها (محصولات)
-========================================================================== */
-/* ==========================================================================
-   صفحه قهوه‌ها و شیک ها و کیک ها – کافه سورن
-   این فایل بعد از style.css لود می‌شود و فقط بخش اصلی صفحه را استایل می‌دهد
-   (هدر و فوتر در style.css هستند).
+  Catalog Pages: Coffee, Shakes, and Cakes (Scoped Layout)
    ========================================================================== */
 
 .menu-page,
@@ -5964,7 +5951,7 @@ main {
 }
 
 /* ========================================
-   اتصال فرانت‌اند به بک‌اند: نشانگر سبد خرید و مودال ثبت سفارش
+   Storefront & Backend Checkout Bridge: Cart Indicator & Modal
    ======================================== */
 
 .cart-badge {
@@ -6757,7 +6744,7 @@ main {
 }
 
 /* ========================================================
-   کشوی اطلاعات کافه (Mobile Off-Canvas Drawer) و نوار بالای موبایل
+   Mobile Off-Canvas Drawer & Minimal Top Bar
    ======================================================== */
 
 /* Backdrop blur filter for off-canvas drawer */
@@ -7015,7 +7002,7 @@ main {
 }
 
 /* ========================================================
-   استایل هدر مینیمال موبایل (< 768px)
+   Minimal Mobile Header (< 768px)
    ======================================================== */
 @media (max-width: 767px) {
   .site-header {
@@ -7100,7 +7087,7 @@ main {
 }
 
 /* ========================================================
-   ریست دسکتاپ (>= 768px): عدم نمایش کشو و نوار پایین موبایل
+   Desktop Reset (>= 768px): Hide mobile drawer & bottom bar
    ======================================================== */
 @media (min-width: 768px) {
   .soren-drawer-backdrop,
@@ -7111,7 +7098,7 @@ main {
 }
 
 /* ========================================================
-   نوار ناوبری پایین صفحه موبایل (Mobile Bottom Navigation - Thumb Zone)
+   Mobile Bottom Navigation Bar (Thumb Zone Ergonomics)
    ======================================================== */
 .mobile-bottom-nav {
   position: fixed;
@@ -7255,7 +7242,7 @@ main {
 }
 
 /* ========================================================
-   تراشه‌های چسبان دسته‌بندی منو (Sticky Category Chips Bar)
+   Sticky Menu Category Chips Bar
    ======================================================== */
 .category-chips-bar {
   position: sticky;
@@ -7365,7 +7352,7 @@ main {
 }
 
 /* ========================================================
-   استپر لمسی کارت‌های محصول (Card Steppers & Action Box)
+   Product Card Steppers & Quantity Action Box
    ======================================================== */
 .card-action-box {
   display: flex;
@@ -7496,7 +7483,7 @@ main {
 }
 
 /* ========================================================
-   نوار شناور سفارش جاری در موبایل (Floating Order Bar)
+   Mobile Floating Active Order Bar
    ======================================================== */
 .floating-order-bar {
   position: fixed;
@@ -7600,7 +7587,7 @@ main {
 }
 
 /* ========================================================
-   برگه کشویی سبد خرید موبایل (Cart Bottom Sheet Drawer)
+   Mobile Cart Bottom Sheet Drawer
    ======================================================== */
 .cart-sheet-backdrop {
   position: fixed;
@@ -8377,7 +8364,7 @@ main {
 
 
 /* ------------------------------------------------------------------
-   تایپوگرافی مدرن قیمت به سبک فین‌تک / دیجی‌کالا (Peyda Tabular Lockup)
+   Tabular Price Lockup (Peyda Numerals)
    ------------------------------------------------------------------ */
 .soren-price-lockup {
   display: inline-flex;
@@ -8403,7 +8390,7 @@ main {
 }
 
 /* ========================================================
-   برگه کشویی جزئیات محصول (Artisanal Menu Detail Bottom Sheet)
+   Menu Detail Bottom Sheet Drawer
    ======================================================== */
 .menu-detail-backdrop {
   position: fixed;
@@ -8717,7 +8704,7 @@ main {
 }
 
 /* ========================================================
-   تبدیل مودال‌ها به دراور زیرین در موبایل (Apple Bottom Sheet & Drawer Architecture)
+   Apple-Style Mobile Bottom Sheet & Drawer Architecture
    ======================================================== */
 @media (max-width: 768px) {
   .soren-modal-backdrop {
@@ -8838,11 +8825,11 @@ main {
 }
 
 /* ========================================================
-   ریدیزاین و آن‌اسلاپ کامل صفحه اصلی در ابعاد موبایل (Unslop Mobile Landing Refinement)
+   Mobile Landing Refinements & Layout Polish
    Disciplines: Unslop, UI/UX Pro Max, Design Taste Frontend
    ======================================================== */
 
-/* 1. نشانگرهای آرام و حذف انیمیشن‌های بی‌پایان */
+/* 1. Subtle indicators & bounded animations */
 .tag-dot {
   animation: none !important;
   opacity: 0.85 !important;
@@ -8857,7 +8844,7 @@ main {
   background: rgba(140, 94, 60, 0.14) !important;
 }
 
-/* 2. آیکون‌های SVG ویژگی‌های داستان سورن و دکمه‌های بستن */
+/* 2. Story feature SVG icons & touch dismiss controls */
 .feature-icon-svg {
   width: 40px;
   height: 40px;
@@ -8956,9 +8943,9 @@ a.brand,
   align-items: center !important;
 }
 
-/* 3. ترکیب‌بندی هیرو، درباره ما، دسته‌ها و کاتالوگ در موبایل */
+/* 3. Mobile composition: hero, story, categories & catalog */
 @media (max-width: 640px) {
-  /* ریتم هیرو در موبایل (ترتیب منطقی خوانش: عنوان و دکمه‌ها در بالا، تصویر در زیر) */
+  /* Mobile hero rhythm: headline & CTA preceding artwork */
   .hero {
     padding-top: clamp(16px, 4vw, 24px) !important;
     padding-bottom: 24px !important;
@@ -9125,7 +9112,7 @@ a.brand,
     width: 100% !important;
   }
 
-  /* ریتم متعادل ۳ ستونه کارت‌های ویژگی درباره ما */
+  /* 3-column feature cards balanced layout */
   .about-section {
     padding-block: 40px !important;
   }
@@ -9187,7 +9174,7 @@ a.brand,
     line-height: 1.35 !important;
   }
 
-  /* اسلایدر متمرکز دسته‌بندی‌ها در موبایل (Single-Card Focused Snap) */
+  /* Mobile category slider snap */
   .categories-section {
     padding-block: 36px !important;
   }
@@ -9262,7 +9249,7 @@ a.brand,
     justify-content: center !important;
   }
 
-  /* نشانگرهای ورق‌زدن دسته‌بندی در موبایل */
+  /* Category carousel pagination dots */
   .category-carousel-dots {
     display: flex !important;
     align-items: center !important;
@@ -9291,7 +9278,7 @@ a.brand,
     background: var(--terracotta, #c86d51) !important;
   }
 
-  /* دکمه‌های کاتالوگ و ارگونومی لمسی ۴۴ پیکسلی */
+  /* 44px touch target ergonomics for catalog controls */
   .card-action-box {
     width: 100% !important;
     min-height: 44px !important;
@@ -9337,7 +9324,7 @@ a.brand,
     font-feature-settings: "tnum" 1 !important;
   }
 
-  /* فوتر متوازن و متمرکز در موبایل */
+  /* Balanced mobile footer layout */
   .footer-bottom {
     flex-direction: column !important;
     align-items: center !important;
@@ -9362,7 +9349,7 @@ a.brand,
 }
 
 /* ========================================================
-   کارت جامع میزبانی کافه و فوتر مدرن آکادمیک
+   Comprehensive Mobile Hospitality Card & Academic Demo Footer
    (Academic Demo Hospitality Card & Modern Footer)
    ======================================================== */
 @media (min-width: 641px) {

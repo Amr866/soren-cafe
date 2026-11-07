@@ -11,7 +11,7 @@
     <link rel="manifest" href="./manifest.json" />
     <link rel="icon" type="image/svg+xml" href="./images/brand/favicon.svg" />
     <link rel="apple-touch-icon" href="./images/brand/favicon.svg" />
-    <!-- فونت‌های اختصاصی لوکس: وزیرمتن و پلاس جاکارتا سانس -->
+    <!-- Typography: Plus Jakarta Sans & Vazirmatn -->
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
@@ -19,13 +19,13 @@
       rel="stylesheet"
     />
 
-    <!-- استایل -->
-        <!-- پیش‌لود پرسرعت فونت‌های محلی پیدا -->
+    <!-- Primary Stylesheet & Font Preloads -->
+        <!-- Preload critical local Peyda font weights -->
     <link rel="preload" href="./fonts/Peyda-Regular.woff2" as="font" type="font/woff2" crossorigin />
     <link rel="preload" href="./fonts/Peyda-Bold.woff2" as="font" type="font/woff2" crossorigin />
     <link rel="stylesheet" href="./css/style.css?v=2.1-peyda-fix" />
 
-    <!-- اگر جاوااسکریپت غیرفعال بود، تصویر درباره‌ی ما پنهان نماند -->
+    <!-- Fallback: ensure artwork is visible when JavaScript is disabled -->
     <noscript>
       <style>
         .artwork-reveal {
@@ -40,7 +40,7 @@
     <!-- ==================== Header ==================== -->
     <header class="site-header">
       <div class="header-inner">
-        <!-- لوگو و نام کافه -->
+        <!-- Brand Identity & Logo -->
         <a class="brand" href="#home" aria-label="صفحه اصلی کافه سورن">
           <img
             src="./images/brand/soren-logo.svg"
@@ -55,7 +55,7 @@
           </span>
         </a>
 
-        <!-- منوی اصلی -->
+        <!-- Desktop Navigation -->
         <nav class="desktop-nav" aria-label="منوی اصلی">
           <a class="nav-link active" href="#" aria-current="page">خانه</a>
 
@@ -90,9 +90,9 @@
           <a class="nav-link" href="#">تماس با ما</a>
         </nav>
 
-        <!-- جست‌وجو و آیکون‌ها -->
+        <!-- Header Actions & Search -->
         <div class="header-actions">
-          <!-- جست‌وجوی دسکتاپ -->
+          <!-- Desktop Search Bar -->
           <form class="search-box desktop-search" role="search">
             <button
               class="search-toggle"
@@ -120,7 +120,7 @@
             />
           </form>
 
-          <!-- جست‌وجوی موبایل -->
+          <!-- Mobile Search Toggle -->
           <button
             class="icon-button mobile-search"
             type="button"
@@ -138,7 +138,7 @@
             </svg>
           </button>
 
-          <!-- حساب کاربری (لینک به صفحه ورود/ثبت‌نام) -->
+          <!-- User Account Access (Login / Register) -->
           <a
             href="./pages/login.html"
             class="icon-button account-button"
@@ -159,7 +159,7 @@
             </svg>
           </a>
 
-          <!-- سبد خرید (لینک به صفحه سبد خرید) -->
+          <!-- Shopping Cart Toggle -->
           <a
             href="./pages/cart.html"
             class="icon-button cart-button"
@@ -177,7 +177,7 @@
             </svg>
           </a>
 
-          <!-- دکمه منوی موبایل -->
+          <!-- Mobile Navigation Hamburger Toggle -->
           <button
             class="icon-button mobile-menu-button"
             type="button"
@@ -197,7 +197,7 @@
           </button>
         </div>
       </div>
-      <!-- پنل منوی موبایل -->
+      <!-- Mobile Navigation Panel -->
       <div class="mobile-panel" id="mobile-panel">
         <div class="mobile-panel-inner">
           <form class="mobile-search-form" role="search">
@@ -236,7 +236,7 @@
       </div>
     </header>
 
-    <!-- کشوی ناوبری ثانویه و اطلاعات کافه (Mobile Off-Canvas Drawer) -->
+    <!-- Mobile Off-Canvas Drawer (Cafe Information & Hospitality) -->
     <div class="soren-drawer-backdrop" id="soren-drawer-backdrop" aria-hidden="true"></div>
     <aside class="soren-offcanvas-drawer" id="soren-offcanvas-drawer" aria-label="منوی اطلاعات کافه" aria-hidden="true">
       <div class="drawer-header">
@@ -252,13 +252,13 @@
       </div>
 
       <div class="drawer-body">
-        <!-- وضعیت زنده باریستا -->
+        <!-- Live Barista & Kitchen Status Indicator -->
         <div class="drawer-barista-status">
           <span class="status-pulse-dot"></span>
           <span class="status-text" id="drawer-barista-text">باریستا: آماده پذیرش سفارش حضوری و بیرون‌بر</span>
         </div>
 
-        <!-- ناوبری ثانویه -->
+        <!-- Secondary Navigation Links -->
         <nav class="drawer-nav" aria-label="لینک‌های کافه">
           <a href="#about-soren" class="drawer-nav-item">
             <span class="nav-item-icon">
@@ -287,7 +287,7 @@
           </a>
         </nav>
 
-        <!-- ساعات کاری و تماس -->
+        <!-- Opening Hours & Contact Details -->
         <div class="drawer-info-block">
           <h4 class="drawer-info-title">ساعات پذیرایی حضوری</h4>
           <p class="drawer-info-text">همه‌روزه از ساعت ۸:۰۰ صبح الی ۲۳:۳۰ شب</p>
@@ -383,7 +383,7 @@
       <!-- ==================== About Soren ==================== -->
       <section class="about-section" id="about-soren">
         <div class="about-container">
-          <!-- متن درباره کافه -->
+          <!-- About Cafe Narrative -->
           <div class="about-content">
             <div class="section-tag">
               <span class="tag-dot"></span>
@@ -428,7 +428,7 @@
             </div>
           </div>
 
-          <!-- تصویر -->
+          <!-- About Cafe Visual Artwork -->
           <div class="about-artwork">
             <div class="artwork-reveal" id="about-artwork">
               <img
@@ -526,7 +526,7 @@
           </article>
         </div>
 
-        <!-- نشانگرهای ورق‌زدن دسته‌بندی در موبایل (Category Carousel Dots) -->
+        <!-- Mobile Category Carousel Pagination Dots -->
         <div class="category-carousel-dots" id="category-dots" role="tablist" aria-label="ورق‌زدن دسته‌بندی‌های سورن">
           <button type="button" class="carousel-dot active" data-index="0" data-category="coffee" role="tab" aria-selected="true" aria-label="دسته‌بندی قهوه‌ها"></button>
           <button type="button" class="carousel-dot" data-index="1" data-category="shakes" role="tab" aria-selected="false" aria-label="دسته‌بندی بار سرد و شیک‌ها"></button>
@@ -547,7 +547,7 @@
           <p>طعم‌هایی که ارزش امتحان کردن دارن؛ دسته‌بندی دلخواه خود را فیلتر کنید.</p>
         </header>
 
-        <!-- نوار تراشه‌های چسبان دسته‌بندی منو (Sticky Category Chips) -->
+        <!-- Sticky Menu Category Chips Bar -->
         <nav class="category-chips-bar" id="category-chips" aria-label="دسته‌بندی‌های منوی سورن">
           <div class="chips-scroll-track">
             <button type="button" class="category-chip active" data-category="all" aria-pressed="true">
@@ -574,7 +574,6 @@
         </nav>
 
         <div class="featured-grid" id="catalog-products-grid">
-          <!-- 1. اسپرسو دبل -->
           <article
             class="featured-card"
             data-id="prd_espresso_double"
@@ -626,8 +625,6 @@
               </div>
             </div>
           </article>
-
-          <!-- 2. کاپوچینو -->
           <article
             class="featured-card"
             data-id="prd_cappuccino"
@@ -679,8 +676,6 @@
               </div>
             </div>
           </article>
-
-          <!-- 3. لاته -->
           <article
             class="featured-card"
             data-id="prd_latte"
@@ -732,8 +727,6 @@
               </div>
             </div>
           </article>
-
-          <!-- 4. اسپرسو -->
           <article
             class="featured-card"
             data-id="prd_espresso"
@@ -785,8 +778,6 @@
               </div>
             </div>
           </article>
-
-          <!-- 5. آمریکانو -->
           <article
             class="featured-card"
             data-id="prd_americano"
@@ -838,8 +829,6 @@
               </div>
             </div>
           </article>
-
-          <!-- 6. موکا -->
           <article
             class="featured-card"
             data-id="prd_mocha"
@@ -891,8 +880,6 @@
               </div>
             </div>
           </article>
-
-          <!-- 7. شیک شکلات -->
           <article
             class="featured-card"
             data-id="prd_shake_choc"
@@ -945,7 +932,6 @@
             </div>
           </article>
 
-          <!-- 8. شیک توت‌فرنگی -->
           <article
             class="featured-card"
             data-id="prd_shake_strawberry"
@@ -997,8 +983,6 @@
               </div>
             </div>
           </article>
-
-          <!-- 9. شیک وانیل -->
           <article
             class="featured-card"
             data-id="prd_shake_vanilla"
@@ -1050,8 +1034,6 @@
               </div>
             </div>
           </article>
-
-          <!-- 10. شیک اورئو -->
           <article
             class="featured-card"
             data-id="prd_shake_oreo"
@@ -1103,8 +1085,6 @@
               </div>
             </div>
           </article>
-
-          <!-- 11. شیک موز -->
           <article
             class="featured-card"
             data-id="prd_shake_banana"
@@ -1156,8 +1136,6 @@
               </div>
             </div>
           </article>
-
-          <!-- 12. شیک کارامل -->
           <article
             class="featured-card"
             data-id="prd_shake_caramel"
@@ -1209,8 +1187,6 @@
               </div>
             </div>
           </article>
-
-          <!-- 13. کیک شکلاتی -->
           <article
             class="featured-card"
             data-id="prd_choc_cake"
@@ -1262,8 +1238,6 @@
               </div>
             </div>
           </article>
-
-          <!-- 14. چیزکیک -->
           <article
             class="featured-card"
             data-id="prd_cheesecake"
@@ -1315,8 +1289,6 @@
               </div>
             </div>
           </article>
-
-          <!-- 15. براونی شکلاتی فاج -->
           <article
             class="featured-card"
             data-id="prd_brownie"
@@ -1368,8 +1340,6 @@
               </div>
             </div>
           </article>
-
-          <!-- 16. تیرامیسو -->
           <article
             class="featured-card"
             data-id="prd_tiramisu"
@@ -1421,8 +1391,6 @@
               </div>
             </div>
           </article>
-
-          <!-- 17. کیک هویج و گردو -->
           <article
             class="featured-card"
             data-id="prd_carrot_cake"
@@ -1474,8 +1442,6 @@
               </div>
             </div>
           </article>
-
-          <!-- 18. کوکی چاکلت چانک -->
           <article
             class="featured-card"
             data-id="prd_cookie"
@@ -1535,7 +1501,7 @@
         <!-- ==================== Site Footer ==================== -->
     <footer class="site-footer" id="site-footer">
       <div class="footer-container">
-        <!-- دسکتاپ: ستون‌های معرفی، دسترسی سریع، منو و شبکه‌های اجتماعی -->
+        <!-- Desktop Footer: Brand, Quick Navigation, Categories & Social -->
         <div class="footer-main">
           <div class="footer-brand">
             <a
@@ -1559,7 +1525,7 @@
             </p>
           </div>
 
-          <!-- لینک‌های سریع -->
+          <!-- Quick Links -->
           <nav class="footer-links" aria-label="لینک‌های سریع">
             <h3 class="footer-title">دسترسی سریع</h3>
             <ul>
@@ -1569,7 +1535,7 @@
             </ul>
           </nav>
 
-          <!-- منوی کافه -->
+          <!-- Menu Categories -->
           <nav class="footer-links" aria-label="دسته‌بندی محصولات">
             <h3 class="footer-title">منوی کافه</h3>
             <ul>
@@ -1579,7 +1545,7 @@
             </ul>
           </nav>
 
-          <!-- شبکه‌های اجتماعی -->
+          <!-- Social Media Channels -->
           <div class="footer-social">
             <h3 class="footer-title">همراه سورن باشید</h3>
 
@@ -1636,9 +1602,9 @@
           </div>
         </div>
 
-        <!-- کارت جامع میزبانی کافه سورن (مخصوص موبایل) -->
+        <!-- Mobile Hospitality Card -->
         <div class="footer-hospitality-card">
-          <!-- معرفی و وضعیت لحظه‌ای کافه -->
+          <!-- Cafe Overview & Real-Time Status -->
           <div class="footer-header-row">
             <a
               href="./index.html"
@@ -1655,7 +1621,7 @@
               <span>کافه سورن</span>
             </a>
 
-            <!-- نشانگر وضعیت زنده کافه -->
+            <!-- Live Service Indicator -->
             <div class="footer-live-status" role="status" aria-label="وضعیت پذیرش کافه">
               <span class="status-indicator" aria-hidden="true"></span>
               <span class="status-text">هم‌اکنون باز است · سرویس تا ۲۳:۳۰</span>
@@ -1666,7 +1632,7 @@
             فضایی آرام برای مکث، لذت از قهوه تخصصی تازه‌برشت و دسرهای دست‌ساز در قلب شهر.
           </p>
 
-          <!-- دکمه‌های اقدام سریع لمسی (Quick Actions) -->
+          <!-- Touch Quick Action Controls (Call / Map) -->
           <div class="footer-actions-row">
             <a
               href="tel:02188884422"
@@ -1694,7 +1660,7 @@
             </a>
           </div>
 
-          <!-- شبکه‌های اجتماعی با هندل مشخص -->
+          <!-- Social Channels & Handles -->
           <div class="footer-social-row">
             <a
               href="https://instagram.com"
@@ -1728,14 +1694,14 @@
           </div>
         </div>
 
-        <!-- جداکننده خلوت با آیکون ستاره الماس -->
+        <!-- Subtle Divider with Star Glyph -->
         <div class="footer-divider" aria-hidden="true">
           <span></span>
           <span class="footer-divider-icon">✦</span>
           <span></span>
         </div>
 
-        <!-- پاورقی: پیام سمت راست و کپی‌رایت سمت چپ -->
+        <!-- Footer Bottom: Brand Note & Copyright -->
         <div class="footer-bottom">
           <p class="footer-bottom-note">
             <span class="footer-brand-glyph" aria-hidden="true">✦</span>
@@ -1913,23 +1879,23 @@
       </div>
 
       <div class="sheet-body">
-        <!-- لیست اقلام سبد خرید -->
+        <!-- Shopping Cart Items List -->
         <div class="sheet-items-list" id="sheet-items-list">
-          <!-- محتوا به صورت پویا با جاوااسکریپت پر می‌شود -->
+          <!-- Dynamically populated by client JavaScript -->
         </div>
 
-        <!-- شلف هوشمند مکمل قهوه جهت ارتقای ارزش سبد (Contextual Upsell Shelf) -->
+        <!-- Contextual Upsell Shelf for Coffee Pairings -->
         <div class="cart-upsell-shelf-container" id="cart-upsell-shelf-container">
-          <!-- با جاوااسکریپت در صورت وجود قهوه در سبد خرید پر می‌شود -->
+          <!-- Populated dynamically when coffee items are in cart -->
         </div>
 
-        <!-- یادداشت به باریستا -->
+        <!-- Barista Special Instructions -->
         <div class="sheet-note-box">
           <label for="sheet-order-note" class="sheet-note-label">یادداشت برای باریستا (اختیاری):</label>
           <input type="text" id="sheet-order-note" class="sheet-note-input" placeholder="مثلاً: شیر کم‌چرب، بدون شکر، دمای سرو ملایم..." />
         </div>
 
-        <!-- خلاصه فاکتور -->
+        <!-- Cart Total & Summary Breakdown -->
         <div class="sheet-summary-box">
           <div class="summary-line">
             <span>مجموع اقلام</span>
