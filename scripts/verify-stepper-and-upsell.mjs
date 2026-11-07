@@ -11,8 +11,8 @@ const ROOT_DIR = path.resolve(__dirname, "..");
 const FRONTEND_DIR = path.resolve(ROOT_DIR, "frontend");
 
 function getChromePath() {
-  if (process.env.CHROME_BIN) return process.env.CHROME_BIN;
-  if (process.env.CHROME_PATH) return process.env.CHROME_PATH;
+  if (process.env.CHROME_BIN && fs.existsSync(process.env.CHROME_BIN)) return process.env.CHROME_BIN;
+  if (process.env.CHROME_PATH && fs.existsSync(process.env.CHROME_PATH)) return process.env.CHROME_PATH;
 
   if (process.platform === "win32") {
     const defaultWin = "C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe";
@@ -131,31 +131,48 @@ async function run() {
 
   const server = await startServer();
   const tmpProfile = fs.mkdtempSync(path.join(os.tmpdir(), "soren-stepper-"));
+  let chromeStderr = "";
   const chromeProcess = spawn(
     CHROME_PATH,
     [
       "--headless=new",
       `--remote-debugging-port=${CHROME_PORT}`,
+      "--remote-debugging-address=0.0.0.0",
+      "--remote-allow-origins=*",
       `--user-data-dir=${tmpProfile}`,
       "--no-sandbox",
       "--disable-setuid-sandbox",
       "--disable-dev-shm-usage",
       "--disable-gpu",
+      "--disable-software-rasterizer",
       "--no-first-run",
       "--no-default-browser-check",
       "--disable-extensions",
       "about:blank",
     ],
-    { stdio: "ignore" }
+    { stdio: ["ignore", "ignore", "pipe"] }
   );
 
+  chromeProcess.stderr?.on("data", (chunk) => {
+    chromeStderr += chunk.toString();
+  });
+
   let tabInfo = null;
-  for (let i = 0; i < 30; i++) {
+  for (let i = 0; i < 50; i++) {
     try {
+      const listRes = await fetch(`http://127.0.0.1:${CHROME_PORT}/json/list`);
+      if (listRes.ok) {
+        const list = await listRes.json();
+        const pageTab = list.find((t) => t.type === "page" && t.webSocketDebuggerUrl);
+        if (pageTab) {
+          tabInfo = pageTab;
+          break;
+        }
+      }
       const res = await fetch(`http://127.0.0.1:${CHROME_PORT}/json/new?about:blank`, { method: "PUT" });
       if (res.ok) {
         tabInfo = await res.json();
-        break;
+        if (tabInfo && tabInfo.webSocketDebuggerUrl) break;
       }
     } catch (_) {}
     await new Promise((r) => setTimeout(r, 200));
@@ -164,6 +181,9 @@ async function run() {
   if (!tabInfo || !tabInfo.webSocketDebuggerUrl) {
     chromeProcess.kill();
     server.close();
+    if (chromeStderr) {
+      console.error("Chrome stderr:", chromeStderr.slice(0, 1000));
+    }
     throw new Error(`Failed to connect to headless Chrome on port ${CHROME_PORT}`);
   }
 
