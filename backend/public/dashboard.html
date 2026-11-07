@@ -77,6 +77,48 @@
     .pulse-subtle {
       animation: pulse-subtle 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
     }
+
+    /* Emil Kowalski Design Engineering & Drawer Animations */
+    :root {
+      --ease-drawer: cubic-bezier(0.32, 0.72, 0, 1);
+      --ease-out-snappy: cubic-bezier(0.23, 1, 0.32, 1);
+    }
+    .ease-drawer {
+      transition-timing-function: var(--ease-drawer);
+    }
+    .drawer-open {
+      transform: translateX(0) !important;
+    }
+    .drawer-backdrop-open {
+      opacity: 1 !important;
+      pointer-events: auto !important;
+    }
+    @keyframes conduit-pulse {
+      0% { stroke-dashoffset: 24; }
+      100% { stroke-dashoffset: 0; }
+    }
+    .animate-conduit-pulse {
+      stroke-dasharray: 6 6;
+      animation: conduit-pulse 1.2s linear infinite;
+    }
+    @keyframes node-shockwave {
+      0% { transform: scale(0.92); opacity: 0.9; }
+      100% { transform: scale(1.35); opacity: 0; }
+    }
+    .ring-shockwave {
+      animation: node-shockwave 0.8s var(--ease-out-snappy) forwards;
+    }
+    .btn-tactile:active {
+      transform: scale(0.97);
+    }
+    .code-scroll::-webkit-scrollbar {
+      height: 4px;
+      width: 4px;
+    }
+    .code-scroll::-webkit-scrollbar-thumb {
+      background: rgba(255, 255, 255, 0.15);
+      border-radius: 4px;
+    }
   </style>
 </head>
 <body class="min-h-screen grid-pattern antialiased text-zinc-300 flex flex-col justify-between selection:bg-white/10 selection:text-white">
@@ -149,6 +191,16 @@
           </svg>
           <span id="sound-label" class="text-[11px]">Audio</span>
         </button>
+
+        <!-- Threat Simulator Quick Jump -->
+        <a 
+          href="#security-dataflow-section" 
+          title="Jump to Security & Data-Flow Pipeline Simulator"
+          class="h-8 px-2.5 rounded-md bg-white/[0.04] hover:bg-white/[0.08] hairline-border text-zinc-300 hover:text-white text-xs font-mono transition-colors flex items-center gap-1.5"
+        >
+          <span class="w-1.5 h-1.5 rounded-full bg-signal-rose pulse-subtle"></span>
+          <span class="text-[11px] hidden sm:inline">Threat Simulator</span>
+        </a>
 
         <!-- Stage Actions Toggle -->
         <button 
@@ -233,6 +285,15 @@
           <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><line x1="4.93" y1="4.93" x2="19.07" y2="19.07"></line></svg>
           <span>Spam 429 Rate Limit</span>
         </button>
+
+        <!-- 6: Trigger Vector Simulation in Security Dashboard -->
+        <button 
+          onclick="SecurityEngine && SecurityEngine.simulateCurrentAttack()" 
+          class="px-2.5 py-1.5 rounded bg-signal-rose/10 hover:bg-signal-rose/20 text-signal-rose border border-signal-rose/30 flex items-center gap-1.5 transition-colors"
+        >
+          <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>
+          <span>Play Threat Simulation</span>
+        </button>
       </div>
 
       <button onclick="toggleStageDrawer()" class="text-zinc-400 hover:text-zinc-200 text-[11px]">✕ Close</button>
@@ -295,6 +356,446 @@
           <span id="failover-message" class="text-zinc-300">Cluster Status: Healthy. Ingress distributed via active round-robin pipeline.</span>
         </div>
         <span class="text-zinc-400 text-[10px] tabular-nums" id="failover-time">Ready</span>
+      </div>
+
+    </section>
+
+    <!-- ================= CYBERSECURITY & DATA-FLOW PIPELINE SIMULATOR ================= -->
+    <section id="security-dataflow-section" class="bg-surface rounded-xl hairline-border flex flex-col overflow-hidden relative shadow-2xl">
+      
+      <!-- Section Header & Master Controls HUD -->
+      <div class="px-5 py-3.5 hairline-bottom bg-[#0E1015]/95 flex flex-wrap items-center justify-between gap-4 font-mono text-xs">
+        
+        <!-- Left: Section Title & Identity -->
+        <div class="flex items-center gap-3">
+          <div class="flex items-center gap-2">
+            <span class="w-2 h-2 rounded-full bg-signal-rose pulse-subtle"></span>
+            <span class="text-zinc-100 font-semibold tracking-wider uppercase">Data-Flow Topology & Threat Simulator</span>
+          </div>
+          <span class="text-zinc-600 hidden sm:inline">|</span>
+          <span class="text-[11px] text-zinc-400 hidden sm:inline">Perimeter WAF ➔ API Middleware ➔ ORM AST ➔ PostgreSQL RLS</span>
+        </div>
+
+        <!-- Right: Master Mode Toggle & Simulation Triggers -->
+        <div class="flex flex-wrap items-center gap-2.5">
+          
+          <!-- Master Toggle: Vulnerable Mode vs. Hardened Mode -->
+          <div class="flex items-center p-0.5 rounded-lg bg-black/50 hairline-border text-xs">
+            <button 
+              id="btn-mode-hardened"
+              onclick="SecurityEngine.setHardenedMode(true)"
+              title="Activate Zero-Trust defenses, WAF rules, Zod filters, and Postgres RLS"
+              class="px-2.5 py-1 rounded-md text-[11px] font-medium transition-all flex items-center gap-1.5 bg-emerald-500/20 text-signal-emerald border border-emerald-500/30 btn-tactile"
+            >
+              <svg class="w-3 h-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>
+              <span>Hardened Mode</span>
+            </button>
+            <button 
+              id="btn-mode-vulnerable"
+              onclick="SecurityEngine.setHardenedMode(false)"
+              title="Disable perimeter checks to demonstrate exploit execution and data leakage"
+              class="px-2.5 py-1 rounded-md text-[11px] font-medium transition-all flex items-center gap-1.5 text-zinc-400 hover:text-zinc-200 btn-tactile"
+            >
+              <svg class="w-3 h-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>
+              <span>Vulnerable Mode</span>
+            </button>
+          </div>
+
+          <!-- Play Attack Simulation Button -->
+          <button 
+            id="btn-run-sec-sim"
+            onclick="SecurityEngine.simulateCurrentAttack()"
+            class="h-8 px-3 rounded-md bg-white text-black hover:bg-zinc-200 font-semibold transition-colors flex items-center gap-1.5 btn-tactile shadow-sm"
+          >
+            <svg class="w-3.5 h-3.5 fill-current" viewBox="0 0 24 24">
+              <polygon points="5 3 19 12 5 21 5 3"></polygon>
+            </svg>
+            <span class="text-[11px]">Inject Vector</span>
+          </button>
+
+          <!-- Reset Pipeline -->
+          <button 
+            onclick="SecurityEngine.resetPipeline()"
+            title="Reset node states and clear packet pulse"
+            class="h-8 px-2.5 rounded-md bg-white/[0.03] hover:bg-white/[0.08] hairline-border text-zinc-400 hover:text-zinc-200 transition-colors flex items-center gap-1 btn-tactile"
+          >
+            <svg class="w-3 h-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"></path><path d="M3 3v5h5"></path></svg>
+            <span class="text-[11px] hidden sm:inline">Reset</span>
+          </button>
+
+          <!-- Open Inspector Drawer -->
+          <button 
+            onclick="SecurityEngine.openInspector(SecurityEngine.activeNodeId || 'waf')"
+            title="Slide open the node inspector drawer"
+            class="h-8 px-2.5 rounded-md bg-white/[0.04] hover:bg-white/[0.08] hairline-border text-zinc-300 hover:text-white transition-colors flex items-center gap-1.5 btn-tactile"
+          >
+            <svg class="w-3.5 h-3.5 text-zinc-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><line x1="15" y1="3" x2="15" y2="21"></line></svg>
+            <span class="text-[11px]">Inspector</span>
+          </button>
+
+        </div>
+      </div>
+
+      <!-- Attack Vector Switcher Tabs -->
+      <div class="px-5 py-2.5 bg-[#090A0D]/90 hairline-bottom flex flex-wrap items-center justify-between gap-2 text-xs font-mono">
+        <div class="flex items-center gap-1.5 overflow-x-auto py-0.5 max-w-full code-scroll">
+          <span class="text-[10px] text-zinc-500 uppercase tracking-wider mr-1 shrink-0">Attack Vectors:</span>
+          
+          <!-- Vector 1: SQLi -->
+          <button 
+            id="tab-vec-sqli"
+            onclick="SecurityEngine.switchVector('sqli')"
+            class="px-3 py-1.5 rounded-md hairline-border transition-all flex items-center gap-2 shrink-0 bg-white/[0.08] text-white border-white/20 font-medium btn-tactile"
+          >
+            <span class="w-1.5 h-1.5 rounded-full bg-signal-rose"></span>
+            <span>SQL Injection (SQLi)</span>
+            <span class="text-[10px] text-zinc-400 font-normal font-mono">' OR 1=1 --</span>
+          </button>
+
+          <!-- Vector 2: IDOR -->
+          <button 
+            id="tab-vec-idor"
+            onclick="SecurityEngine.switchVector('idor')"
+            class="px-3 py-1.5 rounded-md hairline-border transition-all flex items-center gap-2 shrink-0 bg-white/[0.02] text-zinc-400 hover:text-zinc-200 border-white/[0.06] btn-tactile"
+          >
+            <span class="w-1.5 h-1.5 rounded-full bg-signal-amber"></span>
+            <span>IDOR / Broken Access</span>
+            <span class="text-[10px] text-zinc-500 font-normal font-mono">/docs/102 ➔ /103</span>
+          </button>
+
+          <!-- Vector 3: SSRF -->
+          <button 
+            id="tab-vec-ssrf"
+            onclick="SecurityEngine.switchVector('ssrf')"
+            class="px-3 py-1.5 rounded-md hairline-border transition-all flex items-center gap-2 shrink-0 bg-white/[0.02] text-zinc-400 hover:text-zinc-200 border-white/[0.06] btn-tactile"
+          >
+            <span class="w-1.5 h-1.5 rounded-full bg-signal-cyan"></span>
+            <span>SSRF (Cloud Metadata)</span>
+            <span class="text-[10px] text-zinc-500 font-normal font-mono">169.254.169.254</span>
+          </button>
+
+          <!-- Vector 4: Rate-Limit Bypass -->
+          <button 
+            id="tab-vec-ratelimit"
+            onclick="SecurityEngine.switchVector('ratelimit')"
+            class="px-3 py-1.5 rounded-md hairline-border transition-all flex items-center gap-2 shrink-0 bg-white/[0.02] text-zinc-400 hover:text-zinc-200 border-white/[0.06] btn-tactile"
+          >
+            <span class="w-1.5 h-1.5 rounded-full bg-purple-400"></span>
+            <span>Rate-Limit Bypass</span>
+            <span class="text-[10px] text-zinc-500 font-normal font-mono">X-Forwarded-For Spoof</span>
+          </button>
+        </div>
+
+        <div class="hidden xl:flex items-center gap-3 text-[11px] text-zinc-500">
+          <span class="flex items-center gap-1.5"><span class="w-1.5 h-1.5 rounded-full bg-signal-emerald"></span> Mitigated</span>
+          <span class="flex items-center gap-1.5"><span class="w-1.5 h-1.5 rounded-full bg-signal-rose"></span> Breached / Alert</span>
+          <span class="flex items-center gap-1.5"><span class="w-1.5 h-1.5 rounded-full bg-signal-cyan"></span> Active Packet</span>
+        </div>
+      </div>
+
+      <!-- Pipeline Visualization Area -->
+      <div class="relative w-full bg-[#090A0D]/95 p-4 lg:p-6 overflow-hidden">
+        
+        <!-- DESKTOP PIPELINE: Horizontal Interconnected Nodes -->
+        <div class="hidden lg:block relative min-h-[190px]">
+          
+          <!-- Background SVG Conduits & Animated Pulse -->
+          <svg id="pipeline-svg-canvas" class="absolute inset-0 w-full h-full pointer-events-none z-0" xmlns="http://www.w3.org/2000/svg">
+            <defs>
+              <linearGradient id="conduit-grad-normal" x1="0%" y1="0%" x2="100%" y2="0%">
+                <stop offset="0%" stop-color="rgba(255, 255, 255, 0.12)" />
+                <stop offset="100%" stop-color="rgba(255, 255, 255, 0.12)" />
+              </linearGradient>
+              <linearGradient id="conduit-grad-mitigated" x1="0%" y1="0%" x2="100%" y2="0%">
+                <stop offset="0%" stop-color="rgba(16, 185, 129, 0.4)" />
+                <stop offset="100%" stop-color="rgba(16, 185, 129, 0.8)" />
+              </linearGradient>
+              <linearGradient id="conduit-grad-breach" x1="0%" y1="0%" x2="100%" y2="0%">
+                <stop offset="0%" stop-color="rgba(239, 68, 68, 0.4)" />
+                <stop offset="100%" stop-color="rgba(239, 68, 68, 0.8)" />
+              </linearGradient>
+            </defs>
+
+            <!-- 4 Interconnecting Segment Lines (Client -> WAF -> Middleware -> ORM -> DB) -->
+            <path id="svg-seg-0" class="transition-all duration-300" stroke="rgba(255, 255, 255, 0.12)" stroke-width="1.5" stroke-dasharray="4 4" fill="none" d="M0,0 L0,0" />
+            <path id="svg-seg-1" class="transition-all duration-300" stroke="rgba(255, 255, 255, 0.12)" stroke-width="1.5" stroke-dasharray="4 4" fill="none" d="M0,0 L0,0" />
+            <path id="svg-seg-2" class="transition-all duration-300" stroke="rgba(255, 255, 255, 0.12)" stroke-width="1.5" stroke-dasharray="4 4" fill="none" d="M0,0 L0,0" />
+            <path id="svg-seg-3" class="transition-all duration-300" stroke="rgba(255, 255, 255, 0.12)" stroke-width="1.5" stroke-dasharray="4 4" fill="none" d="M0,0 L0,0" />
+
+            <!-- Dynamic Animated 60fps Request Packet -->
+            <g id="svg-animated-packet" class="opacity-0 transition-opacity duration-150">
+              <!-- Outer Shockwave Ring -->
+              <circle id="svg-packet-ring" r="9" fill="none" stroke="#06B6D4" stroke-width="1.5" opacity="0.6" />
+              <!-- Core Packet Glow -->
+              <circle id="svg-packet-core" r="4.5" fill="#06B6D4" />
+            </g>
+          </svg>
+
+          <!-- 5 Pipeline Node Cards -->
+          <div class="relative z-10 grid grid-cols-5 gap-3.5">
+            
+            <!-- Node 1: Client / Attacker -->
+            <div 
+              id="node-card-client" 
+              onclick="SecurityEngine.openInspector('client')"
+              class="group bg-[#0E1015] hairline-border rounded-xl p-3.5 flex flex-col justify-between hover:border-white/30 transition-all cursor-pointer relative shadow-lg min-h-[175px] btn-tactile"
+            >
+              <div class="flex items-center justify-between text-[10px] font-mono pb-2 hairline-bottom text-zinc-500">
+                <span class="tracking-wider">STEP 01</span>
+                <span id="badge-node-client" class="text-zinc-400 font-semibold flex items-center gap-1">
+                  <span class="w-1.5 h-1.5 rounded-full bg-zinc-400"></span> INGRESS
+                </span>
+              </div>
+              <div class="py-2 space-y-1">
+                <div class="flex items-center gap-1.5 text-zinc-100 font-semibold font-mono text-xs group-hover:text-white transition-colors">
+                  <svg class="w-3.5 h-3.5 text-zinc-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><line x1="22" y1="12" x2="18" y2="12"></line><line x1="6" y1="12" x2="2" y2="12"></line><line x1="12" y1="6" x2="12" y2="2"></line><line x1="12" y1="22" x2="12" y2="18"></line></svg>
+                  <span>Client / Attacker</span>
+                </div>
+                <p class="text-[10px] font-mono text-zinc-500">Public WAN • 198.51.100.42</p>
+                <div id="snippet-node-client" class="text-[11px] font-mono text-zinc-300 bg-black/40 px-2 py-1 rounded hairline-border truncate">
+                  ' OR 1=1 --
+                </div>
+              </div>
+              <div class="pt-2 hairline-top flex items-center justify-between text-[10px] font-mono text-zinc-500">
+                <span>Hop: 0 µs</span>
+                <span class="text-zinc-400 group-hover:text-zinc-200 transition-colors">Inspect ➔</span>
+              </div>
+            </div>
+
+            <!-- Node 2: WAF / Reverse Proxy -->
+            <div 
+              id="node-card-waf" 
+              onclick="SecurityEngine.openInspector('waf')"
+              class="group bg-[#0E1015] hairline-border rounded-xl p-3.5 flex flex-col justify-between hover:border-white/30 transition-all cursor-pointer relative shadow-lg min-h-[175px] btn-tactile"
+            >
+              <div class="flex items-center justify-between text-[10px] font-mono pb-2 hairline-bottom text-zinc-500">
+                <span class="tracking-wider">STEP 02</span>
+                <span id="badge-node-waf" class="text-signal-amber font-semibold flex items-center gap-1">
+                  <span class="w-1.5 h-1.5 rounded-full bg-signal-amber"></span> FILTER
+                </span>
+              </div>
+              <div class="py-2 space-y-1">
+                <div class="flex items-center gap-1.5 text-zinc-100 font-semibold font-mono text-xs group-hover:text-white transition-colors">
+                  <svg class="w-3.5 h-3.5 text-signal-amber" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>
+                  <span>WAF / Reverse Proxy</span>
+                </div>
+                <p class="text-[10px] font-mono text-zinc-500">Cloudflare • Envoy Gateway</p>
+                <div id="snippet-node-waf" class="text-[11px] font-mono text-zinc-300 bg-black/40 px-2 py-1 rounded hairline-border truncate">
+                  Signature & Token Filter
+                </div>
+              </div>
+              <div class="pt-2 hairline-top flex items-center justify-between text-[10px] font-mono text-zinc-500">
+                <span>Hop: +0.3 ms</span>
+                <span class="text-zinc-400 group-hover:text-zinc-200 transition-colors">Inspect ➔</span>
+              </div>
+            </div>
+
+            <!-- Node 3: API Route / Middleware -->
+            <div 
+              id="node-card-middleware" 
+              onclick="SecurityEngine.openInspector('middleware')"
+              class="group bg-[#0E1015] hairline-border rounded-xl p-3.5 flex flex-col justify-between hover:border-white/30 transition-all cursor-pointer relative shadow-lg min-h-[175px] btn-tactile"
+            >
+              <div class="flex items-center justify-between text-[10px] font-mono pb-2 hairline-bottom text-zinc-500">
+                <span class="tracking-wider">STEP 03</span>
+                <span id="badge-node-middleware" class="text-zinc-400 font-semibold flex items-center gap-1">
+                  <span class="w-1.5 h-1.5 rounded-full bg-zinc-400"></span> ROUTER
+                </span>
+              </div>
+              <div class="py-2 space-y-1">
+                <div class="flex items-center gap-1.5 text-zinc-100 font-semibold font-mono text-xs group-hover:text-white transition-colors">
+                  <svg class="w-3.5 h-3.5 text-signal-cyan" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="2" width="20" height="8" rx="2" ry="2"></rect><rect x="2" y="14" width="20" height="8" rx="2" ry="2"></rect><line x1="6" y1="6" x2="6.01" y2="6"></line><line x1="6" y1="18" x2="6.01" y2="18"></line></svg>
+                  <span>API Route / Middleware</span>
+                </div>
+                <p class="text-[10px] font-mono text-zinc-500">Bun Kernel • Zod Schemas</p>
+                <div id="snippet-node-middleware" class="text-[11px] font-mono text-zinc-300 bg-black/40 px-2 py-1 rounded hairline-border truncate">
+                  JWT Context & Egress Guard
+                </div>
+              </div>
+              <div class="pt-2 hairline-top flex items-center justify-between text-[10px] font-mono text-zinc-500">
+                <span>Hop: +0.6 ms</span>
+                <span class="text-zinc-400 group-hover:text-zinc-200 transition-colors">Inspect ➔</span>
+              </div>
+            </div>
+
+            <!-- Node 4: ORM / Query Builder -->
+            <div 
+              id="node-card-orm" 
+              onclick="SecurityEngine.openInspector('orm')"
+              class="group bg-[#0E1015] hairline-border rounded-xl p-3.5 flex flex-col justify-between hover:border-white/30 transition-all cursor-pointer relative shadow-lg min-h-[175px] btn-tactile"
+            >
+              <div class="flex items-center justify-between text-[10px] font-mono pb-2 hairline-bottom text-zinc-500">
+                <span class="tracking-wider">STEP 04</span>
+                <span id="badge-node-orm" class="text-zinc-400 font-semibold flex items-center gap-1">
+                  <span class="w-1.5 h-1.5 rounded-full bg-zinc-400"></span> ORM AST
+                </span>
+              </div>
+              <div class="py-2 space-y-1">
+                <div class="flex items-center gap-1.5 text-zinc-100 font-semibold font-mono text-xs group-hover:text-white transition-colors">
+                  <svg class="w-3.5 h-3.5 text-purple-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="16 18 22 12 16 6"></polyline><polyline points="8 6 2 12 8 18"></polyline></svg>
+                  <span>ORM / Query Builder</span>
+                </div>
+                <p class="text-[10px] font-mono text-zinc-500">Prisma • Parameter AST</p>
+                <div id="snippet-node-orm" class="text-[11px] font-mono text-zinc-300 bg-black/40 px-2 py-1 rounded hairline-border truncate">
+                  Prepared Statements
+                </div>
+              </div>
+              <div class="pt-2 hairline-top flex items-center justify-between text-[10px] font-mono text-zinc-500">
+                <span>Hop: +0.2 ms</span>
+                <span class="text-zinc-400 group-hover:text-zinc-200 transition-colors">Inspect ➔</span>
+              </div>
+            </div>
+
+            <!-- Node 5: PostgreSQL Database -->
+            <div 
+              id="node-card-database" 
+              onclick="SecurityEngine.openInspector('database')"
+              class="group bg-[#0E1015] hairline-border rounded-xl p-3.5 flex flex-col justify-between hover:border-white/30 transition-all cursor-pointer relative shadow-lg min-h-[175px] btn-tactile"
+            >
+              <div class="flex items-center justify-between text-[10px] font-mono pb-2 hairline-bottom text-zinc-500">
+                <span class="tracking-wider">STEP 05</span>
+                <span id="badge-node-database" class="text-signal-emerald font-semibold flex items-center gap-1">
+                  <span class="w-1.5 h-1.5 rounded-full bg-signal-emerald"></span> STORAGE
+                </span>
+              </div>
+              <div class="py-2 space-y-1">
+                <div class="flex items-center gap-1.5 text-zinc-100 font-semibold font-mono text-xs group-hover:text-white transition-colors">
+                  <svg class="w-3.5 h-3.5 text-signal-emerald" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><ellipse cx="12" cy="5" rx="9" ry="3"></ellipse><path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"></path><path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"></path></svg>
+                  <span>PostgreSQL Database</span>
+                </div>
+                <p class="text-[10px] font-mono text-zinc-500">PostgreSQL 16 • RLS Policies</p>
+                <div id="snippet-node-database" class="text-[11px] font-mono text-zinc-300 bg-black/40 px-2 py-1 rounded hairline-border truncate">
+                  Row-Level Security Active
+                </div>
+              </div>
+              <div class="pt-2 hairline-top flex items-center justify-between text-[10px] font-mono text-zinc-500">
+                <span>Hop: +1.2 ms</span>
+                <span class="text-zinc-400 group-hover:text-zinc-200 transition-colors">Inspect ➔</span>
+              </div>
+            </div>
+
+          </div>
+        </div>
+
+        <!-- MOBILE / TABLET DIAGNOSTIC VIEW: Step-by-Step Vertical List -->
+        <div class="block lg:hidden space-y-3">
+          <div class="text-[11px] font-mono text-zinc-400 pb-1 flex items-center justify-between">
+            <span>DIAGNOSTIC PIPELINE (STEP-BY-STEP)</span>
+            <span class="text-[10px] text-zinc-500">Tap step to inspect code</span>
+          </div>
+
+          <!-- Mobile Step 1 -->
+          <div onclick="SecurityEngine.openInspector('client')" class="bg-[#0E1015] hairline-border rounded-lg p-3 flex items-center justify-between text-xs font-mono cursor-pointer active:scale-[0.99] transition-transform">
+            <div class="flex items-center gap-2.5">
+              <span class="w-6 h-6 rounded bg-white/[0.05] hairline-border flex items-center justify-center text-[10px] text-zinc-400">01</span>
+              <div>
+                <div class="text-zinc-200 font-medium">Client / Attacker</div>
+                <div class="text-[10px] text-zinc-500">198.51.100.42 • Public Ingress</div>
+              </div>
+            </div>
+            <span class="text-[10px] text-zinc-400 px-2 py-0.5 rounded bg-white/[0.03] hairline-border">Payload</span>
+          </div>
+
+          <div class="flex justify-center"><div class="w-px h-3 bg-white/10"></div></div>
+
+          <!-- Mobile Step 2 -->
+          <div onclick="SecurityEngine.openInspector('waf')" class="bg-[#0E1015] hairline-border rounded-lg p-3 flex items-center justify-between text-xs font-mono cursor-pointer active:scale-[0.99] transition-transform">
+            <div class="flex items-center gap-2.5">
+              <span class="w-6 h-6 rounded bg-white/[0.05] hairline-border flex items-center justify-center text-[10px] text-zinc-400">02</span>
+              <div>
+                <div class="text-zinc-200 font-medium">WAF / Reverse Proxy</div>
+                <div class="text-[10px] text-zinc-500">Cloudflare • CRS #942100</div>
+              </div>
+            </div>
+            <span id="mob-badge-waf" class="text-[10px] text-signal-emerald px-2 py-0.5 rounded bg-emerald-500/10 hairline-border">Shielded</span>
+          </div>
+
+          <div class="flex justify-center"><div class="w-px h-3 bg-white/10"></div></div>
+
+          <!-- Mobile Step 3 -->
+          <div onclick="SecurityEngine.openInspector('middleware')" class="bg-[#0E1015] hairline-border rounded-lg p-3 flex items-center justify-between text-xs font-mono cursor-pointer active:scale-[0.99] transition-transform">
+            <div class="flex items-center gap-2.5">
+              <span class="w-6 h-6 rounded bg-white/[0.05] hairline-border flex items-center justify-center text-[10px] text-zinc-400">03</span>
+              <div>
+                <div class="text-zinc-200 font-medium">API Route / Middleware</div>
+                <div class="text-[10px] text-zinc-500">Bun Gateway • Zod Schema</div>
+              </div>
+            </div>
+            <span class="text-[10px] text-zinc-400 px-2 py-0.5 rounded bg-white/[0.03] hairline-border">Router</span>
+          </div>
+
+          <div class="flex justify-center"><div class="w-px h-3 bg-white/10"></div></div>
+
+          <!-- Mobile Step 4 -->
+          <div onclick="SecurityEngine.openInspector('orm')" class="bg-[#0E1015] hairline-border rounded-lg p-3 flex items-center justify-between text-xs font-mono cursor-pointer active:scale-[0.99] transition-transform">
+            <div class="flex items-center gap-2.5">
+              <span class="w-6 h-6 rounded bg-white/[0.05] hairline-border flex items-center justify-center text-[10px] text-zinc-400">04</span>
+              <div>
+                <div class="text-zinc-200 font-medium">ORM / Query Builder</div>
+                <div class="text-[10px] text-zinc-500">Prisma AST • Parameterized $1</div>
+              </div>
+            </div>
+            <span class="text-[10px] text-zinc-400 px-2 py-0.5 rounded bg-white/[0.03] hairline-border">AST Prepared</span>
+          </div>
+
+          <div class="flex justify-center"><div class="w-px h-3 bg-white/10"></div></div>
+
+          <!-- Mobile Step 5 -->
+          <div onclick="SecurityEngine.openInspector('database')" class="bg-[#0E1015] hairline-border rounded-lg p-3 flex items-center justify-between text-xs font-mono cursor-pointer active:scale-[0.99] transition-transform">
+            <div class="flex items-center gap-2.5">
+              <span class="w-6 h-6 rounded bg-white/[0.05] hairline-border flex items-center justify-center text-[10px] text-zinc-400">05</span>
+              <div>
+                <div class="text-zinc-200 font-medium">PostgreSQL Database</div>
+                <div class="text-[10px] text-zinc-500">PostgreSQL 16 • Row-Level Security</div>
+              </div>
+            </div>
+            <span class="text-[10px] text-signal-emerald px-2 py-0.5 rounded bg-emerald-500/10 hairline-border">RLS Active</span>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Simulation Verdict & Live Data Leakage Preview Card -->
+      <div id="simulation-verdict-card" class="px-5 py-3.5 hairline-top bg-[#0E1015]/95 flex flex-col gap-3 font-mono text-xs">
+        
+        <div class="flex flex-wrap items-center justify-between gap-3">
+          <div class="flex items-center gap-2.5">
+            <span id="verdict-icon-dot" class="w-2 h-2 rounded-full bg-signal-emerald"></span>
+            <span id="verdict-title" class="font-semibold text-zinc-100 text-xs">STATUS: SIMULATION READY</span>
+            <span class="text-zinc-600 hidden sm:inline">•</span>
+            <span id="verdict-summary" class="text-zinc-400 text-[11px]">Click 'Inject Vector' to trace packet through defensive layers.</span>
+          </div>
+
+          <div class="flex items-center gap-4 text-[11px] tabular-nums">
+            <span class="text-zinc-400">HTTP Status: <strong id="verdict-http-code" class="text-zinc-200">200 OK</strong></span>
+            <span class="text-zinc-600">•</span>
+            <span class="text-zinc-400">Data Leakage: <strong id="verdict-leakage-stat" class="text-signal-emerald">0 bytes</strong></span>
+          </div>
+        </div>
+
+        <!-- Collapsible / Dynamic Data Leakage Preview Panel -->
+        <div id="data-leakage-panel" class="hidden bg-black/60 rounded-lg p-3.5 hairline-border space-y-2.5">
+          <div class="flex items-center justify-between text-[11px] hairline-bottom pb-2">
+            <div class="flex items-center gap-2 text-signal-rose">
+              <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>
+              <span class="font-semibold" id="leakage-header-title">EXFILTRATED DATA LEAKAGE PREVIEW (VULNERABLE MODE BREACH)</span>
+            </div>
+            <button onclick="SecurityEngine.copyLeakageData()" class="text-[10px] text-zinc-400 hover:text-white transition-colors flex items-center gap-1 btn-tactile">
+              <svg class="w-3 h-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
+              <span id="btn-copy-leakage-text">Copy Exfiltrated Payload</span>
+            </button>
+          </div>
+
+          <div class="overflow-x-auto max-h-[160px] code-scroll">
+            <pre id="leakage-json-display" class="font-mono text-[11px] text-rose-300/90 whitespace-pre leading-relaxed"></pre>
+          </div>
+
+          <div class="text-[10px] text-zinc-500 pt-1 flex items-center justify-between hairline-top">
+            <span>Root Cause: Missing parameterized statement or untrusted tenant boundary.</span>
+            <span class="text-signal-rose font-medium">Remediation available in Node Inspector</span>
+          </div>
+        </div>
+
       </div>
 
     </section>
@@ -419,6 +920,225 @@
       </div>
     </div>
   </div>
+
+  <!-- ================= TERMINAL / NODE SECURITY INSPECTOR DRAWER ================= -->
+  <!-- Backdrop Overlay -->
+  <div 
+    id="sec-drawer-backdrop" 
+    onclick="SecurityEngine.closeInspector()" 
+    class="fixed inset-0 z-50 bg-black/70 backdrop-blur-sm opacity-0 pointer-events-none transition-opacity duration-300"
+  ></div>
+
+  <!-- Smooth Slide-Over Drawer Container -->
+  <aside 
+    id="sec-inspector-drawer" 
+    class="fixed inset-y-0 right-0 z-50 w-full max-w-2xl bg-[#0E1015] hairline-border border-r-0 shadow-2xl transform translate-x-full transition-transform duration-300 ease-drawer flex flex-col font-mono"
+    role="dialog" 
+    aria-modal="true" 
+    aria-labelledby="drawer-node-title"
+  >
+    <!-- Drawer Top Bar -->
+    <div class="px-5 py-4 hairline-bottom bg-[#090A0D]/95 flex items-center justify-between gap-3">
+      <div class="flex items-center gap-2.5">
+        <div class="w-7 h-7 rounded-md bg-white/[0.04] hairline-border flex items-center justify-center text-zinc-300">
+          <svg class="w-4 h-4 text-signal-amber" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>
+        </div>
+        <div>
+          <div class="flex items-center gap-2">
+            <h3 id="drawer-node-title" class="text-xs font-semibold text-white uppercase tracking-wider">NODE SECURITY INSPECTOR</h3>
+            <span id="drawer-node-badge" class="text-[10px] px-1.5 py-0.5 rounded hairline-border bg-white/[0.03] text-zinc-400">WAF</span>
+          </div>
+          <p id="drawer-node-sub" class="text-[10px] text-zinc-500 font-normal">Layer-7 Ingress Boundary & Signature Inspection</p>
+        </div>
+      </div>
+
+      <div class="flex items-center gap-2">
+        <span class="text-[10px] text-zinc-500 hidden sm:inline">ESC to close</span>
+        <button 
+          onclick="SecurityEngine.closeInspector()" 
+          class="w-7 h-7 rounded-md bg-white/[0.04] hover:bg-white/[0.08] hairline-border text-zinc-400 hover:text-white flex items-center justify-center transition-colors btn-tactile text-xs"
+          title="Close Inspector Drawer"
+        >
+          ✕
+        </button>
+      </div>
+    </div>
+
+    <!-- Active Threat Vector Banner inside Drawer -->
+    <div class="px-5 py-2.5 bg-black/40 hairline-bottom flex flex-wrap items-center justify-between gap-2 text-xs">
+      <div class="flex items-center gap-2">
+        <span class="text-[10px] text-zinc-500 uppercase">Vector:</span>
+        <span id="drawer-vector-name" class="text-zinc-200 font-medium">SQL Injection (SQLi)</span>
+      </div>
+      <div class="flex items-center gap-2">
+        <span id="drawer-owasp-tag" class="text-[10px] text-signal-rose px-2 py-0.5 rounded bg-red-500/10 hairline-border font-medium">OWASP A03:2021 (CWE-89)</span>
+      </div>
+    </div>
+
+    <!-- Inspector Tabs -->
+    <div class="px-5 pt-3 hairline-bottom bg-[#0E1015] flex gap-2 text-xs">
+      <button 
+        id="btn-tab-code" 
+        onclick="SecurityEngine.setInspectorTab('code')"
+        class="pb-2.5 px-3 border-b-2 border-white text-white font-medium transition-colors flex items-center gap-1.5"
+      >
+        <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="16 18 22 12 16 6"></polyline><polyline points="8 6 2 12 8 18"></polyline></svg>
+        <span>Vulnerable vs. Secure Fix</span>
+      </button>
+
+      <button 
+        id="btn-tab-headers" 
+        onclick="SecurityEngine.setInspectorTab('headers')"
+        class="pb-2.5 px-3 border-b-2 border-transparent text-zinc-400 hover:text-zinc-200 transition-colors flex items-center gap-1.5"
+      >
+        <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><line x1="3" y1="9" x2="21" y2="9"></line></svg>
+        <span>Raw HTTP & Headers</span>
+      </button>
+
+      <button 
+        id="btn-tab-trace" 
+        onclick="SecurityEngine.setInspectorTab('trace')"
+        class="pb-2.5 px-3 border-b-2 border-transparent text-zinc-400 hover:text-zinc-200 transition-colors flex items-center gap-1.5"
+      >
+        <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon></svg>
+        <span>SQL Query & Trace</span>
+      </button>
+    </div>
+
+    <!-- Drawer Content Scrollable Area -->
+    <div class="flex-1 overflow-y-auto p-5 space-y-5 code-scroll bg-[#090A0D]/70">
+      
+      <!-- PANE 1: VULNERABLE CODE VS. SECURE FIX -->
+      <div id="pane-tab-code" class="space-y-4">
+        
+        <!-- Vulnerable Code Snippet Card -->
+        <div class="bg-[#0E1015] rounded-xl hairline-border border-red-500/25 overflow-hidden">
+          <div class="px-4 py-2.5 bg-red-500/10 hairline-bottom flex items-center justify-between text-xs">
+            <span class="text-signal-rose font-semibold flex items-center gap-1.5">
+              <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><line x1="15" y1="9" x2="9" y2="15"></line><line x1="9" y1="9" x2="15" y2="15"></line></svg>
+              <span>Vulnerable Implementation (Exploitable)</span>
+            </span>
+            <span class="text-[10px] text-zinc-400">Direct String Concatenation / Missing Scope</span>
+          </div>
+          <div class="p-3.5 bg-black/50 overflow-x-auto code-scroll">
+            <pre id="drawer-vulnerable-code" class="font-mono text-xs text-rose-300 leading-relaxed whitespace-pre"></pre>
+          </div>
+        </div>
+
+        <!-- Secure Fix Code Snippet Card -->
+        <div class="bg-[#0E1015] rounded-xl hairline-border border-emerald-500/30 overflow-hidden shadow-lg">
+          <div class="px-4 py-2.5 bg-emerald-500/10 hairline-bottom flex items-center justify-between text-xs">
+            <span class="text-signal-emerald font-semibold flex items-center gap-1.5">
+              <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>
+              <span>Hardened Zero-Trust Fix (Remediation)</span>
+            </span>
+            <button 
+              onclick="SecurityEngine.copySecureFix()"
+              class="px-2.5 py-1 rounded bg-white/[0.05] hover:bg-white/[0.1] hairline-border text-zinc-200 hover:text-white transition-colors flex items-center gap-1 text-[10px] btn-tactile"
+            >
+              <svg class="w-3 h-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
+              <span id="btn-copy-code-text">Copy Fix</span>
+            </button>
+          </div>
+          <div class="p-3.5 bg-black/50 overflow-x-auto code-scroll">
+            <pre id="drawer-secure-code" class="font-mono text-xs text-emerald-300 leading-relaxed whitespace-pre"></pre>
+          </div>
+          <div class="px-4 py-2 bg-[#0E1015] hairline-top flex items-center justify-between text-[10px] text-zinc-500">
+            <span>Standard: Parameterized AST / OWASP ASVS Level 2</span>
+            <span class="text-signal-emerald">Verified Zero-Leakage Invariant</span>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- PANE 2: RAW HTTP & HEADERS -->
+      <div id="pane-tab-headers" class="hidden space-y-4">
+        <div class="bg-[#0E1015] rounded-xl hairline-border p-4 space-y-3">
+          <div class="flex items-center justify-between text-xs hairline-bottom pb-2">
+            <span class="text-zinc-300 font-semibold">HTTP INGRESS REQUEST LINE</span>
+            <span id="drawer-http-method-badge" class="px-2 py-0.5 rounded bg-white/[0.05] hairline-border text-signal-cyan font-bold text-[10px]">GET</span>
+          </div>
+          <div id="drawer-http-url" class="text-xs font-mono text-zinc-200 bg-black/50 p-2.5 rounded hairline-border break-all">
+            /api/v1/products?search=' OR 1=1 --
+          </div>
+        </div>
+
+        <div class="bg-[#0E1015] rounded-xl hairline-border p-4 space-y-3">
+          <div class="flex items-center justify-between text-xs hairline-bottom pb-2">
+            <span class="text-zinc-300 font-semibold">REQUEST HEADERS TABLE</span>
+            <span class="text-[10px] text-zinc-500">Decoded Key-Value</span>
+          </div>
+          <div class="overflow-x-auto code-scroll">
+            <table class="w-full text-left text-xs font-mono">
+              <tbody id="drawer-headers-table" class="divide-y divide-white/[0.05] text-zinc-300">
+                <!-- Dynamically Populated -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <div class="bg-[#0E1015] rounded-xl hairline-border p-4 space-y-2">
+          <span class="text-xs text-zinc-300 font-semibold">RAW PAYLOAD / BODY</span>
+          <pre id="drawer-raw-payload" class="text-xs font-mono text-zinc-400 bg-black/50 p-2.5 rounded hairline-border whitespace-pre-wrap leading-relaxed">None (URL Query Parameter Only)</pre>
+        </div>
+      </div>
+
+      <!-- PANE 3: QUERY AST & TRACE -->
+      <div id="pane-tab-trace" class="hidden space-y-4">
+        
+        <div class="bg-[#0E1015] rounded-xl hairline-border p-4 space-y-3">
+          <div class="flex items-center justify-between text-xs hairline-bottom pb-2">
+            <span class="text-zinc-300 font-semibold">RESULTING SQL / EXECUTION STATEMENT</span>
+            <span class="text-[10px] text-zinc-500">Database Engine Level</span>
+          </div>
+          <div class="space-y-2">
+            <div class="text-[11px] text-zinc-400">Executed Statement:</div>
+            <pre id="drawer-sql-statement" class="text-xs font-mono text-zinc-200 bg-black/50 p-3 rounded hairline-border whitespace-pre-wrap leading-relaxed overflow-x-auto code-scroll">SELECT * FROM products WHERE name LIKE '%' OR 1=1 --' AND is_active = 1;</pre>
+          </div>
+        </div>
+
+        <div class="bg-[#0E1015] rounded-xl hairline-border p-4 space-y-3">
+          <div class="flex items-center justify-between text-xs hairline-bottom pb-2">
+            <span class="text-zinc-300 font-semibold">LAYER EXECUTION TRACE & SPAN HOPS</span>
+            <span class="text-[10px] text-signal-emerald">Microsecond Resolution</span>
+          </div>
+          <div id="drawer-trace-steps" class="space-y-2 text-xs font-mono">
+            <!-- Dynamically populated trace hops -->
+          </div>
+        </div>
+
+      </div>
+
+    </div>
+
+    <!-- Drawer Footer Actions -->
+    <div class="px-5 py-3 hairline-top bg-[#090A0D] flex items-center justify-between gap-3 text-xs">
+      <div class="flex items-center gap-2">
+        <button 
+          onclick="SecurityEngine.simulateCurrentAttack()" 
+          class="px-3 py-1.5 bg-white text-black font-semibold rounded hover:bg-zinc-200 transition-colors flex items-center gap-1.5 btn-tactile text-xs"
+        >
+          <svg class="w-3 h-3 fill-current" viewBox="0 0 24 24"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>
+          <span>Run Simulation</span>
+        </button>
+
+        <button 
+          id="drawer-toggle-mode-btn"
+          onclick="SecurityEngine.toggleHardenedMode()" 
+          class="px-3 py-1.5 bg-white/[0.04] hover:bg-white/[0.08] hairline-border text-zinc-300 hover:text-white rounded transition-colors btn-tactile text-xs"
+        >
+          Toggle Mode
+        </button>
+      </div>
+
+      <button 
+        onclick="SecurityEngine.closeInspector()" 
+        class="text-zinc-400 hover:text-white transition-colors text-xs"
+      >
+        Close Drawer
+      </button>
+    </div>
+  </aside>
 
   <!-- ================= CLIENT SCRIPT ENGINE ================= -->
   <script>
@@ -1227,6 +1947,893 @@
 
       renderQr(joinUrl);
     });
+
+    // =========================================================================
+    // CYBERSECURITY & DATA-FLOW PIPELINE ENGINE
+    // =========================================================================
+    const SecurityEngine = {
+      currentVector: 'sqli',
+      isHardened: true,
+      activeNodeId: 'waf',
+      currentTab: 'code',
+      animating: false,
+      animationStep: 0,
+      packetT: 0,
+      packetSpeed: 0.035,
+      nodeOrder: ['client', 'waf', 'middleware', 'orm', 'database'],
+
+      scenarios: {
+        sqli: {
+          id: 'sqli',
+          name: 'SQL Injection (SQLi)',
+          owasp: 'OWASP A03:2021 — Injection (CWE-89)',
+          payloadSummary: "' OR 1=1 --",
+          method: 'GET',
+          url: "/api/v1/products?search=' OR 1=1 --",
+          headers: {
+            "Host": "api.soren.internal",
+            "User-Agent": "sqlmap/1.7.2#stable (Automated Pen-Test Tool)",
+            "Accept": "application/json",
+            "X-Request-ID": "req_sqli_7f2b91",
+            "X-Origin-IP": "198.51.100.42"
+          },
+          body: null,
+          interceptNode: 'waf',
+          mitigationLabel: 'WAF CRS #942100 Regex Filter',
+          mitigationStatus: 403,
+          mitigationDetail: "WAF matched malicious SQLi token pattern `/('|\b(SELECT|UNION)\b|--)/i` at perimeter and terminated connection.",
+          breachNode: 'database',
+          breachDetail: "Tautology (' OR 1=1 --) altered SQL statement logic, returning unconstrained database table dump with soft-deleted rows.",
+          leakage: {
+            title: "EXFILTRATED PRODUCTS CATALOG & SECRET SPREADSHEET",
+            records: [
+              { id: "prd_reserve_geisha", name: "Imperial Geisha Reserve", cost_margin: "84%", wholesale_supplier: "Hacienda La Esmeralda", is_active: 0 },
+              { id: "prd_vip_comp", name: "Owner VIP 100% Comp Voucher", hash_salt: "7a8f90b2c41d", is_active: 0 },
+              { id: "usr_admin", email: "admin@soren.internal", role: "SUPER_ADMIN", password_hash: "$argon2id$v=19$m=65536,t=3,p=1$..." }
+            ]
+          },
+          nodes: {
+            client: {
+              title: "Client / Attacker",
+              sub: "Public Ingress • 198.51.100.42",
+              action: "Fired URL query containing SQL syntax delimiter token: ' OR 1=1 --",
+              sql: "-- Ingress URL Parameter:\nsearch=' OR 1=1 --",
+              traceSteps: [
+                { hop: "Origin WAN Ingress", latency: "0 µs", note: "Raw TCP socket accepted from 198.51.100.42" }
+              ],
+              vulnerableCode: `// Attacker crafts malicious query parameter string:\nconst search = "' OR 1=1 --";\nfetch(\`/api/v1/products?search=\${encodeURIComponent(search)}\`);`,
+              secureCode: `// Client input is untrusted:\n// All queries MUST be bound through typed parameters or ORM AST.\n// Never concatenate client-supplied values into query strings.`
+            },
+            waf: {
+              title: "WAF / Reverse Proxy",
+              sub: "Cloudflare / Envoy / OWASP CRS",
+              action: "Hardened: Blocked by CRS Rule #942100. Vulnerable: Permissive bypass allowed to origin.",
+              sql: "-- WAF Layer Inspection:\n-- Match regex: /('|\b(SELECT|UNION|INSERT|DELETE|UPDATE|DROP|ALTER|OR\\s+1=1)\\b|--)/i",
+              traceSteps: [
+                { hop: "TLS Termination", latency: "120 µs", note: "ECDSA P-256 handshake verified" },
+                { hop: "OWASP CRS Rule 942100", latency: "180 µs", note: "Libinjection tokenizer flags SQL tautology" }
+              ],
+              vulnerableCode: `// ❌ VULNERABLE: WAF in passive detection mode or missing rule\n// Request passed through to backend worker without token inspection\nproxy_pass http://backend_cluster;`,
+              secureCode: `//  SECURE: Strict OWASP CRS 3.3 Rule + Libinjection Check\nconst SQLI_REGEX = /('|\b(SELECT|UNION|INSERT|DELETE|UPDATE|DROP|ALTER|OR\\s+1=1)\\b|--|\\/\\*)/i;\nif (SQLI_REGEX.test(url.search)) {\n  return new Response(JSON.stringify({ error: "WAF Intercept: Malicious SQLi signature" }), {\n    status: 403,\n    headers: { "Content-Type": "application/json", "X-WAF-Rule": "CRS-942100" }\n  });\n}`
+            },
+            middleware: {
+              title: "API Route / Middleware",
+              sub: "Bun Kernel • Zod Schema Guard",
+              action: "Hardened: Zod regex schema validation rejects special characters. Vulnerable: Raw string forwarded.",
+              sql: "-- Middleware Schema Validation:\nconst schema = z.object({ search: z.string().max(50).regex(/^[\\p{L}\\p{N}\\s\\-_]+$/u) });",
+              traceSteps: [
+                { hop: "Route Dispatcher", latency: "45 µs", note: "Matched GET /api/v1/products" },
+                { hop: "Zod Schema Parser", latency: "90 µs", note: "Performs input boundary sanitization" }
+              ],
+              vulnerableCode: `// ❌ VULNERABLE: Unchecked query parameter pass-through\napp.get("/api/v1/products", async (req, res) => {\n  const search = req.query.search; // Raw untrusted string\n  const items = await productService.findProducts(search);\n  res.json(items);\n});`,
+              secureCode: `//  SECURE: Schema validation with Zod\nimport { z } from "zod";\n\nconst SearchQuerySchema = z.object({\n  search: z.string().trim().max(60).regex(/^[\\p{L}\\p{N}\\s\\-_]+$/u, "Alphanumeric search terms only"),\n});\n\napp.get("/api/v1/products", async (req, res) => {\n  const parse = SearchQuerySchema.safeParse(req.query);\n  if (!parse.success) {\n    return res.status(400).json({ error: "Invalid search syntax", issues: parse.error.issues });\n  }\n  const items = await productService.findProducts(parse.data.search);\n  res.json(items);\n});`
+            },
+            orm: {
+              title: "ORM / Query Builder",
+              sub: "Prisma ORM • AST Compiler",
+              action: "Hardened: Compiles to parameterized `$1` statement. Vulnerable: Unsafe `$queryRawUnsafe` string concatenation.",
+              sql: "/* Prepared Query Construction */\n-- Parameterized: SELECT * FROM products WHERE name ILIKE $1;\n-- Bound: $1 = \"%' OR 1=1 --%\"",
+              traceSteps: [
+                { hop: "Prisma AST Compilation", latency: "80 µs", note: "Generates positional parameter placeholder $1" },
+                { hop: "Type Coercion", latency: "20 µs", note: "Enforces String primitive binding" }
+              ],
+              vulnerableCode: `// ❌ VULNERABLE: Using raw string concatenation in ORM\nconst query = \`SELECT * FROM products WHERE name LIKE '%\${req.query.search}%' AND is_active = 1\`;\nconst results = await prisma.$queryRawUnsafe(query);`,
+              secureCode: `//  SECURE: Type-safe Query via Prisma ORM / Prepared Tag\n// 1. Prisma Typed findMany:\nconst results = await prisma.product.findMany({\n  where: {\n    name: { contains: search, mode: 'insensitive' },\n    isActive: true,\n  },\n});\n\n// 2. Or Parameterized Tagged Template:\nconst results = await prisma.$queryRaw\`SELECT * FROM products WHERE name ILIKE \${'%' + search + '%'} AND is_active = true\`;`
+            },
+            database: {
+              title: "PostgreSQL Database",
+              sub: "PostgreSQL 16 Engine",
+              action: "Hardened: Parameter value treated as literal string (0 rows). Vulnerable: SQL syntax injected, table leaked.",
+              sql: "/* ❌ VULNERABLE RESULTING QUERY */\nSELECT * FROM products WHERE name LIKE '%' OR 1=1 --' AND is_active = 1;\n\n/*  HARDENED PREPARED EXECUTION */\nPREPARE stmt (text) AS SELECT * FROM products WHERE name ILIKE $1 AND is_active = true;\nEXECUTE stmt('%\\' OR 1=1 --%');",
+              traceSteps: [
+                { hop: "Query Planner", latency: "340 µs", note: "Index Scan on idx_products_name" },
+                { hop: "Disk Heap Fetch", latency: "680 µs", note: "Commit read transaction" }
+              ],
+              vulnerableCode: `/* DATABASE ENGINE EXECUTION LOG (VULNERABLE) */\n-- Query executed without parameter binding:\nSELECT * FROM products WHERE name LIKE '%' OR 1=1 --' AND is_active = 1;\n-- Result: Boolean tautology evaluates to TRUE for ALL records.\n-- Total rows returned: 48 (including hidden admin items).`,
+              secureCode: `/* DATABASE ENGINE EXECUTION LOG (HARDENED) */\n-- Prepared Statement executed with bound parameter:\nSELECT id, name, price, category FROM products WHERE name ILIKE $1 AND is_active = true;\n-- Parameter $1 evaluates as literal string '%\\' OR 1=1 --%'\n-- Total rows returned: 0. Zero syntax breakout possible.`
+            }
+          }
+        },
+        idor: {
+          id: 'idor',
+          name: 'IDOR / Broken Access Control',
+          owasp: 'OWASP A01:2021 — Broken Access Control (CWE-639)',
+          payloadSummary: '/documents/102 -> /documents/103',
+          method: 'GET',
+          url: '/api/v1/documents/103',
+          headers: {
+            "Host": "api.soren.internal",
+            "Authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJ1c3JfNDIiLCJvcmciOiJvcmdfYWxwaGEifQ...",
+            "X-Tenant-ID": "org_alpha",
+            "X-Request-ID": "req_idor_9c4e20",
+            "Accept": "application/json"
+          },
+          body: null,
+          interceptNode: 'database',
+          mitigationLabel: 'PostgreSQL Row-Level Security (RLS) Policy',
+          mitigationStatus: 403,
+          mitigationDetail: "PostgreSQL RLS policy evaluated `organization_id == current_setting('app.current_org')`. Competitor doc returned 0 rows (Access Denied).",
+          breachNode: 'database',
+          breachDetail: "Document 103 fetched by primary key without organization tenancy assertion. Cross-tenant confidential records leaked.",
+          leakage: {
+            title: "CONFIDENTIAL CROSS-TENANT DOCUMENT EXFILTRATED",
+            records: [
+              { id: "doc_103", title: "M&A Acquisition Due Diligence — Competitor Beta", owner_org: "org_beta", classification: "RESTRICTED", financial_exposure: "$4,200,000 USD", signer: "ceo@beta-holdings.internal" }
+            ]
+          },
+          nodes: {
+            client: {
+              title: "Client / Attacker",
+              sub: "Tenant A User • usr_42",
+              action: "Authenticated user of Organization Alpha alters document ID parameter from 102 to 103 (belongs to Org Beta).",
+              sql: "-- Requested URL:\nGET /api/v1/documents/103 HTTP/1.1\n-- User Session: org_alpha (usr_42)",
+              traceSteps: [
+                { hop: "Session Auth Verified", latency: "0 µs", note: "Valid JWT token for User 42 (Tenant Alpha)" }
+              ],
+              vulnerableCode: `// Attacker enumerates sequential primary keys:\nconst targetId = 103; // Belongs to competitor tenant (Org Beta)\nfetch(\`/api/v1/documents/\${targetId}\`, {\n  headers: { "Authorization": validUserToken }\n});`,
+              secureCode: `// Client requests document by ID;\n// Authorization layer must verify tenant ownership before returning resource.`
+            },
+            waf: {
+              title: "WAF / Reverse Proxy",
+              sub: "Cloudflare Ingress Gateway",
+              action: "JWT cryptographically valid. Passes request to API layer with verified user claims.",
+              sql: "-- JWT Verification:\nverify_jwt_signature(req.headers.authorization, JWT_SECRET);",
+              traceSteps: [
+                { hop: "JWT Signature Check", latency: "90 µs", note: "HMAC-SHA256 signature valid" },
+                { hop: "Rate Limiter", latency: "40 µs", note: "Passes request limit" }
+              ],
+              vulnerableCode: `// WAF validates cryptographic token integrity but lacks tenant-to-object ownership logic:\nif (!verifyJwt(req.headers.authorization)) return res.status(401);\nnext();`,
+              secureCode: `// Edge proxy extracts claims and attaches verified headers to upstream:\nres.headers["X-Auth-Org-Id"] = verifiedClaims.org_id;\nres.headers["X-Auth-User-Id"] = verifiedClaims.sub;\nnext();`
+            },
+            middleware: {
+              title: "API Route / Middleware",
+              sub: "Auth & Tenancy Guard",
+              action: "Hardened: Injects authenticated org_id into query scope. Vulnerable: Performs unscoped primary key query.",
+              sql: "-- Route Handler Scoping:\nconst tenantId = req.user.organizationId; // Enforces tenancy boundary",
+              traceSteps: [
+                { hop: "Tenant Context Extraction", latency: "60 µs", note: "Attaches org_alpha context to request" },
+                { hop: "RBAC Authorization", latency: "75 µs", note: "Asserts permission READ:DOCUMENTS" }
+              ],
+              vulnerableCode: `// ❌ VULNERABLE: Only authenticates, fails to authorize tenant ownership\napp.get("/api/v1/documents/:id", authenticateUser, async (req, res) => {\n  // Missing check: does req.user.orgId own req.params.id?\n  const doc = await db.documents.findUnique({ where: { id: req.params.id } });\n  return res.json(doc);\n});`,
+              secureCode: `//  SECURE: Tenant-scoped authorization guard\napp.get("/api/v1/documents/:id", authenticateUser, async (req, res) => {\n  const doc = await prisma.document.findFirst({\n    where: {\n      id: req.params.id,\n      organizationId: req.user.organizationId, // Mandatory tenant constraint\n    },\n  });\n  if (!doc) {\n    return res.status(404).json({ error: "Document not found or access denied" });\n  }\n  return res.json(doc);\n});`
+            },
+            orm: {
+              title: "ORM / Query Builder",
+              sub: "Prisma Client with RLS Extension",
+              action: "Hardened: Wraps query with `set_config('app.current_org_id')`. Vulnerable: Executes unscoped query.",
+              sql: "/* Multi-Tenant Transaction Configuration */\nSELECT set_config('app.current_org_id', 'org_alpha', true);\nSELECT * FROM documents WHERE id = 103;",
+              traceSteps: [
+                { hop: "Session Variable Binding", latency: "40 µs", note: "SET LOCAL app.current_org_id = 'org_alpha'" },
+                { hop: "Query AST Builder", latency: "50 µs", note: "Builds scoped document query" }
+              ],
+              vulnerableCode: `// ❌ VULNERABLE: Unscoped query builder call\nconst doc = await prisma.document.findUnique({ where: { id: 103 } });`,
+              secureCode: `//  SECURE: Transaction-scoped context for Row-Level Security\nawait prisma.$transaction(async (tx) => {\n  await tx.$executeRaw\`SELECT set_config('app.current_org_id', \${user.orgId}, true)\`;\n  return tx.document.findUnique({ where: { id: req.params.id } });\n});`
+            },
+            database: {
+              title: "PostgreSQL Database",
+              sub: "PostgreSQL 16 with RLS Enabled",
+              action: "Hardened: RLS policy evaluates `organization_id == current_org_id` -> FALSE. 0 rows returned.",
+              sql: "/* POSTGRESQL ROW-LEVEL SECURITY POLICY */\nALTER TABLE documents ENABLE ROW LEVEL SECURITY;\nCREATE POLICY tenant_isolation_policy ON documents\n  FOR ALL\n  USING (organization_id = NULLIF(current_setting('app.current_org_id', true), ''));",
+              traceSteps: [
+                { hop: "RLS Policy Evaluator", latency: "210 µs", note: "Evaluated: 'org_beta' == 'org_alpha' -> FALSE" },
+                { hop: "Result Set Filter", latency: "110 µs", note: "Zero rows returned (404 Not Found)" }
+              ],
+              vulnerableCode: `/* ❌ DATABASE EXECUTION WITHOUT RLS */\nSELECT * FROM documents WHERE id = 103;\n-- Output: Document 103 returned to unauthorized user from Org Alpha!\n-- Cross-tenant breach complete.`,
+              secureCode: `/*  POSTGRESQL ROW-LEVEL SECURITY (RLS) IN ACTION */\n-- With RLS enabled, even raw queries cannot leak across tenants:\nALTER TABLE documents ENABLE ROW LEVEL SECURITY;\n\nCREATE POLICY document_tenant_isolation ON documents\n  FOR ALL\n  USING (organization_id = NULLIF(current_setting('app.current_org_id', true), ''));\n-- Query returns 0 rows. Leakage mathematically prevented.`
+            }
+          }
+        },
+        ssrf: {
+          id: 'ssrf',
+          name: 'Server-Side Request Forgery (SSRF)',
+          owasp: 'OWASP A10:2021 — Server-Side Request Forgery (CWE-918)',
+          payloadSummary: '169.254.169.254 cloud metadata',
+          method: 'POST',
+          url: '/api/v1/webhooks/test',
+          headers: {
+            "Host": "api.soren.internal",
+            "Content-Type": "application/json",
+            "X-Request-ID": "req_ssrf_3d81fa",
+            "Accept": "application/json"
+          },
+          body: JSON.stringify({
+            webhookUrl: "http://169.254.169.254/latest/meta-data/iam/security-credentials/production-node-role"
+          }, null, 2),
+          interceptNode: 'middleware',
+          mitigationLabel: 'Private CIDR & Link-Local RFC 3927 Egress Guard',
+          mitigationStatus: 400,
+          mitigationDetail: "Egress firewall detected link-local IPv4 169.254.169.254 (RFC 3927 / AWS Metadata API). Connection aborted before dispatch.",
+          breachNode: 'database',
+          breachDetail: "Server dispatched outbound HTTP request into internal cloud metadata IP. Stole production AWS IAM role credentials.",
+          leakage: {
+            title: "AWS CLOUD IAM TEMPORARY SECURITY CREDENTIALS LEAKED",
+            records: [
+              {
+                Code: "Success",
+                Type: "AWS-HMAC",
+                AccessKeyId: "AKIAIOSFODNN7EXAMPLE",
+                SecretAccessKey: "wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY",
+                Token: "IQoJb3JpZ2luX2VjEEYaCXVzLWVhc3QtMSJGMEQCID8... [SESSION_TOKEN]",
+                Expiration: "2026-11-08T04:12:00Z"
+              }
+            ]
+          },
+          nodes: {
+            client: {
+              title: "Client / Attacker",
+              sub: "External Attacker Host",
+              action: "Submits POST request with webhookUrl pointing to cloud link-local address 169.254.169.254.",
+              sql: "-- Malicious Webhook Payload:\nPOST /api/v1/webhooks/test\n{\"webhookUrl\": \"http://169.254.169.254/latest/meta-data/...\"}",
+              traceSteps: [
+                { hop: "External POST Ingress", latency: "0 µs", note: "Receives user-controlled destination URL" }
+              ],
+              vulnerableCode: `// Attacker supplies cloud metadata endpoint:\nfetch("/api/v1/webhooks/test", {\n  method: "POST",\n  headers: { "Content-Type": "application/json" },\n  body: JSON.stringify({\n    webhookUrl: "http://169.254.169.254/latest/meta-data/iam/security-credentials/production-node-role"\n  })\n});`,
+              secureCode: `// Outbound URL targets provided by users must be validated\n// against strict DNS, protocol, and CIDR private IP filters.`
+            },
+            waf: {
+              title: "WAF / Reverse Proxy",
+              sub: "Cloudflare Ingress Gateway",
+              action: "Hardened: Layer-7 pattern filter checks for metadata IP strings. Passes request to API inspector.",
+              sql: "-- Ingress WAF Inspection:\nContent-Type: application/json verified.",
+              traceSteps: [
+                { hop: "JSON Content Inspection", latency: "70 µs", note: "Valid JSON syntax confirmed" },
+                { hop: "WAF Metadata Pattern Filter", latency: "110 µs", note: "Screens for known cloud metadata IP addresses" }
+              ],
+              vulnerableCode: `// WAF passes JSON body since endpoint is intended to accept URLs:\nnext(); // Forwarded to backend`,
+              secureCode: `// WAF Layer-7 inspection rule blocks known cloud metadata addresses:\nif (req.body.includes("169.254.169.254") || req.body.includes("metadata.google.internal")) {\n  return res.status(403).json({ error: "Egress target blocked by WAF policy" });\n}`
+            },
+            middleware: {
+              title: "API Route / Middleware",
+              sub: "Webhook Dispatcher Engine",
+              action: "Hardened: DNS lookup detects RFC 3927 link-local range. Egress blocked with 400 Bad Request.",
+              sql: "-- Egress IP Range Check:\nipaddr.parse(dnsAddress).range() === 'linkLocal' -> ABORT",
+              traceSteps: [
+                { hop: "URL Parser", latency: "30 µs", note: "Protocol verified as HTTPS only" },
+                { hop: "DNS Resolution Pinning", latency: "240 µs", note: "Resolved 169.254.169.254 -> Blocked Range" }
+              ],
+              vulnerableCode: `// ❌ VULNERABLE: Blind HTTP fetch of user-controlled destination\napp.post("/api/v1/webhooks/test", async (req, res) => {\n  const { webhookUrl } = req.body;\n  // Directly executes HTTP GET from within the server's private VPC network:\n  const response = await fetch(webhookUrl);\n  const data = await response.text();\n  res.json({ success: true, preview: data });\n});`,
+              secureCode: `//  SECURE: DNS Resolution Pinning + Private CIDR Blocklist Validator\nimport ipaddr from "ipaddr.js";\nimport dns from "node:dns/promises";\n\nasync function validateEgressUrl(rawUrl: string): Promise<string> {\n  const parsed = new URL(rawUrl);\n  if (parsed.protocol !== "https:") throw new Error("Only HTTPS allowed");\n\n  const lookup = await dns.lookup(parsed.hostname);\n  const ip = ipaddr.parse(lookup.address);\n\n  // Disallow loopback, private RFC 1918, link-local RFC 3927 (169.254.0.0/16)\n  const range = ip.range();\n  if (range !== "unicast" || ip.toString().startsWith("169.254.")) {\n    throw new Error("Outbound destination resolves to restricted private IP");\n  }\n  return parsed.href;\n}`
+            },
+            orm: {
+              title: "ORM / Query Builder",
+              sub: "Security Audit Logger",
+              action: "Records security incident event into audit ledger table.",
+              sql: "INSERT INTO security_audit_events (event_type, target_url, origin_ip) VALUES ('SSRF_BLOCKED', $1, $2);",
+              traceSteps: [
+                { hop: "Audit Log Dispatch", latency: "90 µs", note: "Appends security telemetry row" }
+              ],
+              vulnerableCode: `// Records dispatch in audit log table:\nawait db.webhookLogs.create({ data: { url: webhookUrl, status: "DISPATCHED" } });`,
+              secureCode: `// Records blocked attempt in security audit ledger:\nawait db.securityAudit.create({\n  data: { eventType: "SSRF_ATTEMPT_BLOCKED", target: sanitizedUrl, ip: clientIp }\n});`
+            },
+            database: {
+              title: "PostgreSQL Database",
+              sub: "Internal VPC Data Store",
+              action: "Hardened: Protected behind VPC security group and mTLS. Vulnerable: Attacker can probe internal services.",
+              sql: "-- VPC Network Security Guard:\nInternal PostgreSQL reachable only via authenticated TLS certificates.",
+              traceSteps: [
+                { hop: "Internal Network Isolation", latency: "150 µs", note: "VPC Security Group isolates database port 5432" }
+              ],
+              vulnerableCode: `/* VULNERABLE NETWORK IMPACT */\nWeb server serves as open HTTP proxy for attacker, exposing AWS IMDSv2 metadata,\ninternal Kubernetes cluster pods, and internal microservice endpoints.`,
+              secureCode: `/* DEFENSE-IN-DEPTH HARDENING */\n1. Enforce AWS IMDSv2 (Session Token required, Hop Limit = 1 to prevent forwarding).\n2. Egress firewall on application containers restricts outbound traffic to port 443 only.`
+            }
+          }
+        },
+        ratelimit: {
+          id: 'ratelimit',
+          name: 'Rate-Limit Bypass via IP Spoofing',
+          owasp: 'OWASP A07:2021 — Identification & Authentication (CWE-290)',
+          payloadSummary: 'X-Forwarded-For spoofing burst hitting auth',
+          method: 'POST',
+          url: '/api/v1/auth/login',
+          headers: {
+            "Host": "api.soren.internal",
+            "Content-Type": "application/json",
+            "X-Forwarded-For": "203.0.113.84, 198.51.100.22",
+            "X-Request-ID": "req_burst_e1b994",
+            "Accept": "application/json"
+          },
+          body: JSON.stringify({
+            username: "barista_head",
+            password: "password1234"
+          }, null, 2),
+          interceptNode: 'middleware',
+          mitigationLabel: 'Trusted Proxy Validation + Redis Sliding Window (HTTP 429)',
+          mitigationStatus: 429,
+          mitigationDetail: "Socket remote IP enforced; client-spoofed X-Forwarded-For ignored. Sliding window threshold exceeded (10 req/min). Issued HTTP 429.",
+          breachNode: 'database',
+          breachDetail: "Server accepted spoofed IP as distinct client; rate-limit counter fragmented. Credential brute-forced successfully.",
+          leakage: {
+            title: "BARISTA ACCOUNT PRIVILEGED CREDENTIALS COMPROMISED",
+            records: [
+              { account: "barista_head", pin_cracked: "4491", auth_token: "soren_ses_9921e4a77b8", permissions: ["ORDER_CANCEL", "PRICE_OVERRIDE", "CASH_DRAWER_OPEN"] }
+            ]
+          },
+          nodes: {
+            client: {
+              title: "Client / Attacker",
+              sub: "Distributed Brute-Force Bot",
+              action: "Fires 100 rapid login attempts, appending randomized X-Forwarded-For IPs to bypass rate limiters.",
+              sql: "-- Spoofed Header:\nX-Forwarded-For: 203.0.113.84",
+              traceSteps: [
+                { hop: "Rotated Header Ingress", latency: "0 µs", note: "Bot rotates client IP address header" }
+              ],
+              vulnerableCode: `// Attacker cycles forged IP headers on each request:\nfor (let i = 0; i < 100; i++) {\n  fetch("/api/v1/auth/login", {\n    method: "POST",\n    headers: { "X-Forwarded-For": \`203.0.113.\${i}\` },\n    body: JSON.stringify({ username: "barista", password: wordlist[i] })\n  });\n}`,
+              secureCode: `// IP addresses derived from client-provided headers are untrusted\n// unless validated by a known upstream reverse-proxy hop count.`
+            },
+            waf: {
+              title: "WAF / Reverse Proxy",
+              sub: "Cloudflare / NGINX Ingress",
+              action: "Hardened: Strips client X-Forwarded-For; attaches authoritative socket IP into CF-Connecting-IP.",
+              sql: "-- Header Sanitization:\nproxy_set_header X-Real-IP $remote_addr;",
+              traceSteps: [
+                { hop: "Header Scrubbing", latency: "50 µs", note: "Strips unverified client X-Forwarded-For" },
+                { hop: "Edge Socket IP Stamp", latency: "60 µs", note: "CF-Connecting-IP stamped as 198.51.100.42" }
+              ],
+              vulnerableCode: `// ❌ VULNERABLE NGINX / REVERSE PROXY CONFIGURATION:\nlocation / {\n  # Forwards client-supplied header without overwriting or stripping:\n  proxy_set_header X-Forwarded-For $http_x_forwarded_for;\n  proxy_pass http://backend;\n}`,
+              secureCode: `//  SECURE REVERSE PROXY CONFIGURATION:\nlocation / {\n  # Overwrite with true remote socket address:\n  proxy_set_header X-Real-IP $remote_addr;\n  proxy_set_header X-Forwarded-For $remote_addr;\n  # In Cloudflare, utilize CF-Connecting-IP exclusively.\n}`
+            },
+            middleware: {
+              title: "API Route / Middleware",
+              sub: "Rate Limiter & Auth Route",
+              action: "Hardened: Redis sliding window threshold hit (10 reqs) for true socket IP. Emits HTTP 429 Too Many Requests.",
+              sql: "-- Sliding Window Redis Key:\nauth_ratelimit:198.51.100.42:barista_head",
+              traceSteps: [
+                { hop: "Socket IP Resolution", latency: "40 µs", note: "Enforces trust proxy = 1" },
+                { hop: "Redis Sliding Window", latency: "160 µs", note: "Count exceeds 10 req/min -> 429 Blocked" }
+              ],
+              vulnerableCode: `// ❌ VULNERABLE: Direct access to client-spoofed header for rate limiting\napp.post("/api/v1/auth/login", async (req, res) => {\n  const ip = req.headers["x-forwarded-for"] || req.socket.remoteAddress;\n  if (rateLimiter.isExceeded(ip)) { // Each request has a unique fake IP!\n    return res.status(429).json({ error: "Rate limit exceeded" });\n  }\n  // Proceed to authentication...\n});`,
+              secureCode: `//  SECURE: Trusted proxy configuration + Compound Sliding Window Limit\n// 1. Configure trusted hop count in Express / Bun:\napp.set("trust proxy", 1); // Trust single reverse proxy hop\n\n// 2. Multi-factor rate limit keying:\nconst clientIp = req.ip; // Derived strictly from trusted proxy socket\nconst rateKey = \`auth_limit:\${clientIp}:\${req.body.username}\`;\nconst allowed = await redisRateLimiter.consume(rateKey, { max: 5, windowSec: 60 });\nif (!allowed) {\n  return res.status(429).header("Retry-After", "60").json({ error: "Too many login attempts" });\n}`
+            },
+            orm: {
+              title: "ORM / Query Builder",
+              sub: "User Authentication Query",
+              action: "Hardened: Request throttled before querying database. Vulnerable: Database hit repeatedly with password hash comparisons.",
+              sql: "SELECT id, username, password_hash, role FROM users WHERE username = 'barista_head';",
+              traceSteps: [
+                { hop: "Rate Throttling Check", latency: "20 µs", note: "Protects database from brute-force hash exhaustion" }
+              ],
+              vulnerableCode: `// Attacker forces repeated password hash verification queries:\nconst user = await db.user.findUnique({ where: { username: req.body.username } });`,
+              secureCode: `// Rate limiting occurs prior to database access or CPU-intensive password verification:\n// Argon2id / bcrypt is not invoked when rate limit is exceeded.`
+            },
+            database: {
+              title: "PostgreSQL Database",
+              sub: "Auth & Credential Store",
+              action: "Hardened: Argon2id hash parameters prevent offline cracking. Vulnerable: Attacker cracks password online.",
+              sql: "-- Argon2id Verification:\nargon2.verify(user.passwordHash, 'password1234');",
+              traceSteps: [
+                { hop: "Argon2id Verification", latency: "42,000 µs", note: "Memory-hard hashing (timeCost=3, mem=64MB)" }
+              ],
+              vulnerableCode: `/* ❌ VULNERABLE OUTCOME */\nAttacker successfully cracks PIN/password after 142 attempts due to missing throttle.\nBarista session token issued.`,
+              secureCode: `/*  SECURE PASSWORD HASHING (ARGON2ID) */\nimport argon2 from "argon2";\n\n// Verify password with timing-attack resistant Argon2id:\nconst isValid = await argon2.verify(user.passwordHash, password, {\n  type: argon2.argon2id,\n  memoryCost: 2 ** 16, // 64 MB\n  timeCost: 3,\n  parallelism: 1,\n});`
+            }
+          }
+        }
+      },
+
+      init() {
+        this.updateConduitPositions();
+        window.addEventListener('resize', () => this.updateConduitPositions());
+        this.switchVector('sqli');
+        this.setHardenedMode(true);
+      },
+
+      switchVector(vecId) {
+        if (!this.scenarios[vecId]) return;
+        this.currentVector = vecId;
+
+        // Update Vector Tab Buttons
+        const tabs = ['sqli', 'idor', 'ssrf', 'ratelimit'];
+        for (const t of tabs) {
+          const btn = document.getElementById(`tab-vec-${t}`);
+          if (!btn) continue;
+          if (t === vecId) {
+            btn.className = "px-3 py-1.5 rounded-md hairline-border transition-all flex items-center gap-2 shrink-0 bg-white/[0.08] text-white border-white/20 font-medium btn-tactile";
+          } else {
+            btn.className = "px-3 py-1.5 rounded-md hairline-border transition-all flex items-center gap-2 shrink-0 bg-white/[0.02] text-zinc-400 hover:text-zinc-200 border-white/[0.06] btn-tactile";
+          }
+        }
+
+        this.resetPipeline();
+        this.updateNodeCardSnippets();
+
+        // If inspector is open, update its content
+        if (this.isInspectorOpen()) {
+          this.populateInspector(this.activeNodeId);
+        }
+      },
+
+      setHardenedMode(hardened) {
+        this.isHardened = hardened;
+        const btnHardened = document.getElementById('btn-mode-hardened');
+        const btnVulnerable = document.getElementById('btn-mode-vulnerable');
+        const drawerToggle = document.getElementById('drawer-toggle-mode-btn');
+
+        if (hardened) {
+          if (btnHardened) btnHardened.className = "px-2.5 py-1 rounded-md text-[11px] font-medium transition-all flex items-center gap-1.5 bg-emerald-500/20 text-signal-emerald border border-emerald-500/30 btn-tactile";
+          if (btnVulnerable) btnVulnerable.className = "px-2.5 py-1 rounded-md text-[11px] font-medium transition-all flex items-center gap-1.5 text-zinc-400 hover:text-zinc-200 btn-tactile";
+          if (drawerToggle) drawerToggle.innerText = "Mode: Hardened";
+        } else {
+          if (btnHardened) btnHardened.className = "px-2.5 py-1 rounded-md text-[11px] font-medium transition-all flex items-center gap-1.5 text-zinc-400 hover:text-zinc-200 btn-tactile";
+          if (btnVulnerable) btnVulnerable.className = "px-2.5 py-1 rounded-md text-[11px] font-medium transition-all flex items-center gap-1.5 bg-red-500/20 text-signal-rose border border-red-500/30 btn-tactile";
+          if (drawerToggle) drawerToggle.innerText = "Mode: Vulnerable";
+        }
+
+        this.resetPipeline();
+      },
+
+      toggleHardenedMode() {
+        this.setHardenedMode(!this.isHardened);
+      },
+
+      updateNodeCardSnippets() {
+        const scenario = this.scenarios[this.currentVector];
+        if (!scenario) return;
+
+        const nodeClient = document.getElementById('snippet-node-client');
+        if (nodeClient) nodeClient.innerText = scenario.payloadSummary;
+
+        const nodeWaf = document.getElementById('snippet-node-waf');
+        if (nodeWaf) {
+          nodeWaf.innerText = this.currentVector === 'sqli' ? 'CRS 942100 Regex Filter' : (this.currentVector === 'ratelimit' ? 'CF-Connecting-IP Scrub' : 'JWT Signature Verify');
+        }
+
+        const nodeMw = document.getElementById('snippet-node-middleware');
+        if (nodeMw) {
+          nodeMw.innerText = this.currentVector === 'ssrf' ? 'RFC 3927 Link-Local Block' : (this.currentVector === 'ratelimit' ? 'Redis Sliding Window' : 'Zod Schema Validation');
+        }
+
+        const nodeOrm = document.getElementById('snippet-node-orm');
+        if (nodeOrm) {
+          nodeOrm.innerText = this.currentVector === 'sqli' ? 'Parameterized AST ($1)' : (this.currentVector === 'idor' ? 'Tenant Context Config' : 'Prepared Binding');
+        }
+
+        const nodeDb = document.getElementById('snippet-node-database');
+        if (nodeDb) {
+          nodeDb.innerText = this.currentVector === 'idor' ? 'PostgreSQL RLS Active' : 'PostgreSQL 16 Engine';
+        }
+      },
+
+      updateConduitPositions() {
+        const svg = document.getElementById('pipeline-svg-canvas');
+        if (!svg) return;
+
+        const pairs = [
+          ['node-card-client', 'node-card-waf', 'svg-seg-0'],
+          ['node-card-waf', 'node-card-middleware', 'svg-seg-1'],
+          ['node-card-middleware', 'node-card-orm', 'svg-seg-2'],
+          ['node-card-orm', 'node-card-database', 'svg-seg-3']
+        ];
+
+        const svgRect = svg.getBoundingClientRect();
+        this.segmentCoords = [];
+
+        for (const [fromId, toId, segId] of pairs) {
+          const fromEl = document.getElementById(fromId);
+          const toEl = document.getElementById(toId);
+          const pathEl = document.getElementById(segId);
+
+          if (fromEl && toEl && pathEl) {
+            const fRect = fromEl.getBoundingClientRect();
+            const tRect = toEl.getBoundingClientRect();
+
+            const x1 = fRect.right - svgRect.left;
+            const y1 = fRect.top - svgRect.top + fRect.height / 2;
+            const x2 = tRect.left - svgRect.left;
+            const y2 = tRect.top - svgRect.top + tRect.height / 2;
+
+            pathEl.setAttribute('d', `M ${x1},${y1} L ${x2},${y2}`);
+            this.segmentCoords.push({ x1, y1, x2, y2 });
+          }
+        }
+      },
+
+      simulateCurrentAttack() {
+        if (this.animating) return;
+        this.animating = true;
+        this.resetPipeline();
+
+        const scenario = this.scenarios[this.currentVector];
+        const stopNodeIndex = this.isHardened 
+          ? this.nodeOrder.indexOf(scenario.interceptNode) 
+          : this.nodeOrder.length - 1;
+
+        const packetGroup = document.getElementById('svg-animated-packet');
+        const packetCore = document.getElementById('svg-packet-core');
+        const packetRing = document.getElementById('svg-packet-ring');
+
+        if (packetGroup) packetGroup.style.opacity = '1';
+        if (packetCore) packetCore.setAttribute('fill', this.isHardened ? '#06B6D4' : '#EF4444');
+        if (packetRing) packetRing.setAttribute('stroke', this.isHardened ? '#06B6D4' : '#EF4444');
+
+        let currentSegIndex = 0;
+        let progress = 0;
+        const speed = 0.045; // 60fps smooth step
+
+        if (window.AudioEngine) AudioEngine.play('cache_hit');
+
+        const stepAnimation = () => {
+          if (!this.animating) return;
+
+          // If current segment is past the allowed stop point
+          if (currentSegIndex >= stopNodeIndex) {
+            this.finishSimulation(scenario, stopNodeIndex);
+            return;
+          }
+
+          const seg = this.segmentCoords && this.segmentCoords[currentSegIndex];
+          if (!seg) {
+            this.finishSimulation(scenario, stopNodeIndex);
+            return;
+          }
+
+          progress += speed;
+
+          const cx = seg.x1 + (seg.x2 - seg.x1) * Math.min(1, progress);
+          const cy = seg.y1 + (seg.y2 - seg.y1) * Math.min(1, progress);
+
+          if (packetCore) {
+            packetCore.setAttribute('cx', cx);
+            packetCore.setAttribute('cy', cy);
+          }
+          if (packetRing) {
+            packetRing.setAttribute('cx', cx);
+            packetRing.setAttribute('cy', cy);
+          }
+
+          if (progress >= 1) {
+            progress = 0;
+            currentSegIndex++;
+
+            const visitedNodeId = this.nodeOrder[currentSegIndex];
+            this.highlightNodeTransient(visitedNodeId);
+
+            if (currentSegIndex >= stopNodeIndex) {
+              this.finishSimulation(scenario, stopNodeIndex);
+              return;
+            } else {
+              if (window.AudioEngine) AudioEngine.play('cache_hit');
+            }
+          }
+
+          requestAnimationFrame(stepAnimation);
+        };
+
+        requestAnimationFrame(stepAnimation);
+      },
+
+      highlightNodeTransient(nodeId) {
+        const card = document.getElementById(`node-card-${nodeId}`);
+        if (card) {
+          card.classList.add('border-white/40');
+          setTimeout(() => card.classList.remove('border-white/40'), 300);
+        }
+      },
+
+      finishSimulation(scenario, targetNodeIndex) {
+        this.animating = false;
+        const targetNodeId = this.nodeOrder[targetNodeIndex];
+        const card = document.getElementById(`node-card-${targetNodeId}`);
+
+        const verdictDot = document.getElementById('verdict-icon-dot');
+        const verdictTitle = document.getElementById('verdict-title');
+        const verdictSummary = document.getElementById('verdict-summary');
+        const verdictHttp = document.getElementById('verdict-http-code');
+        const verdictLeakage = document.getElementById('verdict-leakage-stat');
+        const leakagePanel = document.getElementById('data-leakage-panel');
+        const leakageJson = document.getElementById('leakage-json-display');
+        const leakageTitle = document.getElementById('leakage-header-title');
+
+        if (this.isHardened) {
+          // MITIGATED STATE
+          if (window.AudioEngine) AudioEngine.play('waf_blocked');
+
+          if (card) {
+            card.classList.add('border-emerald-500/60', 'bg-emerald-950/20');
+          }
+
+          const badge = document.getElementById(`badge-node-${targetNodeId}`);
+          if (badge) {
+            badge.innerHTML = `<span class="w-1.5 h-1.5 rounded-full bg-signal-emerald animate-ping"></span> MITIGATED`;
+            badge.className = "text-signal-emerald font-bold flex items-center gap-1";
+          }
+
+          if (verdictDot) verdictDot.className = "w-2 h-2 rounded-full bg-signal-emerald";
+          if (verdictTitle) {
+            verdictTitle.innerText = `DEFENSE VERDICT: ATTACK MITIGATED (${scenario.name})`;
+            verdictTitle.className = "font-semibold text-signal-emerald text-xs";
+          }
+          if (verdictSummary) {
+            verdictSummary.innerText = scenario.mitigationDetail;
+          }
+          if (verdictHttp) {
+            verdictHttp.innerText = `${scenario.mitigationStatus} Mitigated`;
+            verdictHttp.className = "text-signal-emerald font-bold";
+          }
+          if (verdictLeakage) {
+            verdictLeakage.innerText = "0 bytes (Prevented)";
+            verdictLeakage.className = "text-signal-emerald font-semibold";
+          }
+
+          if (leakagePanel) leakagePanel.classList.add('hidden');
+
+        } else {
+          // BREACHED STATE
+          if (window.AudioEngine) AudioEngine.play('kill_server');
+
+          if (card) {
+            card.classList.add('border-red-500/80', 'bg-red-950/20');
+          }
+
+          const badge = document.getElementById(`badge-node-${targetNodeId}`);
+          if (badge) {
+            badge.innerHTML = `<span class="w-1.5 h-1.5 rounded-full bg-signal-rose animate-ping"></span> BREACHED`;
+            badge.className = "text-signal-rose font-bold flex items-center gap-1";
+          }
+
+          if (verdictDot) verdictDot.className = "w-2 h-2 rounded-full bg-signal-rose pulse-subtle";
+          if (verdictTitle) {
+            verdictTitle.innerText = `SECURITY ALERT: CRITICAL EXPLOIT SUCCEEDED (${scenario.name})`;
+            verdictTitle.className = "font-semibold text-signal-rose text-xs";
+          }
+          if (verdictSummary) {
+            verdictSummary.innerText = scenario.breachDetail;
+          }
+          if (verdictHttp) {
+            verdictHttp.innerText = `200 OK (Unfiltered)`;
+            verdictHttp.className = "text-signal-rose font-bold";
+          }
+          if (verdictLeakage) {
+            verdictLeakage.innerText = `${scenario.leakage.records.length} records leaked!`;
+            verdictLeakage.className = "text-signal-rose font-bold";
+          }
+
+          if (leakagePanel) {
+            leakagePanel.classList.remove('hidden');
+            if (leakageTitle) leakageTitle.innerText = scenario.leakage.title;
+            if (leakageJson) {
+              leakageJson.innerText = JSON.stringify(scenario.leakage.records, null, 2);
+            }
+          }
+        }
+      },
+
+      resetPipeline() {
+        this.animating = false;
+        const packetGroup = document.getElementById('svg-animated-packet');
+        if (packetGroup) packetGroup.style.opacity = '0';
+
+        // Reset node cards
+        for (const id of this.nodeOrder) {
+          const card = document.getElementById(`node-card-${id}`);
+          if (card) {
+            card.className = "group bg-[#0E1015] hairline-border rounded-xl p-3.5 flex flex-col justify-between hover:border-white/30 transition-all cursor-pointer relative shadow-lg min-h-[175px] btn-tactile";
+          }
+          const badge = document.getElementById(`badge-node-${id}`);
+          if (badge) {
+            const defaultLabels = {
+              client: 'INGRESS',
+              waf: 'FILTER',
+              middleware: 'ROUTER',
+              orm: 'ORM AST',
+              database: 'STORAGE'
+            };
+            badge.innerHTML = `<span class="w-1.5 h-1.5 rounded-full bg-zinc-400"></span> ${defaultLabels[id] || 'NODE'}`;
+            badge.className = "text-zinc-400 font-semibold flex items-center gap-1";
+          }
+        }
+
+        // Reset verdict banner
+        const verdictDot = document.getElementById('verdict-icon-dot');
+        const verdictTitle = document.getElementById('verdict-title');
+        const verdictSummary = document.getElementById('verdict-summary');
+        const verdictHttp = document.getElementById('verdict-http-code');
+        const verdictLeakage = document.getElementById('verdict-leakage-stat');
+        const leakagePanel = document.getElementById('data-leakage-panel');
+
+        if (verdictDot) verdictDot.className = "w-2 h-2 rounded-full bg-signal-emerald";
+        if (verdictTitle) {
+          verdictTitle.innerText = "STATUS: SIMULATION READY";
+          verdictTitle.className = "font-semibold text-zinc-100 text-xs";
+        }
+        if (verdictSummary) {
+          verdictSummary.innerText = "Click 'Inject Vector' to trace packet through defensive layers.";
+        }
+        if (verdictHttp) {
+          verdictHttp.innerText = "200 OK";
+          verdictHttp.className = "text-zinc-200";
+        }
+        if (verdictLeakage) {
+          verdictLeakage.innerText = "0 bytes";
+          verdictLeakage.className = "text-signal-emerald";
+        }
+        if (leakagePanel) leakagePanel.classList.add('hidden');
+      },
+
+      openInspector(nodeId) {
+        if (!this.nodeOrder.includes(nodeId)) nodeId = 'waf';
+        this.activeNodeId = nodeId;
+        this.populateInspector(nodeId);
+
+        const drawer = document.getElementById('sec-inspector-drawer');
+        const backdrop = document.getElementById('sec-drawer-backdrop');
+
+        if (drawer) drawer.classList.add('drawer-open');
+        if (backdrop) backdrop.classList.add('drawer-backdrop-open');
+      },
+
+      closeInspector() {
+        const drawer = document.getElementById('sec-inspector-drawer');
+        const backdrop = document.getElementById('sec-drawer-backdrop');
+
+        if (drawer) drawer.classList.remove('drawer-open');
+        if (backdrop) backdrop.classList.remove('drawer-backdrop-open');
+      },
+
+      isInspectorOpen() {
+        const drawer = document.getElementById('sec-inspector-drawer');
+        return drawer && drawer.classList.contains('drawer-open');
+      },
+
+      populateInspector(nodeId) {
+        const scenario = this.scenarios[this.currentVector];
+        if (!scenario) return;
+        const nodeData = scenario.nodes[nodeId];
+        if (!nodeData) return;
+
+        // Header info
+        const titleEl = document.getElementById('drawer-node-title');
+        const subEl = document.getElementById('drawer-node-sub');
+        const badgeEl = document.getElementById('drawer-node-badge');
+        const vecNameEl = document.getElementById('drawer-vector-name');
+        const owaspEl = document.getElementById('drawer-owasp-tag');
+
+        if (titleEl) titleEl.innerText = nodeData.title;
+        if (subEl) subEl.innerText = `${nodeData.sub} • ${nodeData.action}`;
+        if (badgeEl) badgeEl.innerText = nodeId.toUpperCase();
+        if (vecNameEl) vecNameEl.innerText = scenario.name;
+        if (owaspEl) owaspEl.innerText = scenario.owasp;
+
+        // Pane 1: Code Diff
+        const vulnEl = document.getElementById('drawer-vulnerable-code');
+        const secEl = document.getElementById('drawer-secure-code');
+        if (vulnEl) vulnEl.innerText = nodeData.vulnerableCode;
+        if (secEl) secEl.innerText = nodeData.secureCode;
+
+        // Pane 2: Headers
+        const httpMethod = document.getElementById('drawer-http-method-badge');
+        const httpUrl = document.getElementById('drawer-http-url');
+        const headersTable = document.getElementById('drawer-headers-table');
+        const rawPayload = document.getElementById('drawer-raw-payload');
+
+        if (httpMethod) httpMethod.innerText = scenario.method;
+        if (httpUrl) httpUrl.innerText = scenario.url;
+
+        if (headersTable) {
+          headersTable.innerHTML = '';
+          for (const [k, v] of Object.entries(scenario.headers)) {
+            const tr = document.createElement('tr');
+            tr.className = "hover:bg-white/[0.03]";
+            tr.innerHTML = `
+              <td class="py-1.5 pr-4 text-zinc-400 font-semibold select-all whitespace-nowrap">${escapeHtml(k)}:</td>
+              <td class="py-1.5 text-zinc-200 select-all break-all">${escapeHtml(v)}</td>
+            `;
+            headersTable.appendChild(tr);
+          }
+        }
+
+        if (rawPayload) {
+          rawPayload.innerText = scenario.body || 'None (URL Query Parameter Ingress)';
+        }
+
+        // Pane 3: SQL & Trace
+        const sqlEl = document.getElementById('drawer-sql-statement');
+        if (sqlEl) sqlEl.innerText = nodeData.sql || scenario.url;
+
+        const traceContainer = document.getElementById('drawer-trace-steps');
+        if (traceContainer) {
+          traceContainer.innerHTML = '';
+          const steps = nodeData.traceSteps || [];
+          for (const s of steps) {
+            const stepDiv = document.createElement('div');
+            stepDiv.className = "flex items-center justify-between p-2.5 rounded bg-black/40 hairline-border";
+            stepDiv.innerHTML = `
+              <div>
+                <div class="text-zinc-200 font-medium">${escapeHtml(s.hop)}</div>
+                <div class="text-[10px] text-zinc-500">${escapeHtml(s.note)}</div>
+              </div>
+              <span class="text-signal-emerald text-[11px] font-semibold tabular-nums">${escapeHtml(s.latency)}</span>
+            `;
+            traceContainer.appendChild(stepDiv);
+          }
+        }
+      },
+
+      setInspectorTab(tabId) {
+        this.currentTab = tabId;
+        const tabs = ['code', 'headers', 'trace'];
+
+        for (const t of tabs) {
+          const btn = document.getElementById(`btn-tab-${t}`);
+          const pane = document.getElementById(`pane-tab-${t}`);
+
+          if (t === tabId) {
+            if (btn) btn.className = "pb-2.5 px-3 border-b-2 border-white text-white font-medium transition-colors flex items-center gap-1.5";
+            if (pane) pane.classList.remove('hidden');
+          } else {
+            if (btn) btn.className = "pb-2.5 px-3 border-b-2 border-transparent text-zinc-400 hover:text-zinc-200 transition-colors flex items-center gap-1.5";
+            if (pane) pane.classList.add('hidden');
+          }
+        }
+      },
+
+      copySecureFix() {
+        const scenario = this.scenarios[this.currentVector];
+        if (!scenario) return;
+        const nodeData = scenario.nodes[this.activeNodeId];
+        if (!nodeData || !nodeData.secureCode) return;
+
+        navigator.clipboard.writeText(nodeData.secureCode).then(() => {
+          const btnText = document.getElementById('btn-copy-code-text');
+          if (btnText) {
+            const prev = btnText.innerText;
+            btnText.innerText = "Copied!";
+            setTimeout(() => { btnText.innerText = prev; }, 1800);
+          }
+        });
+      },
+
+      copyLeakageData() {
+        const scenario = this.scenarios[this.currentVector];
+        if (!scenario || !scenario.leakage) return;
+
+        navigator.clipboard.writeText(JSON.stringify(scenario.leakage.records, null, 2)).then(() => {
+          const btnText = document.getElementById('btn-copy-leakage-text');
+          if (btnText) {
+            const prev = btnText.innerText;
+            btnText.innerText = "Payload Copied!";
+            setTimeout(() => { btnText.innerText = prev; }, 1800);
+          }
+        });
+      }
+    };
+
+    // ESC key listener to close Inspector Drawer
+    window.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') {
+        SecurityEngine.closeInspector();
+      }
+    });
+
+    // Expose SecurityEngine on window
+    window.SecurityEngine = SecurityEngine;
+
+    // Initialize SecurityEngine when DOM is loaded
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', () => SecurityEngine.init());
+    } else {
+      SecurityEngine.init();
+    }
+
   </script>
 
 </body>
