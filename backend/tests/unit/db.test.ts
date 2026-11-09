@@ -45,6 +45,37 @@ describe("Database Layer (bun:sqlite WAL Mode)", () => {
     }
   });
 
+  it("queries products with search query and handles Persian/Arabic normalization", () => {
+    // English search in description / name
+    const v60 = getAllProducts(undefined, "V60");
+    expect(v60.length).toBeGreaterThan(0);
+    expect(v60.some((p) => p.name.includes("V60") || p.description.includes("V60"))).toBe(true);
+
+    // Persian search
+    const saffron = getAllProducts(undefined, "زعفران");
+    expect(saffron.length).toBeGreaterThan(0);
+
+    // Arabic Yeh (ي) normalized to Persian Yeh (ی)
+    const arabicYeh = getAllProducts(undefined, "زعفراني");
+    expect(arabicYeh.length).toBeGreaterThan(0);
+
+    // Filter by both category and query
+    const coffeeDoppio = getAllProducts("coffee", "doppio");
+    expect(coffeeDoppio.length).toBeGreaterThan(0);
+    for (const p of coffeeDoppio) {
+      expect(p.category).toBe("coffee");
+    }
+
+    // Empty result for unknown query
+    const unknown = getAllProducts(undefined, "unknown_item_not_found");
+    expect(unknown.length).toBe(0);
+
+    // Null / empty query returns full list
+    const all = getAllProducts();
+    const emptyQ = getAllProducts(undefined, "   ");
+    expect(emptyQ.length).toBe(all.length);
+  });
+
   it("toggles product availability correctly", () => {
     const products = getAllProducts();
     expect(products.length).toBeGreaterThan(0);

@@ -1,5 +1,6 @@
 import { Database } from "bun:sqlite";
 import { join } from "path";
+import { normalizeSearchText } from "./routes/helpers.ts";
 
 // Initialize SQLite database in WAL mode for maximum concurrent read/write performance
 const dbPath = join(import.meta.dir, "../soren.db");
@@ -142,13 +143,27 @@ if (tableCountCheck.count === 0) {
 
 // ---------------- Database Operations ----------------
 
-export function getAllProducts(category?: string): Product[] {
-  if (category) {
+export function getAllProducts(category?: string, query?: string): Product[] {
+  let products: Product[];
+  if (category && category !== "all") {
     const stmt = db.prepare("SELECT * FROM products WHERE category = ? ORDER BY price ASC");
-    return stmt.all(category) as Product[];
+    products = stmt.all(category) as Product[];
+  } else {
+    const stmt = db.prepare("SELECT * FROM products ORDER BY category, price ASC");
+    products = stmt.all() as Product[];
   }
-  const stmt = db.prepare("SELECT * FROM products ORDER BY category, price ASC");
-  return stmt.all() as Product[];
+
+  const normQuery = normalizeSearchText(query);
+  if (!normQuery) {
+    return products;
+  }
+
+  return products.filter((p) => {
+    const nameNorm = normalizeSearchText(p.name);
+    const descNorm = normalizeSearchText(p.description);
+    const tagsNorm = normalizeSearchText(p.tags);
+    return nameNorm.includes(normQuery) || descNorm.includes(normQuery) || tagsNorm.includes(normQuery);
+  });
 }
 
 export function getProductById(id: string): Product | null {

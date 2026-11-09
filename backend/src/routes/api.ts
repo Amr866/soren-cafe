@@ -15,7 +15,7 @@ import {
   getTableRowCounts,
 } from "../db.ts";
 import { telemetry, type TraceStep } from "../telemetry.ts";
-import { jsonResponse, errorResponse, BARISTA_PIN } from "./helpers.ts";
+import { jsonResponse, errorResponse, BARISTA_PIN, normalizeSearchText } from "./helpers.ts";
 
 export interface ApiClientContext {
   clientIp: string;
@@ -45,7 +45,25 @@ export async function handleApiRoutes(
   // ---------------- ROUTE 1: GET /api/v1/products ----------------
   if (path === "/products" && method === "GET") {
     const category = url.searchParams.get("category");
+    const query = url.searchParams.get("q") || url.searchParams.get("search") || "";
     const bypassCache = url.searchParams.get("bypass_cache") === "true";
+
+    function filterProductsList(items: any[]): any[] {
+      let filtered = items;
+      if (category && category !== "all") {
+        filtered = filtered.filter((p: any) => p.category === category);
+      }
+      const normQ = normalizeSearchText(query);
+      if (normQ) {
+        filtered = filtered.filter((p: any) => {
+          const nameNorm = normalizeSearchText(p.name);
+          const descNorm = normalizeSearchText(p.description);
+          const tagsNorm = normalizeSearchText(p.tags);
+          return nameNorm.includes(normQ) || descNorm.includes(normQ) || tagsNorm.includes(normQ);
+        });
+      }
+      return filtered;
+    }
 
     // L1 In-Memory Cache Check
     if (!bypassCache) {
@@ -58,7 +76,7 @@ export async function handleApiRoutes(
           detail: "L1 In-Memory Cache Hit (0ms Disk)",
         });
 
-        const filtered = category ? cached.filter((p: any) => p.category === category) : cached;
+        const filtered = filterProductsList(cached);
         const totalUs = Math.round((performance.now() - t0) * 1000);
 
         telemetry.recordTrace({
@@ -93,7 +111,7 @@ export async function handleApiRoutes(
     if (!bypassCache) {
       telemetry.setCachedProducts(allProducts);
     }
-    const products = category ? allProducts.filter((p) => p.category === category) : allProducts;
+    const products = filterProductsList(allProducts);
     const dbUs = Math.round((performance.now() - tDbStart) * 1000);
 
     traceSteps.push({
