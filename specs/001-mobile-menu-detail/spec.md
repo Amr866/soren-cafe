@@ -32,6 +32,19 @@
 - Q: How should the zone filtering tabs (.zone-tabs-bar) behave on compact mobile widths? (FR-028) → A: Option A — Smooth horizontal kinetic scroll track (flex-nowrap, scrollbar-width: none; -webkit-overflow-scrolling: touch; flex-shrink: 0) preserving single-row luxury aesthetic without wrapping into messy lines.
 - Q: How should table hold status (TTL timer) and occupied states be represented on .table-card? (FR-029) → A: Option A — Live status pill with luxury color tokens and WCAG AA contrast (green dot for "آماده پذیرایی", amber dot with tabular Persian countdown for "در حال رزرو", and accessible muted styling with aria-disabled="true" for occupied tables).
 
+### Session 2026-11-07
+
+- Q: When a customer presses Enter in the landing page search bar, how should the page navigate or reveal the matching items? (FR-030) → A: Option A — Smooth-scroll directly to the catalog section (#menu) on the landing page, highlighting the filtered products without a full page reload.
+- Q: When a user searches on the landing page, how should the category chip counts (e.g., ۱۸, ۶, ۶, ۶) update to reflect matching items? (FR-031) → A: Option A — Dynamically update each category chip count to display the matching items in each category (e.g., همه: ۲, قهوه: ۲, شیک: ۰), restoring original totals when search is cleared.
+- Q: How should the English search option be provided to patrons? (FR-032) → A: Option A — Seamless bilingual matching: automatically match English terms (e.g. "latte", "espresso", "v60", "san sebastian") against English and Persian titles, descriptions, and tags without requiring a manual toggle.
+
+### Session 2026-11-09
+
+- Q: How should cart item controls (quantity stepper & item deletion) be restructured on mobile? (FR-031) → A: Clean inline row — Unified stepper (minus morphs to subtle trash icon at 1, alongside swipe-to-delete gesture), completely removing the isolated top-left trash button.
+- Q: How should the checkout CTA and order summary be anchored on mobile? (FR-032) → A: Sticky bottom bar — Fixed bottom bar displaying total price + 'تکمیل خرید' CTA, ensuring checkout is always 1-tap accessible without forcing users to scroll past the entire list.
+- Q: How would you like the Free Shipping tier to be presented? (FR-033) → A: Dynamic progress bar — Interactive milestone bar showing remaining amount to free shipping, turning into a subtle green/amber success badge when reached.
+- Q: What visual aesthetic should replace the current card styling? (FR-034) → A: Artisan Editorial (No-Slop) — Warm cream background with crisp typographic hierarchy, elegant dividers instead of heavy nested cards, and natural food photography.
+
 ## User Scenarios & Testing *(mandatory)*
 
 ### User Story 1 - Inspecting Specialty Coffee & Pastry Details on Phone (Priority: P1)
@@ -129,6 +142,10 @@ As a patron navigating the mobile interface, I want the header, off-canvas drawe
 - **FR-028**: System MUST style `.zone-tabs-bar` as a single-row touch-scrollable pill track (`flex-wrap: nowrap; overflow-x: auto; scrollbar-width: none; -webkit-overflow-scrolling: touch;`) with `flex-shrink: 0` on tab buttons, ensuring smooth horizontal swipe exploration across all zones on mobile without multi-line layout jitter.
 - **FR-029**: System MUST display table availability states in `.table-card-footer` with WCAG AA compliant text contrast and live status indicators (green dot for `FREE` "آماده پذیرایی", amber dot with tabular Persian countdown digits for active `HOLD` "در حال رزرو", and muted accessible styling with `aria-disabled="true"` for `OCCUPIED` tables).
 - **FR-030**: System MUST stack `.order-fields-grid` into a single column (`grid-template-columns: 1fr; gap: 10px;`) under `@media (max-width: 480px)` so delivery name and phone inputs have full width and uncompressed labels on compact phones.
+- **FR-031**: System MUST unify the mobile cart item quantity stepper into a clean inline control where decrementing below 1 transforms into a subtle trash icon (with swipe-to-delete support) and eliminates the isolated top-left delete icon button to avoid visual clutter.
+- **FR-032**: System MUST anchor a sticky checkout bar at the bottom of the mobile cart view displaying total payable amount and an uncompressed 100% width primary CTA ("تکمیل سفارش و پرداخت آنلاین"), ensuring immediate reachability without scrolling.
+- **FR-033**: System MUST render the Free Shipping indicator as a dynamic progress bar tracking progress toward the free shipping threshold (`FREE_SHIPPING_THRESHOLD`), transitioning to a celebrated status badge when unlocked.
+- **FR-034**: System MUST apply the Artisan Editorial no-slop design to the mobile cart page (`cart.html`), replacing heavy boxed "card-soup" with clean typographic hierarchy, elegant 1px dividers, and balanced spacing.
 
 ### Key Entities
 
