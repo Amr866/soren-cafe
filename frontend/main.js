@@ -5270,3 +5270,481 @@ if (typeof window !== "undefined") {
     }
   }, true);
 }
+
+/* ========================================================
+   Soren Café: Cookie Consent & Legal Search Modules
+   Zero-Bloat Vanilla Implementation conforming to specs
+   ======================================================== */
+
+const SorenCookieConsent = {
+  STORAGE_KEY: "soren_cookie_consent",
+  VERSION: 1,
+
+  defaultConsent: {
+    version: 1,
+    timestamp: new Date().toISOString(),
+    categories: {
+      strictly_necessary: true,
+      analytics: false,
+      functional: false,
+      marketing: false
+    }
+  },
+
+  getConsent() {
+    if (typeof window === "undefined" || !window.localStorage) {
+      return { ...this.defaultConsent };
+    }
+    try {
+      const raw = localStorage.getItem(this.STORAGE_KEY);
+      if (!raw) return null;
+      const parsed = JSON.parse(raw);
+      if (parsed && parsed.categories) {
+        parsed.categories.strictly_necessary = true; // Always locked
+        return parsed;
+      }
+    } catch (e) {
+      console.warn("[SorenCookieConsent] Failed to read localStorage:", e);
+    }
+    return null;
+  },
+
+  hasConsent(category) {
+    if (category === "strictly_necessary") return true;
+    const consent = this.getConsent();
+    if (!consent || !consent.categories) return false;
+    return Boolean(consent.categories[category]);
+  },
+
+  saveConsent(categories) {
+    const payload = {
+      version: this.VERSION,
+      timestamp: new Date().toISOString(),
+      categories: {
+        strictly_necessary: true,
+        analytics: Boolean(categories.analytics),
+        functional: Boolean(categories.functional),
+        marketing: Boolean(categories.marketing)
+      }
+    };
+
+    try {
+      localStorage.setItem(this.STORAGE_KEY, JSON.stringify(payload));
+    } catch (e) {
+      console.warn("[SorenCookieConsent] Failed to save consent to localStorage:", e);
+    }
+
+    this.emitEvent(payload);
+    this.hideBanner();
+    this.closePreferencesModal();
+  },
+
+  acceptAll() {
+    this.saveConsent({
+      analytics: true,
+      functional: true,
+      marketing: true
+    });
+  },
+
+  rejectNonEssential() {
+    this.saveConsent({
+      analytics: false,
+      functional: false,
+      marketing: false
+    });
+  },
+
+  emitEvent(detail) {
+    if (typeof window === "undefined") return;
+    try {
+      const event = new CustomEvent("soren:cookie-consent-updated", {
+        bubbles: true,
+        detail
+      });
+      window.dispatchEvent(event);
+    } catch (e) {
+      console.error("[SorenCookieConsent] Error dispatching event:", e);
+    }
+  },
+
+  renderBanner() {
+    if (document.getElementById("cookie-consent-banner")) return;
+
+    const banner = document.createElement("div");
+    banner.id = "cookie-consent-banner";
+    banner.className = "cookie-banner-wrap";
+    banner.setAttribute("role", "region");
+    banner.setAttribute("aria-label", "اعلان کوکی و حریم خصوصی");
+
+    const policyPath = location.pathname.includes("/pages/") ? "./cookies.html" : "./pages/cookies.html";
+
+    banner.innerHTML = `
+      <div class="cookie-banner-inner">
+        <p class="cookie-banner-text">
+          <strong>احترام به حریم خصوصی شما:</strong>
+          کافه سورن برای حفظ اقلام سفارش در سبد خرید و ارائه خدمات روان از کوکی‌های ضروری استفاده می‌کند. با انتخاب خود می‌توانید کوکی‌های تحلیلی و عملکردی را فعال یا غیرفعال فرمایید.
+          <a href="${policyPath}">مطالعه سیاست کوکی‌ها</a>
+        </p>
+        <div class="cookie-banner-actions">
+          <button type="button" class="cookie-btn cookie-btn-accept" data-consent-action="accept-all">تایید همه</button>
+          <button type="button" class="cookie-btn cookie-btn-reject" data-consent-action="reject-all">رد غیراضطراری</button>
+          <button type="button" class="cookie-btn cookie-btn-manage" data-consent-action="open-preferences">تنظیمات</button>
+        </div>
+      </div>
+    `;
+
+    document.body.appendChild(banner);
+
+    banner.querySelector('[data-consent-action="accept-all"]').addEventListener("click", () => this.acceptAll());
+    banner.querySelector('[data-consent-action="reject-all"]').addEventListener("click", () => this.rejectNonEssential());
+    banner.querySelector('[data-consent-action="open-preferences"]').addEventListener("click", () => this.openPreferencesModal());
+
+    // Fade in after subtle delay
+    setTimeout(() => {
+      banner.classList.add("is-visible");
+    }, 600);
+  },
+
+  hideBanner() {
+    const banner = document.getElementById("cookie-consent-banner");
+    if (banner) {
+      banner.classList.remove("is-visible");
+      setTimeout(() => banner.remove(), 400);
+    }
+  },
+
+  renderPreferencesModal() {
+    if (document.getElementById("cookie-preference-modal")) return;
+
+    const current = this.getConsent() || this.defaultConsent;
+
+    const modal = document.createElement("div");
+    modal.id = "cookie-preference-modal";
+    modal.className = "cookie-modal-backdrop";
+    modal.setAttribute("role", "dialog");
+    modal.setAttribute("aria-modal", "true");
+    modal.setAttribute("aria-labelledby", "cookie-modal-title");
+
+    modal.innerHTML = `
+      <div class="cookie-modal-card" id="cookie-modal-card">
+        <div class="cookie-modal-header">
+          <h2 class="cookie-modal-title" id="cookie-modal-title">مدیریت ترجیحات کوکی و حریم خصوصی</h2>
+          <button type="button" class="cookie-modal-close-btn" data-modal-close aria-label="بستن پنجره">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <line x1="18" y1="6" x2="6" y2="18"></line>
+              <line x1="6" y1="6" x2="18" y2="18"></line>
+            </svg>
+          </button>
+        </div>
+        <div class="cookie-modal-body">
+          <p style="margin: 0 0 16px; font-size: 14px; color: var(--text-muted); line-height: 1.6;">
+            شما می‌توانید انتخاب کنید که کدام دسته از اطلاعات در مرورگر شما نگهداری شوند. کوکی‌های ضروری برای ثبت و پیگیری سفارشات قهوه الزامی هستند.
+          </p>
+
+          <!-- Strictly Necessary -->
+          <div class="cookie-category-item">
+            <div class="cookie-category-top">
+              <span class="cookie-category-label">
+                کوکی‌های ضروری (Strictly Necessary)
+                <span class="cookie-badge necessary">همیشه فعال</span>
+              </span>
+              <button type="button" class="cookie-switch" id="cookie-switch-strictly" role="switch" aria-checked="true" disabled aria-label="کوکی‌های ضروری قفل شده"></button>
+            </div>
+            <p class="cookie-category-desc">
+              برای نگهداری اقلام سفارش، شناسه میز سالن و حفظ پایداری سبد خرید در هنگام رفرش صفحه.
+            </p>
+          </div>
+
+          <!-- Analytics -->
+          <div class="cookie-category-item">
+            <div class="cookie-category-top">
+              <span class="cookie-category-label">
+                تحلیلی و کارایی (Analytics)
+              </span>
+              <button type="button" class="cookie-switch" id="cookie-switch-analytics" role="switch" aria-checked="${current.categories.analytics ? 'true' : 'false'}" aria-label="کوکی‌های تحلیلی"></button>
+            </div>
+            <p class="cookie-category-desc">
+              سنجش ناشناس سرعت بارگذاری منو در دستگاه‌های همراه جهت بهینه‌سازی تجربه مشتریان.
+            </p>
+          </div>
+
+          <!-- Functional -->
+          <div class="cookie-category-item">
+            <div class="cookie-category-top">
+              <span class="cookie-category-label">
+                عملکردی (Functional)
+              </span>
+              <button type="button" class="cookie-switch" id="cookie-switch-functional" role="switch" aria-checked="${current.categories.functional ? 'true' : 'false'}" aria-label="کوکی‌های عملکردی"></button>
+            </div>
+            <p class="cookie-category-desc">
+              به‌خاطر سپردن تنظیمات شخصی مانند قطع یا وصل صدای لمس دکمه‌ها و رد کردن انیمیشن ورودی.
+            </p>
+          </div>
+
+          <!-- Marketing -->
+          <div class="cookie-category-item">
+            <div class="cookie-category-top">
+              <span class="cookie-category-label">
+                پویش‌ها و اطلاع‌رسانی (Marketing)
+              </span>
+              <button type="button" class="cookie-switch" id="cookie-switch-marketing" role="switch" aria-checked="${current.categories.marketing ? 'true' : 'false'}" aria-label="کوکی‌های بازاریابی"></button>
+            </div>
+            <p class="cookie-category-desc">
+              ذخیره کدهای تخفیف جشنواره‌های قهوه و پیشنهادهای مناسبتی داخل کافه بدون تبلیغات متفرقه.
+            </p>
+          </div>
+        </div>
+
+        <div class="cookie-modal-footer">
+          <div style="display: flex; gap: 8px;">
+            <button type="button" class="cookie-btn cookie-btn-accept" id="cookie-modal-accept-all">تایید همه</button>
+            <button type="button" class="cookie-btn cookie-btn-reject" id="cookie-modal-reject-all">رد همه</button>
+          </div>
+          <button type="button" class="cookie-btn" style="background: var(--brand-primary); color: #fff;" id="cookie-modal-save">ذخیره انتخاب‌ها</button>
+        </div>
+      </div>
+    `;
+
+    document.body.appendChild(modal);
+
+    // Toggle switch listeners
+    const setupSwitch = (id) => {
+      const sw = modal.querySelector(`#${id}`);
+      if (!sw || sw.disabled) return;
+      sw.addEventListener("click", () => {
+        const isChecked = sw.getAttribute("aria-checked") === "true";
+        sw.setAttribute("aria-checked", isChecked ? "false" : "true");
+      });
+    };
+
+    setupSwitch("cookie-switch-analytics");
+    setupSwitch("cookie-switch-functional");
+    setupSwitch("cookie-switch-marketing");
+
+    // Close actions
+    modal.querySelectorAll("[data-modal-close]").forEach((btn) => {
+      btn.addEventListener("click", () => this.closePreferencesModal());
+    });
+
+    modal.addEventListener("click", (e) => {
+      if (e.target === modal) this.closePreferencesModal();
+    });
+
+    document.addEventListener("keydown", (e) => {
+      if (e.key === "Escape" && modal.classList.contains("is-open")) {
+        this.closePreferencesModal();
+      }
+    });
+
+    // Action buttons
+    modal.querySelector("#cookie-modal-accept-all").addEventListener("click", () => this.acceptAll());
+    modal.querySelector("#cookie-modal-reject-all").addEventListener("click", () => this.rejectNonEssential());
+    modal.querySelector("#cookie-modal-save").addEventListener("click", () => {
+      const analytics = modal.querySelector("#cookie-switch-analytics").getAttribute("aria-checked") === "true";
+      const functional = modal.querySelector("#cookie-switch-functional").getAttribute("aria-checked") === "true";
+      const marketing = modal.querySelector("#cookie-switch-marketing").getAttribute("aria-checked") === "true";
+
+      this.saveConsent({ analytics, functional, marketing });
+    });
+  },
+
+  openPreferencesModal() {
+    this.renderPreferencesModal();
+    const modal = document.getElementById("cookie-preference-modal");
+    if (!modal) return;
+
+    const current = this.getConsent() || this.defaultConsent;
+    const setSw = (id, val) => {
+      const el = modal.querySelector(`#${id}`);
+      if (el) el.setAttribute("aria-checked", val ? "true" : "false");
+    };
+    setSw("cookie-switch-analytics", current.categories.analytics);
+    setSw("cookie-switch-functional", current.categories.functional);
+    setSw("cookie-switch-marketing", current.categories.marketing);
+
+    modal.classList.add("is-open");
+    document.body.style.overflow = "hidden";
+  },
+
+  closePreferencesModal() {
+    const modal = document.getElementById("cookie-preference-modal");
+    if (modal) {
+      modal.classList.remove("is-open");
+      document.body.style.overflow = "";
+    }
+  },
+
+  init() {
+    const existing = this.getConsent();
+    if (!existing) {
+      this.renderBanner();
+    }
+  }
+};
+
+/* ========================================================
+   Soren Legal Search & Scroll-Spy Engine
+   ======================================================== */
+const SorenLegal = {
+  currentMatchIndex: -1,
+  matches: [],
+
+  initScrollSpy() {
+    const links = document.querySelectorAll(".legal-toc-link");
+    const sections = document.querySelectorAll(".legal-section");
+    if (!links.length || !sections.length) return;
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            const id = entry.target.id;
+            links.forEach((l) => {
+              const href = l.getAttribute("href");
+              if (href === `#${id}`) {
+                l.classList.add("active");
+              } else {
+                l.classList.remove("active");
+              }
+            });
+          }
+        });
+      },
+      {
+        rootMargin: "-15% 0px -70% 0px",
+        threshold: 0
+      }
+    );
+
+    sections.forEach((s) => observer.observe(s));
+  },
+
+  initSearch() {
+    const input = document.getElementById("legal-search-input");
+    const countEl = document.getElementById("legal-search-count");
+    const prevBtn = document.getElementById("legal-search-prev");
+    const nextBtn = document.getElementById("legal-search-next");
+    const content = document.getElementById("legal-prose-content");
+
+    if (!input || !content) return;
+
+    const clearHighlights = () => {
+      const marks = content.querySelectorAll("mark.search-match");
+      marks.forEach((m) => {
+        const parent = m.parentNode;
+        parent.replaceChild(document.createTextNode(m.textContent), m);
+        parent.normalize();
+      });
+      this.matches = [];
+      this.currentMatchIndex = -1;
+      if (countEl) countEl.textContent = "۰ نتیجه";
+      if (prevBtn) prevBtn.disabled = true;
+      if (nextBtn) nextBtn.disabled = true;
+    };
+
+    const highlightText = (query) => {
+      clearHighlights();
+      const q = query.trim().toLowerCase();
+      if (!q || q.length < 2) return;
+
+      const walker = document.createTreeWalker(content, NodeFilter.SHOW_TEXT, null, false);
+      const textNodes = [];
+      let node;
+      while ((node = walker.nextNode())) {
+        if (node.parentElement && !["SCRIPT", "STYLE", "MARK"].includes(node.parentElement.tagName)) {
+          textNodes.push(node);
+        }
+      }
+
+      textNodes.forEach((tNode) => {
+        const text = tNode.nodeValue;
+        const lower = text.toLowerCase();
+        let index = lower.indexOf(q);
+
+        if (index !== -1) {
+          const fragment = document.createDocumentFragment();
+          let lastIndex = 0;
+
+          while (index !== -1) {
+            fragment.appendChild(document.createTextNode(text.substring(lastIndex, index)));
+            const mark = document.createElement("mark");
+            mark.className = "search-match";
+            mark.textContent = text.substring(index, index + q.length);
+            fragment.appendChild(mark);
+
+            lastIndex = index + q.length;
+            index = lower.indexOf(q, lastIndex);
+          }
+
+          fragment.appendChild(document.createTextNode(text.substring(lastIndex)));
+          tNode.parentNode.replaceChild(fragment, tNode);
+        }
+      });
+
+      this.matches = Array.from(content.querySelectorAll("mark.search-match"));
+      if (this.matches.length > 0) {
+        this.currentMatchIndex = 0;
+        this.updateCurrentMatch();
+        if (prevBtn) prevBtn.disabled = false;
+        if (nextBtn) nextBtn.disabled = false;
+      } else {
+        if (countEl) countEl.textContent = "موردی یافت نشد";
+      }
+    };
+
+    this.updateCurrentMatch = () => {
+      this.matches.forEach((m, idx) => {
+        if (idx === this.currentMatchIndex) {
+          m.classList.add("is-current");
+          m.scrollIntoView({ behavior: "smooth", block: "center" });
+        } else {
+          m.classList.remove("is-current");
+        }
+      });
+      if (countEl) {
+        countEl.textContent = `${this.currentMatchIndex + 1} از ${this.matches.length}`;
+      }
+    };
+
+    let debounceTimer;
+    input.addEventListener("input", (e) => {
+      clearTimeout(debounceTimer);
+      debounceTimer = setTimeout(() => {
+        highlightText(e.target.value);
+      }, 200);
+    });
+
+    if (prevBtn) {
+      prevBtn.addEventListener("click", () => {
+        if (this.matches.length === 0) return;
+        this.currentMatchIndex = (this.currentMatchIndex - 1 + this.matches.length) % this.matches.length;
+        this.updateCurrentMatch();
+      });
+    }
+
+    if (nextBtn) {
+      nextBtn.addEventListener("click", () => {
+        if (this.matches.length === 0) return;
+        this.currentMatchIndex = (this.currentMatchIndex + 1) % this.matches.length;
+        this.updateCurrentMatch();
+      });
+    }
+  }
+};
+
+if (typeof window !== "undefined") {
+  window.SorenCookieConsent = SorenCookieConsent;
+  window.SorenLegal = SorenLegal;
+}
+
+// Auto-run on DOM ready
+document.addEventListener("DOMContentLoaded", () => {
+  if (typeof SorenCookieConsent !== "undefined") {
+    SorenCookieConsent.init();
+  }
+  if (typeof SorenLegal !== "undefined") {
+    SorenLegal.initScrollSpy();
+    SorenLegal.initSearch();
+  }
+});
