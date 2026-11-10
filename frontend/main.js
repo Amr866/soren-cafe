@@ -3774,7 +3774,13 @@ if (document.readyState === "loading") {
     const modalCard = modalBackdrop.querySelector(".soren-modal-card");
     const modalBody = modalBackdrop.querySelector(".soren-modal-body");
 
+    let cleanTableWsListeners = null;
+
     const closeModal = () => {
+      if (cleanTableWsListeners) {
+        cleanTableWsListeners();
+        cleanTableWsListeners = null;
+      }
       modalBackdrop.classList.remove("is-open");
       modalBackdrop.setAttribute("aria-hidden", "true");
       if (modalCard) {
@@ -3930,10 +3936,12 @@ if (document.readyState === "loading") {
     };
 
     let allTablesData = [];
+    let currentFilterZone = "all";
 
     const toFaDigits = (str) => String(str).replace(/[0-9]/g, (d) => "۰۱۲۳۴۵۶۷۸۹"[d]);
 
-    function renderTables(filterZone = "all") {
+    function renderTables(filterZone = currentFilterZone) {
+      currentFilterZone = filterZone;
       tablesContainer.innerHTML = "";
       const filtered = allTablesData.filter((t) => filterZone === "all" || t.zone === filterZone);
 
@@ -4058,6 +4066,77 @@ if (document.readyState === "loading") {
       selectedLabel.textContent = `${selectedTable.number} (${selectedTable.name})`;
       renderTables("all");
     }
+
+    // Real-Time Table Sync via WebSocket
+    const onTableHeld = (data) => {
+      if (!data || !data.tableId) return;
+      const t = allTablesData.find((x) => x.id === data.tableId);
+      if (t) {
+        t.status = "HELD";
+        t.heldBy = data.heldBy;
+        t.heldUntil = data.heldUntil;
+        t.remainingHoldSeconds = data.remainingHoldSeconds || (data.heldUntil ? Math.max(0, Math.round((data.heldUntil - Date.now()) / 1000)) : 120);
+        if (selectedTable && selectedTable.id === t.id) {
+          selectedTable = null;
+          selectedLabel.textContent = "انتخاب میز";
+        }
+        renderTables(currentFilterZone);
+      }
+    };
+
+    const onTableReleased = (data) => {
+      if (!data || !data.tableId) return;
+      const t = allTablesData.find((x) => x.id === data.tableId);
+      if (t) {
+        t.status = "FREE";
+        t.heldBy = null;
+        t.heldUntil = null;
+        t.remainingHoldSeconds = 0;
+        renderTables(currentFilterZone);
+      }
+    };
+
+    const onTableTaken = (data) => {
+      if (!data || !data.tableId) return;
+      const t = allTablesData.find((x) => x.id === data.tableId);
+      if (t) {
+        t.status = "OCCUPIED";
+        if (selectedTable && selectedTable.id === t.id) {
+          selectedTable = null;
+          selectedLabel.textContent = "انتخاب میز";
+        }
+        renderTables(currentFilterZone);
+      }
+    };
+
+    let holdTicker = setInterval(() => {
+      let shouldRerender = false;
+      allTablesData.forEach((t) => {
+        if (t.status === "HELD" && t.remainingHoldSeconds > 0) {
+          t.remainingHoldSeconds--;
+          shouldRerender = true;
+        }
+      });
+      if (shouldRerender) {
+        renderTables(currentFilterZone);
+      }
+    }, 1000);
+
+    if (typeof SorenWS !== "undefined" && SorenWS.on) {
+      SorenWS.init();
+      SorenWS.on("table:held", onTableHeld);
+      SorenWS.on("table:released", onTableReleased);
+      SorenWS.on("table:taken", onTableTaken);
+    }
+
+    cleanTableWsListeners = () => {
+      if (holdTicker) clearInterval(holdTicker);
+      if (typeof SorenWS !== "undefined" && SorenWS.off) {
+        SorenWS.off("table:held", onTableHeld);
+        SorenWS.off("table:released", onTableReleased);
+        SorenWS.off("table:taken", onTableTaken);
+      }
+    };
 
     // Zone filter tabs for cafe tables
     zoneTabs.forEach((tab) => {
