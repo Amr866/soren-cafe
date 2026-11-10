@@ -4684,6 +4684,307 @@ main {
 }
 
 /* ==========================================================================
+   Forgot & Reset Password Extensions (Micro-interactions, Guardrails & Theme)
+========================================================================== */
+
+.auth-visual--forgot {
+  background-image: url("../images/ui/login-page.png");
+}
+
+.auth-visual--reset {
+  background-image: url("../images/ui/Registration-page.png");
+}
+
+/* Alert notifications */
+.auth-alert {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 12px 14px;
+  border-radius: var(--auth-radius-input);
+  font-size: 12px;
+  line-height: 1.7;
+  animation: authAlertFade 0.25s ease-out;
+  transition: all 0.2s ease;
+}
+
+@keyframes authAlertFade {
+  from {
+    opacity: 0;
+    transform: translateY(-6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.auth-alert svg {
+  width: 18px;
+  height: 18px;
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+
+.auth-alert--error {
+  background: rgba(200, 109, 81, 0.1);
+  border: 1px solid rgba(200, 109, 81, 0.35);
+  color: #a8472a;
+}
+
+.auth-alert--success {
+  background: rgba(125, 140, 108, 0.12);
+  border: 1px solid rgba(125, 140, 108, 0.35);
+  color: #3b5a27;
+}
+
+.auth-alert--warning {
+  background: rgba(121, 82, 57, 0.1);
+  border: 1px solid rgba(121, 82, 57, 0.35);
+  color: var(--coffee);
+}
+
+.auth-alert-content {
+  flex: 1;
+}
+
+/* Input validation states */
+.input-wrapper.is-invalid input {
+  border-color: var(--terracotta);
+  background: rgba(200, 109, 81, 0.04);
+}
+
+.input-wrapper.is-invalid input:focus {
+  box-shadow: 0 0 0 3px rgba(200, 109, 81, 0.18);
+}
+
+.input-wrapper.is-valid input {
+  border-color: var(--sage);
+}
+
+.field-error {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  margin-top: 4px;
+  color: var(--terracotta);
+  font-size: 11px;
+  animation: authAlertFade 0.2s ease;
+}
+
+.field-error svg {
+  width: 13px;
+  height: 13px;
+  flex-shrink: 0;
+}
+
+/* Button in-flight loading spinner */
+.auth-button {
+  position: relative;
+}
+
+.auth-button.is-loading {
+  pointer-events: none;
+  opacity: 0.85;
+}
+
+.auth-button .btn-spinner {
+  display: none;
+  width: 18px;
+  height: 18px;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  border-top-color: #ffffff;
+  border-radius: 50%;
+  animation: authSpin 0.7s linear infinite;
+}
+
+@keyframes authSpin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.auth-button.is-loading .btn-spinner {
+  display: inline-block;
+}
+
+.auth-button.is-loading .btn-icon,
+.auth-button.is-loading .btn-text-default {
+  display: none;
+}
+
+.auth-button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  box-shadow: none;
+}
+
+/* Secondary & Resend Buttons */
+.auth-button-secondary {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  width: 100%;
+  min-height: 44px;
+  padding: 10px 16px;
+  border: 1px solid var(--auth-border);
+  border-radius: var(--auth-radius-input);
+  background: transparent;
+  color: var(--charcoal);
+  font-size: 13px;
+  font-weight: 600;
+  transition: all 0.2s ease;
+  cursor: pointer;
+}
+
+.auth-button-secondary:hover:not(:disabled) {
+  background: var(--ivory);
+  border-color: rgba(121, 82, 57, 0.3);
+  color: var(--coffee);
+}
+
+.auth-button-secondary:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+  border-color: var(--auth-border);
+}
+
+.auth-button-secondary svg {
+  width: 16px;
+  height: 16px;
+}
+
+/* Confirmation State & Recovery Card Details */
+.state-card {
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+  animation: authAlertFade 0.3s ease-out;
+}
+
+.state-card .form-heading {
+  margin-bottom: 0;
+}
+
+.auth-icon-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  background: rgba(121, 82, 57, 0.08);
+  color: var(--coffee);
+  box-shadow: 0 0 0 8px rgba(121, 82, 57, 0.04);
+}
+
+.auth-icon-badge svg {
+  width: 28px;
+  height: 28px;
+}
+
+.auth-icon-badge--success {
+  background: rgba(125, 140, 108, 0.12);
+  color: var(--sage);
+  box-shadow: 0 0 0 8px rgba(125, 140, 108, 0.06);
+}
+
+.auth-icon-badge--danger {
+  background: rgba(200, 109, 81, 0.12);
+  color: var(--terracotta);
+  box-shadow: 0 0 0 8px rgba(200, 109, 81, 0.06);
+}
+
+.email-chip {
+  display: inline-block;
+  padding: 4px 12px;
+  border-radius: 999px;
+  background: rgba(121, 82, 57, 0.08);
+  color: var(--coffee);
+  font-family: var(--font-latin);
+  font-size: 13px;
+  font-weight: 600;
+  direction: ltr;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.security-box {
+  background: rgba(247, 244, 238, 0.7);
+  border: 1px dashed rgba(121, 82, 57, 0.22);
+  border-radius: var(--auth-radius-input);
+  padding: 12px 14px;
+  font-size: 12px;
+  line-height: 1.8;
+  color: var(--auth-muted);
+  text-align: right;
+  width: 100%;
+}
+
+.security-box p {
+  margin: 0;
+}
+
+.cooldown-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-family: var(--font-latin);
+  font-weight: 700;
+}
+
+/* Password strength checklist criteria */
+.strength-criteria {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 6px;
+  margin-top: 4px;
+  text-align: right;
+}
+
+.criterion {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 11px;
+  color: var(--auth-muted);
+  transition: color 0.2s ease;
+}
+
+.criterion svg {
+  width: 13px;
+  height: 13px;
+  flex-shrink: 0;
+  stroke: var(--auth-border);
+  transition: stroke 0.2s ease, transform 0.2s ease;
+}
+
+.criterion.is-met {
+  color: var(--sage);
+  font-weight: 500;
+}
+
+.criterion.is-met svg {
+  stroke: var(--sage);
+  transform: scale(1.1);
+}
+
+/* Redirect timer progress */
+.redirect-counter {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  font-size: 12px;
+  color: var(--auth-muted);
+}
+
+/* ==========================================================================
    Cart Page Layout
 ========================================================================== */
 
