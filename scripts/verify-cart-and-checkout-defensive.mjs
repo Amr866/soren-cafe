@@ -154,7 +154,15 @@ async function run() {
   // --------------------------------------------------------------------------
   console.log("\n📦 >>> AUDITING CART BOTTOM SHEET DEFENSIVE HARDENING <<<");
   await cdp.send("Page.navigate", { url: `http://127.0.0.1:${port}/index.html` });
-  await new Promise(r => setTimeout(r, 1600));
+  for (let i = 0; i < 30; i++) {
+    try {
+      const ready = await cdp.send("Runtime.evaluate", {
+        expression: `document.readyState === "complete" && !!document.getElementById("cart-bottom-sheet") && typeof window.openCartBottomSheet === "function"`
+      });
+      if (ready.result && ready.result.value) break;
+    } catch (_) {}
+    await new Promise(r => setTimeout(r, 200));
+  }
 
   for (const vp of testViewports) {
     console.log(`\n--- Viewport: ${vp.name} (${vp.width}x${vp.height}) ---`);
