@@ -239,6 +239,21 @@
           <span class="text-[11px] hidden sm:inline">Storefront</span>
         </a>
 
+        <!-- API Docs Link -->
+        <a 
+          href="./docs.html" 
+          id="btn-nav-docs"
+          title="Open Soren API Contracts & Interactive Documentation"
+          class="h-8 px-2.5 rounded-md bg-white/[0.04] hover:bg-white/[0.08] hairline-border text-zinc-300 hover:text-white text-xs font-mono transition-colors flex items-center gap-1.5"
+        >
+          <svg class="w-3.5 h-3.5 text-signal-amber" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1-2.5-2.5Z"></path>
+            <path d="M6 6h10"></path>
+            <path d="M6 10h10"></path>
+          </svg>
+          <span class="text-[11px] hidden sm:inline">API Docs</span>
+        </a>
+
         <!-- Threat Simulator Quick Jump -->
         <a 
           href="#security-dataflow-section" 
@@ -3338,20 +3353,27 @@
     window.SecurityEngine = SecurityEngine;
 
     // Initialize SecurityEngine when DOM is loaded
+    function adjustNavLinks() {
+      const isPagesDir = window.location.pathname.includes('/pages/');
+      const sfBtn = document.getElementById('btn-nav-storefront');
+      const docsBtn = document.getElementById('btn-nav-docs');
+      if (isPagesDir) {
+        if (sfBtn) sfBtn.href = '../index.html';
+        if (docsBtn) docsBtn.href = './docs.html';
+      } else {
+        if (sfBtn) sfBtn.href = '/';
+        if (docsBtn) docsBtn.href = '/docs';
+      }
+    }
+
     if (document.readyState === 'loading') {
       document.addEventListener('DOMContentLoaded', () => {
         SecurityEngine.init();
-        if (window.location.pathname.includes('/pages/')) {
-          const sfBtn = document.getElementById('btn-nav-storefront');
-          if (sfBtn) sfBtn.href = '../index.html';
-        }
+        adjustNavLinks();
       });
     } else {
       SecurityEngine.init();
-      if (window.location.pathname.includes('/pages/')) {
-        const sfBtn = document.getElementById('btn-nav-storefront');
-        if (sfBtn) sfBtn.href = '../index.html';
-      }
+      adjustNavLinks();
     }
 
   </script>
