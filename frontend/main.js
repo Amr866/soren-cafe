@@ -580,6 +580,8 @@ if (typeof window !== "undefined") {
   const mobileForm = document.querySelector(".mobile-search-form");
   const emptyState = document.getElementById("catalog-empty-state") || document.querySelector(".catalog-empty-state");
   const resetBtn = document.getElementById("reset-filter-btn");
+  const quickInput = document.getElementById("menu-quick-search");
+  const quickClear = document.getElementById("menu-search-clear");
 
   const chipsBar = document.getElementById("category-chips");
   const categoryChips = chipsBar ? Array.from(chipsBar.querySelectorAll(".category-chip")) : [];
@@ -855,6 +857,8 @@ if (typeof window !== "undefined") {
       // Sync other input if present
       if (desktopInput && desktopInput.value !== query) desktopInput.value = query;
       if (mobileInput && mobileInput.value !== query) mobileInput.value = query;
+      if (quickInput && quickInput.value !== query) quickInput.value = query;
+      if (quickClear && quickInput) quickClear.hidden = !query;
 
       const normQ = normalize(query);
       const activeCat = getActiveCategory();
@@ -1007,11 +1011,43 @@ if (typeof window !== "undefined") {
     });
   }
 
+  // Bind quick search in menu catalog
+  if (quickInput) {
+    quickInput.addEventListener("input", (e) => {
+      const val = e.target.value;
+      if (quickClear) quickClear.hidden = !val;
+      if (desktopInput && desktopInput.value !== val) desktopInput.value = val;
+      if (mobileInput && mobileInput.value !== val) mobileInput.value = val;
+      onSearchInput(val);
+    });
+
+    quickInput.addEventListener("keydown", (e) => {
+      if (e.key === "Enter") {
+        handleFormSubmit(e, quickInput);
+      }
+    });
+  }
+
+  if (quickClear && quickInput) {
+    quickClear.addEventListener("click", () => {
+      quickInput.value = "";
+      quickClear.hidden = true;
+      if (desktopInput) desktopInput.value = "";
+      if (mobileInput) mobileInput.value = "";
+      onSearchInput("");
+      try {
+        quickInput.focus();
+      } catch (err) {}
+    });
+  }
+
   // Reset filter button
   if (resetBtn) {
     resetBtn.addEventListener("click", () => {
       if (desktopInput) desktopInput.value = "";
       if (mobileInput) mobileInput.value = "";
+      if (quickInput) quickInput.value = "";
+      if (quickClear) quickClear.hidden = true;
       savedCategoryBeforeSearch = null;
       // Reset category filter buttons if present
       const filterBtns = document.querySelectorAll(".menu-page .filter-btn");
@@ -1031,22 +1067,45 @@ if (typeof window !== "undefined") {
     });
   }
 
-  // Hydrate search from URL query parameter ?q= or ?search=
+  // Hydrate search from URL query parameter ?q= or ?search= or ?focus_search=1
   try {
     const urlParams = new URLSearchParams(window.location.search);
     const initialQ = urlParams.get("q") || urlParams.get("search");
     if (initialQ) {
       if (desktopInput) desktopInput.value = initialQ;
       if (mobileInput) mobileInput.value = initialQ;
+      if (quickInput) {
+        quickInput.value = initialQ;
+        if (quickClear) quickClear.hidden = false;
+      }
       if (desktopBox) desktopBox.classList.add("active");
       setTimeout(() => applyFilter(initialQ), 100);
+    }
+
+    if (urlParams.get("focus_search") === "1" || window.location.hash === "#menu-quick-search") {
+      setTimeout(() => {
+        const quickEl = document.getElementById("menu-quick-search");
+        const wrapper = document.getElementById("menu-search-wrapper");
+        if (quickEl) {
+          quickEl.scrollIntoView({ behavior: "smooth", block: "center" });
+          try {
+            quickEl.focus({ preventScroll: true });
+          } catch (err) {}
+        }
+        if (wrapper) {
+          wrapper.classList.remove("has-highlight");
+          void wrapper.offsetWidth;
+          wrapper.classList.add("has-highlight");
+          setTimeout(() => wrapper.classList.remove("has-highlight"), 1200);
+        }
+      }, 350);
     }
   } catch (e) {}
 
   // Expose global helper for other scripts / category switchers
   window.sorenApplySearch = applyFilter;
   window.sorenNormalizeSearch = normalize;
-  window.sorenGetCurrentQuery = () => (desktopInput?.value || mobileInput?.value || "");
+  window.sorenGetCurrentQuery = () => (quickInput?.value || desktopInput?.value || mobileInput?.value || "");
   window.sorenNotifyCategoryManualChange = () => { savedCategoryBeforeSearch = null; };
 })();
 
@@ -1391,14 +1450,25 @@ if (typeof window !== "undefined") {
     { passive: true }
   );
 
-  // Mobile header quick search trigger
-  if (searchBtn) {
-    searchBtn.addEventListener("click", (e) => {
+  // Mobile header quick search trigger (FR-016 & Option B)
+  const mobileSearchBtns = document.querySelectorAll(".mobile-search");
+  mobileSearchBtns.forEach((btn) => {
+    btn.addEventListener("click", (e) => {
       e.preventDefault();
+      const quickSearch = document.getElementById("menu-quick-search");
       const menuSection = document.getElementById("menu");
-      if (menuSection) {
-        menuSection.scrollIntoView({ behavior: "smooth" });
+      if (quickSearch || menuSection) {
+        const target = document.getElementById("menu-search-wrapper") || quickSearch || menuSection;
+        target.scrollIntoView({ behavior: "smooth", block: "start" });
+        const wrapper = document.getElementById("menu-search-wrapper");
+        if (wrapper) {
+          wrapper.classList.remove("has-highlight");
+          void wrapper.offsetWidth;
+          wrapper.classList.add("has-highlight");
+          setTimeout(() => wrapper.classList.remove("has-highlight"), 1200);
+        }
         const filterInput =
+          quickSearch ||
           document.getElementById("menu-quick-search") ||
           document.querySelector(".menu-search input") ||
           searchInput;
@@ -1409,13 +1479,13 @@ if (typeof window !== "undefined") {
             } catch (err) {}
           }, 350);
         }
-      } else if (panel && searchInput) {
-        panel.classList.add("open");
-        if (menuBtn) menuBtn.setAttribute("aria-expanded", "true");
-        searchInput.focus({ preventScroll: true });
+      } else {
+        const isPagesDir = window.location.pathname.includes("/pages/");
+        const targetUrl = isPagesDir ? "../index.html?focus_search=1#menu" : "./index.html?focus_search=1#menu";
+        window.location.href = targetUrl;
       }
     });
-  }
+  });
 
   // Handle live barista and kitchen status updates via WebSocket
   if (typeof SorenWS !== "undefined" && drawerBaristaText) {
@@ -4361,6 +4431,7 @@ if (document.readyState === "loading") {
 
     function filterCards(category) {
       const currentQuery =
+        document.getElementById("menu-quick-search")?.value ||
         document.querySelector(".desktop-search input")?.value ||
         document.getElementById("mobile-search-input")?.value ||
         "";

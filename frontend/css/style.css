@@ -9136,6 +9136,101 @@ main {
 }
 
 /* ========================================================
+   Menu Quick Search Bar (FR-016 & Mobile Search Destination)
+   ======================================================== */
+.menu-search-wrapper {
+  width: min(100% - 32px, 640px);
+  margin: 0 auto 16px auto;
+  position: relative;
+  z-index: 25;
+}
+
+.menu-search-inner {
+  position: relative;
+  display: flex;
+  align-items: center;
+  background: #FFFFFF;
+  border: 1px solid rgba(140, 94, 60, 0.18);
+  border-radius: 14px;
+  box-shadow: 0 2px 8px rgba(80, 50, 30, 0.04);
+  transition: border-color 0.2s ease, box-shadow 0.2s ease, transform 0.15s ease;
+}
+
+.menu-search-inner:focus-within,
+.menu-search-wrapper.has-highlight .menu-search-inner {
+  border-color: var(--coffee, #261F1A);
+  box-shadow: 0 0 0 3px rgba(140, 94, 60, 0.16), 0 4px 12px rgba(80, 50, 30, 0.08);
+}
+
+.menu-search-icon {
+  position: absolute;
+  right: 14px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: rgba(140, 94, 60, 0.65);
+  pointer-events: none;
+}
+
+.menu-quick-search-input {
+  width: 100%;
+  height: 46px;
+  border: none;
+  background: transparent;
+  padding: 0 44px 0 40px;
+  font-family: inherit;
+  font-size: 14px;
+  color: var(--charcoal, #2B2623);
+  border-radius: 14px;
+  outline: none;
+  -webkit-appearance: none;
+}
+
+.menu-quick-search-input::placeholder {
+  color: rgba(140, 94, 60, 0.55);
+  font-size: 13.5px;
+}
+
+.menu-search-clear-btn {
+  position: absolute;
+  left: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  border: none;
+  background: rgba(140, 94, 60, 0.1);
+  color: var(--coffee, #261F1A);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: background 0.15s ease, transform 0.15s ease;
+  padding: 0;
+}
+
+.menu-search-clear-btn:hover {
+  background: rgba(140, 94, 60, 0.2);
+  transform: translateY(-50%) scale(1.05);
+}
+
+.menu-search-clear-btn[hidden] {
+  display: none !important;
+}
+
+@media (max-width: 767px) {
+  .menu-search-wrapper {
+    width: min(100% - 24px, 640px);
+    margin-bottom: 12px;
+  }
+
+  .menu-quick-search-input {
+    height: 44px;
+    font-size: 13.5px;
+  }
+}
+
+/* ========================================================
    Sticky Menu Category Chips Bar
    ======================================================== */
 .category-chips-bar {
