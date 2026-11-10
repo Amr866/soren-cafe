@@ -313,7 +313,9 @@ const SorenCartStore = {
 
   init() {
     try {
-      const stored = typeof localStorage !== "undefined" ? localStorage.getItem("soren_cart_v1") : null;
+      const stored = typeof localStorage !== "undefined"
+        ? (localStorage.getItem("soren_cart_v1") || localStorage.getItem("soren_cart"))
+        : null;
       const parsed = stored ? JSON.parse(stored) : [];
       this.items = Array.isArray(parsed)
         ? parsed.map((it) => {
@@ -328,13 +330,15 @@ const SorenCartStore = {
     } catch (e) {
       this.items = [];
     }
-    this.notify(false); // initial state notification
+    this.notify(true);
   },
 
   save() {
     try {
       if (typeof localStorage !== "undefined") {
-        localStorage.setItem("soren_cart_v1", JSON.stringify(this.items));
+        const json = JSON.stringify(this.items);
+        localStorage.setItem("soren_cart_v1", json);
+        localStorage.setItem("soren_cart", json);
       }
     } catch (e) {
       console.warn("[SorenCartStore] Save error:", e);
@@ -437,6 +441,11 @@ const SorenCartStore = {
 // Backward compatibility bridge for legacy cart store access
 const SorenCart = {
   KEY: "soren_cart_v1",
+
+  load() {
+    SorenCartStore.init();
+    return this.getItems();
+  },
 
   getItems() {
     return SorenCartStore.getItems();
@@ -1428,8 +1437,8 @@ function initCartBottomSheetAndFloatingBar() {
               <h4 class="sheet-item-name">${name}</h4>
             </div>
             <div class="sheet-item-prices">
-              <span class="sheet-item-unit-price">${formatPriceFa(unitPrice)} واحد</span>
               <span class="sheet-item-total-price">${formatPriceFa(lineTotal)}</span>
+              ${q > 1 ? `<span class="sheet-item-unit-price">واحد: ${formatPriceFa(unitPrice)}</span>` : `<span class="sheet-item-unit-price" style="display:none">${formatPriceFa(unitPrice)}</span>`}
             </div>
             <div class="sheet-item-controls">
               <div class="sheet-stepper" data-id="${id}" aria-label="تنظیم تعداد ${name}">
@@ -1438,8 +1447,8 @@ function initCartBottomSheetAndFloatingBar() {
                 <button type="button" class="sheet-stepper-btn sheet-plus-btn" data-id="${id}" aria-label="افزایش تعداد ${name}">+</button>
               </div>
               <button type="button" class="sheet-delete-btn" data-id="${id}" aria-label="حذف ${name} از سبد">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
-                  <path d="M3 6h18M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">
+                  <path d="M3 6h18M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" stroke-linecap="round" stroke-linejoin="round"/>
                 </svg>
               </button>
             </div>
@@ -1451,7 +1460,7 @@ function initCartBottomSheetAndFloatingBar() {
     renderCartUpsellShelf(validItems);
   }
 
-  // Render contextual upsell shelf (AOV booster for coffee pairings)
+  // Render contextual upsell shelf (artisanal barista pairing recommendation)
   function renderCartUpsellShelf(validItems) {
     const upsellContainer = document.getElementById("cart-upsell-shelf-container");
     if (!upsellContainer) return;
@@ -1483,10 +1492,13 @@ function initCartBottomSheetAndFloatingBar() {
       upsellContainer.innerHTML = `
         <div class="cart-upsell-shelf" role="complementary" aria-label="پیشنهاد ویژه باریستا">
           <div class="upsell-shelf-header">
-            <h5 class="upsell-shelf-title">
-              <span>پیشنهاد باریستا؛ ترکیب مکمل با قهوه:</span>
-            </h5>
-            <span class="upsell-badge">AOV +۲۵٪</span>
+            <div class="upsell-shelf-title-box">
+              <span class="upsell-spark-icon" aria-hidden="true">✦</span>
+              <h5 class="upsell-shelf-title">
+                <span>پیشنهاد باریستا؛ ترکیب مکمل با قهوه:</span>
+              </h5>
+            </div>
+            <span class="upsell-badge">همنشین قهوه</span>
           </div>
           <div class="upsell-shelf-item">
             <div class="upsell-item-content">
@@ -1938,11 +1950,317 @@ if (document.readyState === "loading") {
 
   const formatter = new Intl.NumberFormat("fa-IR");
   const format = (n) => formatter.format(n);
+  const toFaDigits = (str) => String(str).replace(/[0-9]/g, (d) => "۰۱۲۳۴۵۶۷۸۹"[d]);
 
   const CLUB_DISCOUNT_RATE = 0.05;
   const CLUB_DISCOUNT_STEP = 5000;
   const COUPONS = { SOREN10: 0.1, WELCOME: 0.15 };
   let couponRate = 0;
+
+  const FREE_SHIPPING_THRESHOLD = 500000;
+  const freeShippingBar = document.getElementById("free-shipping-bar");
+  const mobileBar = document.getElementById("cart-mobile-bar");
+  const mobileBarTotal = document.getElementById("mobile-bar-total");
+  const mobileBarCheckoutBtn = document.getElementById("mobile-bar-checkout-btn");
+
+  let undoToastTimer = null;
+  function showUndoToast(item) {
+    let toast = document.getElementById("soren-undo-toast");
+    if (!toast) {
+      toast = document.createElement("div");
+      toast.id = "soren-undo-toast";
+      toast.className = "soren-undo-toast";
+      toast.setAttribute("role", "status");
+      toast.setAttribute("aria-live", "polite");
+      document.body.appendChild(toast);
+    }
+
+    toast.innerHTML = `
+      <div class="undo-toast-inner">
+        <div class="undo-toast-content">
+          <svg class="undo-toast-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+            <path d="M3 6h18M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+          <span class="undo-toast-text">«${item.name}» از سبد حذف شد</span>
+        </div>
+        <button type="button" class="undo-toast-action" id="undo-toast-btn" aria-label="بازگرداندن ${item.name} به سبد">
+          <span>لغو</span>
+        </button>
+      </div>
+    `;
+
+    toast.classList.remove("is-hiding");
+    toast.classList.add("is-visible");
+
+    const undoBtn = toast.querySelector("#undo-toast-btn");
+    if (undoBtn) {
+      undoBtn.onclick = (e) => {
+        e.preventDefault();
+        clearTimeout(undoToastTimer);
+        const restoreQty = Number(item.qty || item.quantity) || 1;
+        SorenCart.addItem({
+          id: item.id,
+          name: item.name,
+          price: item.price,
+          quantity: restoreQty,
+          qty: restoreQty,
+          image: item.image,
+          category: item.category,
+          desc: item.desc
+        });
+        toast.classList.remove("is-visible");
+        if (typeof SorenAudio !== "undefined" && typeof SorenAudio.playAdd === "function") {
+          SorenAudio.playAdd();
+        }
+        if (typeof showToast === "function") {
+          showToast(`«${item.name}» بازگردانده شد.`);
+        }
+        renderCart();
+      };
+    }
+
+    clearTimeout(undoToastTimer);
+    undoToastTimer = setTimeout(() => {
+      toast.classList.add("is-hiding");
+      setTimeout(() => {
+        toast.classList.remove("is-visible", "is-hiding");
+      }, 300);
+    }, 5000);
+  }
+
+  function attachSwipeToDelete(card, item, onRemove) {
+    const content = card.querySelector(".item-main-content");
+    if (!content) return;
+
+    let startX = 0;
+    let startY = 0;
+    let currentDeltaX = 0;
+    let isSwiping = false;
+    let isLockedHorizontal = false;
+
+    card.addEventListener("touchstart", (e) => {
+      if (e.touches.length !== 1) return;
+      if (e.target.closest("button")) return;
+      startX = e.touches[0].clientX;
+      startY = e.touches[0].clientY;
+      currentDeltaX = 0;
+      isSwiping = true;
+      isLockedHorizontal = false;
+      content.style.transition = "none";
+    }, { passive: true });
+
+    card.addEventListener("touchmove", (e) => {
+      if (!isSwiping) return;
+      const dx = e.touches[0].clientX - startX;
+      const dy = e.touches[0].clientY - startY;
+
+      if (!isLockedHorizontal) {
+        if (Math.abs(dy) > Math.abs(dx) && Math.abs(dy) > 8) {
+          isSwiping = false;
+          content.style.transform = "";
+          return;
+        }
+        if (Math.abs(dx) > 8) {
+          isLockedHorizontal = true;
+        }
+      }
+
+      if (isLockedHorizontal) {
+        if (e.cancelable) e.preventDefault();
+        // Swiping left in RTL reveals delete on the right
+        if (dx < 0) {
+          const pull = dx < -90 ? -90 + (dx + 90) * 0.35 : dx;
+          currentDeltaX = pull;
+          content.style.transform = `translateX(${pull}px)`;
+          card.classList.toggle("is-swiping", true);
+          if (pull < -75 && !card.dataset.vibrated) {
+            card.dataset.vibrated = "true";
+            if (typeof navigator !== "undefined" && navigator.vibrate) {
+              try { navigator.vibrate(10); } catch (_) {}
+            }
+          }
+        } else {
+          const pull = dx * 0.15;
+          currentDeltaX = pull;
+          content.style.transform = `translateX(${pull}px)`;
+        }
+      }
+    }, { passive: false });
+
+    const finishSwipe = () => {
+      if (!isSwiping) return;
+      isSwiping = false;
+      delete card.dataset.vibrated;
+      content.style.transition = "transform 0.3s cubic-bezier(0.2, 0.8, 0.2, 1)";
+
+      if (currentDeltaX < -75) {
+        content.style.transform = "translateX(-110%)";
+        card.style.opacity = "0";
+        card.style.maxHeight = `${card.offsetHeight}px`;
+        card.style.transition = "max-height 0.3s ease 0.15s, opacity 0.25s ease, padding 0.3s ease 0.15s";
+        setTimeout(() => {
+          card.style.maxHeight = "0";
+          card.style.padding = "0";
+          setTimeout(() => {
+            onRemove(item);
+          }, 200);
+        }, 150);
+      } else {
+        content.style.transform = "";
+        card.classList.remove("is-swiping");
+      }
+      currentDeltaX = 0;
+    };
+
+    card.addEventListener("touchend", finishSwipe, { passive: true });
+    card.addEventListener("touchcancel", finishSwipe, { passive: true });
+  }
+
+  function createCartItemRow(item, onQtyChange, onRemove) {
+    const card = document.createElement("article");
+    card.className = "cart-item cart-item-row";
+    card.dataset.id = item.id;
+    card.dataset.price = String(item.price);
+    card.dataset.qty = String(item.qty || item.quantity || 1);
+
+    const isPagesDir = window.location.pathname.includes("/pages/");
+    let displayImage = item.image || "";
+    if (isPagesDir && !displayImage.startsWith("..") && !displayImage.startsWith("/")) {
+      displayImage = "../" + displayImage;
+    } else if (!isPagesDir && displayImage.startsWith("../")) {
+      displayImage = displayImage.replace(/^\.\.\//, "./");
+    }
+
+    let terroirNotes = item.desc || "";
+    if (!terroirNotes && typeof window !== "undefined" && window.PRODUCT_CATALOG) {
+      const catalogItem = window.PRODUCT_CATALOG[item.name] || Object.values(window.PRODUCT_CATALOG).find(p => p.id === item.id);
+      if (catalogItem && catalogItem.desc) {
+        terroirNotes = catalogItem.desc;
+      }
+    }
+    if (!terroirNotes) {
+      terroirNotes = "برشته‌کاری تازه و آماده‌سازی اختصاصی باریستا";
+    }
+
+    const q = Number(item.qty || item.quantity) || 1;
+    const isSingle = q === 1;
+    const unitPrice = Number(item.price) || 0;
+    const lineTotal = unitPrice * q;
+
+    card.innerHTML = `
+      <div class="item-swipe-track" aria-hidden="true">
+        <div class="swipe-delete-hint">
+          <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M3 6h18M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+          <span>حذف</span>
+        </div>
+      </div>
+      <div class="item-main-content">
+        <div class="item-thumb-box product-image">
+          <img src="${displayImage}" alt="${item.name}" class="item-thumb-img" width="72" height="72" loading="lazy" onerror="window.handleImageError && window.handleImageError(this)" />
+        </div>
+        <div class="item-info-center product-details">
+          <h3 class="item-title">${item.name}</h3>
+          <p class="item-terroir-notes">${terroirNotes}</p>
+          <span class="item-unit-rate">${format(unitPrice)} تومان واحد</span>
+        </div>
+        <div class="item-meta-left product-bottom">
+          <div class="item-price-box price">
+            <strong class="item-total-price">${format(lineTotal)}</strong>
+            <span class="item-price-currency">تومان</span>
+          </div>
+          <div class="item-stepper quantity" data-id="${item.id}" aria-label="تنظیم تعداد ${item.name}">
+            <button type="button" class="stepper-btn stepper-btn--minus ${isSingle ? 'is-delete' : ''}" data-qty-step="-1" data-id="${item.id}" aria-label="${isSingle ? `حذف ${item.name} از سبد` : `کاهش تعداد ${item.name}`}">
+              ${isSingle ? `
+                <svg class="stepper-trash-svg" viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M3 6h18M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+              ` : `−`}
+            </button>
+            <span class="stepper-value quantity-value" aria-live="polite">${toFaDigits(q)}</span>
+            <button type="button" class="stepper-btn stepper-btn--plus" data-qty-step="1" data-id="${item.id}" aria-label="افزایش تعداد ${item.name}">+</button>
+          </div>
+        </div>
+      </div>
+    `;
+
+    const plusBtn = card.querySelector(".stepper-btn--plus");
+    const minusBtn = card.querySelector(".stepper-btn--minus");
+
+    if (plusBtn) {
+      plusBtn.addEventListener("click", (e) => {
+        e.stopPropagation();
+        onQtyChange(item.id, 1);
+      });
+    }
+
+    if (minusBtn) {
+      minusBtn.addEventListener("click", (e) => {
+        e.stopPropagation();
+        if (isSingle) {
+          onRemove(item);
+        } else {
+          onQtyChange(item.id, -1);
+        }
+      });
+    }
+
+    attachSwipeToDelete(card, item, onRemove);
+
+    return card;
+  }
+
+  // Expose createCartItemRow on window for testing and external consumption
+  window.createCartItemRow = createCartItemRow;
+
+  function updateFreeShippingProgress(subtotal) {
+    if (!freeShippingBar) return;
+    const sub = Number(subtotal) || 0;
+
+    if (sub >= FREE_SHIPPING_THRESHOLD) {
+      freeShippingBar.innerHTML = `
+        <div class="shipping-unlocked-badge">
+          <div class="shipping-unlocked-icon">
+            <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+              <path d="M1 3h15v13H1z" />
+              <path d="M16 8h4l3 3v5h-7z" />
+              <circle cx="5.5" cy="18.5" r="2.5" />
+              <circle cx="18.5" cy="18.5" r="2.5" />
+            </svg>
+          </div>
+          <div class="shipping-unlocked-text">
+            <strong>سفارش شما شامل ارسال رایگان اکسپرس شد!</strong>
+            <span>بدون هزینه حمل و نقل، مستقیم از بار به آدرس شما</span>
+          </div>
+          <span class="shipping-sparkle-glyph" aria-hidden="true">✦</span>
+        </div>
+        <div class="shipping-progress-track is-complete" role="progressbar" aria-valuenow="100" aria-valuemin="0" aria-valuemax="100">
+          <div class="shipping-progress-fill" style="width: 100%"></div>
+        </div>
+      `;
+    } else {
+      const remaining = FREE_SHIPPING_THRESHOLD - sub;
+      const percent = Math.min(100, Math.max(0, Math.round((sub / FREE_SHIPPING_THRESHOLD) * 100)));
+      freeShippingBar.innerHTML = `
+        <div class="shipping-progress-header">
+          <div class="shipping-progress-title">
+            <svg class="shipping-truck-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">
+              <path d="M1 3h15v13H1z" />
+              <path d="M16 8h4l3 3v5h-7z" />
+              <circle cx="5.5" cy="18.5" r="2.5" />
+              <circle cx="18.5" cy="18.5" r="2.5" />
+            </svg>
+            <span>تنها <strong>${format(remaining)} تومان</strong> تا ارسال رایگان اکسپرس</span>
+          </div>
+          <span class="shipping-progress-percent">${toFaDigits(percent)}٪</span>
+        </div>
+        <div class="shipping-progress-track" role="progressbar" aria-valuenow="${percent}" aria-valuemin="0" aria-valuemax="100">
+          <div class="shipping-progress-fill" style="width: ${percent}%"></div>
+        </div>
+      `;
+    }
+  }
 
   function renderCart() {
     const items = SorenCart.getItems();
@@ -1954,79 +2272,35 @@ if (document.readyState === "loading") {
     if (items.length === 0) {
       emptyState.hidden = false;
       filledState.hidden = true;
+      if (mobileBar) mobileBar.hidden = true;
       return;
     }
 
     emptyState.hidden = true;
     filledState.hidden = false;
+    if (mobileBar) mobileBar.hidden = false;
 
-    // Render cart items into DOM container
-    const shippingNotice = itemsContainer.querySelector(".shipping-notice");
+    // Update dynamic free shipping progress bar
+    updateFreeShippingProgress(subtotal);
+
+    // Render cart items using Artisan Editorial rows
     itemsContainer.innerHTML = "";
-    if (shippingNotice) itemsContainer.appendChild(shippingNotice);
+    if (freeShippingBar) itemsContainer.appendChild(freeShippingBar);
 
     items.forEach((item) => {
-      const card = document.createElement("article");
-      card.className = "cart-item";
-      card.dataset.id = item.id;
-      card.dataset.price = String(item.price);
-      card.dataset.qty = String(item.qty);
-
-      const isPagesDir = window.location.pathname.includes("/pages/");
-      let displayImage = item.image || "";
-      if (isPagesDir && !displayImage.startsWith("..") && !displayImage.startsWith("/")) {
-        displayImage = "../" + displayImage;
-      } else if (!isPagesDir && displayImage.startsWith("../")) {
-        displayImage = displayImage.replace(/^\.\.\//, "./");
-      }
-
-      card.innerHTML = `
-        <div class="product-image">
-          <img src="${displayImage}" alt="${item.name}" width="128" height="128" loading="lazy" />
-        </div>
-        <div class="product-details">
-          <div class="product-top">
-            <div>
-              <span class="product-tag">${item.desc || "محصول کافه سورن"}</span>
-              <h3>${item.name}</h3>
-              <p>قیمت واحد: ${format(item.price)} تومان</p>
-            </div>
-            <button class="delete-btn" type="button" aria-label="حذف ${item.name} از سبد">
-              <svg class="icon" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
-                <path d="M3 6h18M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
-              </svg>
-            </button>
-          </div>
-          <div class="product-bottom">
-            <div class="price">
-              <strong>${format(item.price * item.qty)}</strong>
-              <span>تومان</span>
-            </div>
-            <div class="quantity">
-              <button type="button" data-qty-step="1" aria-label="افزایش تعداد">+</button>
-              <span class="quantity-value" aria-live="polite">${format(item.qty)}</span>
-              <button type="button" data-qty-step="-1" aria-label="کاهش تعداد">−</button>
-            </div>
-          </div>
-        </div>
-      `;
-
-      card.querySelector("[data-qty-step='1']").addEventListener("click", () => {
-        SorenCart.updateQty(item.id, 1);
-        renderCart();
-      });
-
-      card.querySelector("[data-qty-step='-1']").addEventListener("click", () => {
-        SorenCart.updateQty(item.id, -1);
-        renderCart();
-      });
-
-      card.querySelector(".delete-btn").addEventListener("click", () => {
-        SorenCart.removeItem(item.id);
-        renderCart();
-      });
-
-      itemsContainer.appendChild(card);
+      const row = createCartItemRow(
+        item,
+        (id, delta) => {
+          SorenCart.updateQty(id, delta);
+          renderCart();
+        },
+        (it) => {
+          SorenCart.removeItem(it.id);
+          showUndoToast(it);
+          renderCart();
+        }
+      );
+      itemsContainer.appendChild(row);
     });
 
     // Discount calculations
@@ -2039,6 +2313,18 @@ if (document.readyState === "loading") {
     if (couponAmountEl) couponAmountEl.textContent = format(couponDiscount);
     if (couponRow) couponRow.hidden = couponDiscount === 0;
     if (totalEl) totalEl.textContent = format(total);
+
+    // Sync sticky mobile checkout bar
+    if (mobileBarTotal) mobileBarTotal.textContent = format(total);
+  }
+
+  // Bind sticky mobile checkout bar CTA
+  if (mobileBarCheckoutBtn) {
+    mobileBarCheckoutBtn.addEventListener("click", () => {
+      if (typeof openCheckoutModal === "function") {
+        openCheckoutModal();
+      }
+    });
   }
 
   // Promo coupon code validation
