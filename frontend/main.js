@@ -2789,33 +2789,35 @@ if (document.readyState === "loading") {
     confirm.addEventListener("input", checkMatch);
   }
 
-  form.addEventListener("submit", (e) => {
-    e.preventDefault();
-    const nameInput = form.querySelector("#fullName");
-    const name = nameInput ? nameInput.value.trim() : "مشتری کافه";
-    const idInput = form.querySelector("#identifier") || form.querySelector("#phone") || form.querySelector("#email");
-    const identifier = idInput ? idInput.value.trim() : "";
+  if (form.id === "loginForm" || form.id === "registerForm") {
+    form.addEventListener("submit", (e) => {
+      e.preventDefault();
+      const nameInput = form.querySelector("#fullName");
+      const name = nameInput ? nameInput.value.trim() : "مشتری کافه";
+      const idInput = form.querySelector("#identifier") || form.querySelector("#phone") || form.querySelector("#email");
+      const identifier = idInput ? idInput.value.trim() : "";
 
-    localStorage.setItem(
-      "soren_user",
-      JSON.stringify({
-        name: name || "مشتری کافه",
-        identifier: identifier,
-        isLoggedIn: true,
-        savedAt: Date.now(),
-      })
-    );
+      localStorage.setItem(
+        "soren_user",
+        JSON.stringify({
+          name: name || "مشتری کافه",
+          identifier: identifier,
+          isLoggedIn: true,
+          savedAt: Date.now(),
+        })
+      );
 
-    const submitBtn = form.querySelector('button[type="submit"]');
-    if (submitBtn) {
-      submitBtn.textContent = "با موفقیت وارد شدید...";
-      submitBtn.disabled = true;
-    }
+      const submitBtn = form.querySelector('button[type="submit"]');
+      if (submitBtn) {
+        submitBtn.textContent = "با موفقیت وارد شدید...";
+        submitBtn.disabled = true;
+      }
 
-    setTimeout(() => {
-      window.location.href = "../index.html";
-    }, 600);
-  });
+      setTimeout(() => {
+        window.location.href = "../index.html";
+      }, 600);
+    });
+  }
 })();
 
 /* ========================================
