@@ -225,6 +225,20 @@
           <span id="sound-label" class="text-[11px]">Audio</span>
         </button>
 
+        <!-- Return to Storefront -->
+        <a 
+          href="./index.html" 
+          id="btn-nav-storefront"
+          title="Return to Soren Café Storefront"
+          class="h-8 px-2.5 rounded-md bg-white/[0.04] hover:bg-white/[0.08] hairline-border text-zinc-300 hover:text-white text-xs font-mono transition-colors flex items-center gap-1.5"
+        >
+          <svg class="w-3.5 h-3.5 text-signal-cyan" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
+            <polyline points="9 22 9 12 15 12 15 22"></polyline>
+          </svg>
+          <span class="text-[11px] hidden sm:inline">Storefront</span>
+        </a>
+
         <!-- Threat Simulator Quick Jump -->
         <a 
           href="#security-dataflow-section" 
@@ -366,7 +380,7 @@
       </div>
 
       <!-- Canvas Area -->
-      <div class="relative w-full min-h-[460px] lg:min-h-[500px] flex-1 bg-[#090A0D]" id="canvas-container">
+      <div class="relative w-full min-h-[640px] lg:min-h-[720px] flex-1 bg-[#090A0D]" id="canvas-container">
         <canvas id="journey-canvas" class="w-full h-full block cursor-crosshair"></canvas>
 
         <!-- Subdued Performance Watermark -->
@@ -831,6 +845,146 @@
           </div>
         </div>
 
+      </div>
+
+    </section>
+
+    <!-- ================= TELEMETRY CHARTS: JITTER OSCILLOSCOPE & ENGINE RESOURCE USAGE ================= -->
+    <section class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      
+      <!-- CHART 1: MICROSECOND LATENCY & JITTER OSCILLOSCOPE -->
+      <div class="bg-surface rounded-xl hairline-border flex flex-col overflow-hidden shadow-2xl">
+        <div class="px-5 py-3.5 hairline-bottom bg-[#0E1015]/90 flex items-center justify-between text-xs font-mono">
+          <div class="flex items-center gap-2.5">
+            <span class="w-2 h-2 rounded-sm bg-signal-emerald"></span>
+            <span class="text-zinc-100 font-semibold tracking-wider uppercase">Microsecond Latency &amp; Jitter</span>
+            <span class="text-[10px] text-zinc-400 px-2 py-0.5 rounded bg-white/[0.03] hairline-border">Rolling 50 Spans</span>
+          </div>
+          <div class="flex items-center gap-3 text-[11px] text-zinc-400 tabular-nums">
+            <span>Jitter: <strong id="chart-jitter-val" class="text-signal-emerald font-semibold">±0 µs</strong></span>
+            <span class="text-zinc-600">•</span>
+            <span>p95: <strong id="chart-p95-val" class="text-zinc-100 font-semibold">0 µs</strong></span>
+          </div>
+        </div>
+
+        <div class="p-4 bg-[#090A0D] flex flex-col gap-3">
+          <!-- Big Waveform SVG Container -->
+          <div class="relative w-full h-44 bg-black/40 rounded-lg hairline-border p-2 overflow-hidden flex flex-col justify-between">
+            <!-- Background Grid Lines -->
+            <div class="absolute inset-0 flex flex-col justify-between pointer-events-none p-3 opacity-20">
+              <div class="border-b border-zinc-500 w-full flex justify-end"><span class="text-[9px] font-mono text-zinc-400 mr-1">3000µs</span></div>
+              <div class="border-b border-zinc-500 w-full flex justify-end"><span class="text-[9px] font-mono text-zinc-400 mr-1">1500µs</span></div>
+              <div class="border-b border-zinc-500 w-full flex justify-end"><span class="text-[9px] font-mono text-zinc-400 mr-1">500µs</span></div>
+              <div class="w-full flex justify-end"><span class="text-[9px] font-mono text-zinc-400 mr-1">0µs</span></div>
+            </div>
+
+            <!-- Waveform SVG -->
+            <svg id="jitter-waveform-svg" class="w-full h-full relative z-10 overflow-visible" preserveAspectRatio="none" viewBox="0 0 500 140">
+              <defs>
+                <linearGradient id="jitter-grad" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0%" stop-color="#10B981" stop-opacity="0.35" />
+                  <stop offset="100%" stop-color="#10B981" stop-opacity="0.0" />
+                </linearGradient>
+              </defs>
+              <polygon id="jitter-waveform-area" points="0,140 500,140" fill="url(#jitter-grad)" />
+              <polyline id="jitter-waveform-poly" stroke="#10B981" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" fill="none" points="0,140 500,140" />
+              <!-- Current Head Marker -->
+              <circle id="jitter-waveform-dot" cx="500" cy="140" r="4" fill="#34D399" />
+            </svg>
+          </div>
+
+          <!-- Bottom Metric Readouts Bar -->
+          <div class="grid grid-cols-4 gap-2 pt-1 font-mono text-xs tabular-nums text-center">
+            <div class="p-2 rounded bg-white/[0.02] hairline-border">
+              <div class="text-[10px] text-zinc-500 uppercase">Last Span</div>
+              <div id="chart-last-val" class="text-zinc-100 font-semibold text-sm">0 µs</div>
+            </div>
+            <div class="p-2 rounded bg-white/[0.02] hairline-border">
+              <div class="text-[10px] text-zinc-500 uppercase">Min Latency</div>
+              <div id="chart-min-val" class="text-signal-emerald font-semibold text-sm">0 µs</div>
+            </div>
+            <div class="p-2 rounded bg-white/[0.02] hairline-border">
+              <div class="text-[10px] text-zinc-500 uppercase">Mean (Avg)</div>
+              <div id="chart-avg-val" class="text-zinc-200 font-semibold text-sm">0 µs</div>
+            </div>
+            <div class="p-2 rounded bg-white/[0.02] hairline-border">
+              <div class="text-[10px] text-zinc-500 uppercase">Max Peak</div>
+              <div id="chart-max-val" class="text-signal-amber font-semibold text-sm">0 µs</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- CHART 2: ENGINE & SYSTEM RESOURCE USAGE -->
+      <div class="bg-surface rounded-xl hairline-border flex flex-col overflow-hidden shadow-2xl">
+        <div class="px-5 py-3.5 hairline-bottom bg-[#0E1015]/90 flex items-center justify-between text-xs font-mono">
+          <div class="flex items-center gap-2.5">
+            <span class="w-2 h-2 rounded-sm bg-signal-cyan"></span>
+            <span class="text-zinc-100 font-semibold tracking-wider uppercase">System &amp; Engine Resource Usage</span>
+            <span class="text-[10px] text-zinc-400 px-2 py-0.5 rounded bg-white/[0.03] hairline-border">Bun Kernel / Epoll</span>
+          </div>
+          <div class="flex items-center gap-3 text-[11px] text-zinc-400 tabular-nums">
+            <span>RSS: <strong id="chart-rss-val" class="text-signal-cyan font-semibold">42.5 MB</strong></span>
+            <span class="text-zinc-600">•</span>
+            <span>Heap: <strong id="chart-heap-val" class="text-signal-emerald font-semibold">21.8 MB</strong></span>
+          </div>
+        </div>
+
+        <div class="p-4 bg-[#090A0D] flex flex-col gap-3">
+          <!-- Big Waveform SVG Container -->
+          <div class="relative w-full h-44 bg-black/40 rounded-lg hairline-border p-2 overflow-hidden flex flex-col justify-between">
+            <!-- Background Grid Lines -->
+            <div class="absolute inset-0 flex flex-col justify-between pointer-events-none p-3 opacity-20">
+              <div class="border-b border-zinc-500 w-full flex justify-end"><span class="text-[9px] font-mono text-zinc-400 mr-1">128MB</span></div>
+              <div class="border-b border-zinc-500 w-full flex justify-end"><span class="text-[9px] font-mono text-zinc-400 mr-1">64MB</span></div>
+              <div class="border-b border-zinc-500 w-full flex justify-end"><span class="text-[9px] font-mono text-zinc-400 mr-1">32MB</span></div>
+              <div class="w-full flex justify-end"><span class="text-[9px] font-mono text-zinc-400 mr-1">0MB</span></div>
+            </div>
+
+            <!-- Memory Waveform SVG -->
+            <svg id="usage-waveform-svg" class="w-full h-full relative z-10 overflow-visible" preserveAspectRatio="none" viewBox="0 0 500 140">
+              <defs>
+                <linearGradient id="usage-grad-rss" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0%" stop-color="#06B6D4" stop-opacity="0.30" />
+                  <stop offset="100%" stop-color="#06B6D4" stop-opacity="0.0" />
+                </linearGradient>
+                <linearGradient id="usage-grad-heap" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0%" stop-color="#10B981" stop-opacity="0.25" />
+                  <stop offset="100%" stop-color="#10B981" stop-opacity="0.0" />
+                </linearGradient>
+              </defs>
+              <polygon id="usage-area-rss" points="0,140 500,140" fill="url(#usage-grad-rss)" />
+              <polyline id="usage-poly-rss" stroke="#06B6D4" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" fill="none" points="0,140 500,140" />
+              <polyline id="usage-poly-heap" stroke="#10B981" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" fill="none" points="0,140 500,140" />
+              <!-- Current Markers -->
+              <circle id="usage-dot-rss" cx="500" cy="140" r="3.5" fill="#22D3EE" />
+              <circle id="usage-dot-heap" cx="500" cy="140" r="3.5" fill="#34D399" />
+            </svg>
+          </div>
+
+          <!-- Capacity Gauges & Progress Bars -->
+          <div class="grid grid-cols-2 gap-3 pt-1 font-mono text-xs tabular-nums">
+            <div class="p-2.5 rounded bg-white/[0.02] hairline-border space-y-1.5">
+              <div class="flex items-center justify-between text-[11px]">
+                <span class="text-zinc-400 flex items-center gap-1.5"><span class="w-2 h-2 rounded-full bg-signal-cyan"></span> RSS Resident Set</span>
+                <span id="chart-rss-pct" class="text-zinc-200 font-semibold">33% (42.5 MB)</span>
+              </div>
+              <div class="w-full bg-white/5 rounded-full h-2 overflow-hidden">
+                <div id="chart-rss-bar" class="bg-signal-cyan h-full rounded-full transition-all duration-500" style="width: 33%"></div>
+              </div>
+            </div>
+
+            <div class="p-2.5 rounded bg-white/[0.02] hairline-border space-y-1.5">
+              <div class="flex items-center justify-between text-[11px]">
+                <span class="text-zinc-400 flex items-center gap-1.5"><span class="w-2 h-2 rounded-full bg-signal-emerald"></span> JSC Heap Allocation</span>
+                <span id="chart-heap-pct" class="text-zinc-200 font-semibold">34% (21.8 MB)</span>
+              </div>
+              <div class="w-full bg-white/5 rounded-full h-2 overflow-hidden">
+                <div id="chart-heap-bar" class="bg-signal-emerald h-full rounded-full transition-all duration-500" style="width: 34%"></div>
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
 
     </section>
@@ -1459,19 +1613,19 @@
         );
 
         if (isOffline) {
-          ctx.strokeStyle = 'rgba(239, 68, 68, 0.25)';
-          ctx.lineWidth = 1;
-          ctx.setLineDash([3, 4]);
+          ctx.strokeStyle = 'rgba(239, 68, 68, 0.40)';
+          ctx.lineWidth = 2;
+          ctx.setLineDash([4, 4]);
         } else {
-          ctx.strokeStyle = 'rgba(255, 255, 255, 0.08)';
-          ctx.lineWidth = 1;
-          ctx.setLineDash([2, 4]);
+          ctx.strokeStyle = 'rgba(255, 255, 255, 0.16)';
+          ctx.lineWidth = 2;
+          ctx.setLineDash([3, 4]);
         }
         ctx.stroke();
         ctx.setLineDash([]);
       }
 
-      // 2. Draw Precision Coordinate Nodes
+      // 2. Draw Precision Coordinate Nodes (Enlarged High-Visibility)
       for (const key of Object.keys(nodes)) {
         const n = nodes[key];
         const { x, y } = getNodeCoords(key);
@@ -1481,42 +1635,42 @@
         if (!n.active) {
           // Offline Node Crosshair
           ctx.strokeStyle = '#EF4444';
-          ctx.lineWidth = 1.5;
+          ctx.lineWidth = 2;
           ctx.beginPath();
-          ctx.moveTo(x - 7, y); ctx.lineTo(x + 7, y);
-          ctx.moveTo(x, y - 7); ctx.lineTo(x, y + 7);
+          ctx.moveTo(x - 12, y); ctx.lineTo(x + 12, y);
+          ctx.moveTo(x, y - 12); ctx.lineTo(x, y + 12);
           ctx.stroke();
 
-          ctx.font = '500 10px "JetBrains Mono", monospace';
+          ctx.font = '600 12px "JetBrains Mono", monospace';
           ctx.textAlign = 'center';
           ctx.fillStyle = '#EF4444';
-          ctx.fillText(`[${n.label} - OFFLINE]`, x, y - 18);
+          ctx.fillText(`[${n.label} - OFFLINE]`, x, y - 26);
         } else {
-          // Minimal Coordinate Anchor Box
+          // Coordinate Anchor Box (Enlarged 44x44)
           ctx.fillStyle = '#0E1015';
-          ctx.strokeStyle = 'rgba(255, 255, 255, 0.15)';
-          ctx.lineWidth = 1;
+          ctx.strokeStyle = 'rgba(255, 255, 255, 0.20)';
+          ctx.lineWidth = 1.5;
           ctx.beginPath();
-          ctx.roundRect(x - 14, y - 14, 28, 28, 6);
+          ctx.roundRect(x - 22, y - 22, 44, 44, 10);
           ctx.fill();
           ctx.stroke();
 
           // Center Status Dot
           ctx.beginPath();
-          ctx.arc(x, y, 3, 0, Math.PI * 2);
+          ctx.arc(x, y, 4.5, 0, Math.PI * 2);
           ctx.fillStyle = n.color;
           ctx.fill();
 
-          // Node Label
-          ctx.font = '600 10px "JetBrains Mono", monospace';
+          // Node Label (High-Visibility Font)
+          ctx.font = '600 13px "JetBrains Mono", monospace';
           ctx.textAlign = 'center';
-          ctx.fillStyle = '#E4E4E7';
-          ctx.fillText(n.label, x, y - 22);
+          ctx.fillStyle = '#F4F4F5';
+          ctx.fillText(n.label, x, y - 28);
 
           // Subtext
-          ctx.font = '400 9px "JetBrains Mono", monospace';
-          ctx.fillStyle = '#71717A';
-          ctx.fillText(n.sub, x, y + 26);
+          ctx.font = '500 11px "JetBrains Mono", monospace';
+          ctx.fillStyle = '#A1A1AA';
+          ctx.fillText(n.sub, x, y + 34);
         }
         ctx.restore();
       }
@@ -1558,34 +1712,34 @@
         p.t += p.speed;
         const pos = getCurvePoint(p0, p1, Math.min(1, p.t));
 
-        // Adaptive trail
+        // Adaptive trail (longer, glowing tail)
         p.trail.unshift({ x: pos.x, y: pos.y });
-        if (p.trail.length > 5) p.trail.pop();
+        if (p.trail.length > 8) p.trail.pop();
 
         // Draw streamlined trail
         for (let j = 0; j < p.trail.length; j++) {
           const pt = p.trail[j];
-          const alpha = (1 - j / p.trail.length) * 0.5;
+          const alpha = (1 - j / p.trail.length) * 0.6;
           ctx.beginPath();
-          ctx.arc(pt.x, pt.y, Math.max(1, 2.2 - j * 0.3), 0, Math.PI * 2);
+          ctx.arc(pt.x, pt.y, Math.max(1.2, 3.2 - j * 0.35), 0, Math.PI * 2);
           ctx.fillStyle = p.color;
           ctx.globalAlpha = alpha;
           ctx.fill();
         }
         ctx.globalAlpha = 1.0;
 
-        // Draw particle head
+        // Draw particle head (enlarged for projection clarity)
         ctx.beginPath();
-        ctx.arc(pos.x, pos.y, p.isAudience ? 3.5 : 2.5, 0, Math.PI * 2);
+        ctx.arc(pos.x, pos.y, p.isAudience ? 5.5 : 4.0, 0, Math.PI * 2);
         ctx.fillStyle = p.color;
         ctx.fill();
 
         // Audience floating label
         if (p.isAudience && p.label) {
-          ctx.font = '500 9px "JetBrains Mono", sans-serif';
+          ctx.font = '500 11px "JetBrains Mono", sans-serif';
           ctx.fillStyle = '#F59E0B';
           ctx.textAlign = 'center';
-          ctx.fillText(p.label, pos.x, pos.y - 8);
+          ctx.fillText(p.label, pos.x, pos.y - 10);
         }
 
         // Advance segment
@@ -1607,7 +1761,7 @@
     }
     requestAnimationFrame(render);
 
-    // Canvas Click Inspection
+    // Canvas Click Inspection (Expanded Hit Radius for larger nodes)
     canvas.addEventListener('click', (e) => {
       const rect = canvas.getBoundingClientRect();
       const clickX = e.clientX - rect.left;
@@ -1616,7 +1770,7 @@
       for (const key of Object.keys(nodes)) {
         const { x, y } = getNodeCoords(key);
         const dist = Math.hypot(clickX - x, clickY - y);
-        if (dist <= 24) {
+        if (dist <= 30) {
           inspectNodeState(key);
           return;
         }
@@ -1666,6 +1820,11 @@
         if (rpsEl) rpsEl.innerText = simRps.toLocaleString();
         if (p95El) p95El.innerText = `${p95.toLocaleString()} µs`;
         if (wsEl) wsEl.innerText = `Demo Mode`;
+
+        // Update live memory telemetry
+        const simRss = Math.round((42.0 + Math.random() * 4.5) * 10) / 10;
+        const simHeap = Math.round((21.0 + Math.random() * 3.2) * 10) / 10;
+        updateUsageChart(simRss, simHeap);
 
         // Spawn 2-4 normal background particles across topology
         const burstCount = Math.floor(2 + Math.random() * 3);
@@ -1799,6 +1958,9 @@
       document.getElementById('stat-ws').innerText = `${data.activeWsClients} Device(s)`;
       if (data.cluster) {
         updateClusterState(data.cluster);
+      }
+      if (data.memoryRssMb !== undefined && data.heapUsedMb !== undefined) {
+        updateUsageChart(data.memoryRssMb, data.heapUsedMb);
       }
     }
 
@@ -1935,6 +2097,134 @@
     }
 
     const sparklineHistory = [];
+    const jitterHistory = [];
+    const usageRssHistory = [];
+    const usageHeapHistory = [];
+
+    function updateJitterChart(durationUs) {
+      jitterHistory.push(durationUs);
+      if (jitterHistory.length > 50) jitterHistory.shift();
+
+      const avg = runtimeStats.count > 0 ? Math.round(runtimeStats.sum / runtimeStats.count) : durationUs;
+      const currentJitter = Math.abs(durationUs - avg);
+
+      const elJitter = document.getElementById('chart-jitter-val');
+      const elLast = document.getElementById('chart-last-val');
+      const elMin = document.getElementById('chart-min-val');
+      const elAvg = document.getElementById('chart-avg-val');
+      const elMax = document.getElementById('chart-max-val');
+      const elP95 = document.getElementById('chart-p95-val');
+
+      if (elJitter) elJitter.innerText = `±${currentJitter.toLocaleString()} µs`;
+      if (elLast) elLast.innerText = `${durationUs.toLocaleString()} µs`;
+      if (elMin) elMin.innerText = `${(runtimeStats.min === Infinity ? durationUs : runtimeStats.min).toLocaleString()} µs`;
+      if (elAvg) elAvg.innerText = `${avg.toLocaleString()} µs`;
+      if (elMax) elMax.innerText = `${runtimeStats.max.toLocaleString()} µs`;
+
+      if (jitterHistory.length >= 4) {
+        const sorted = [...jitterHistory].sort((a, b) => a - b);
+        const p95Idx = Math.floor(sorted.length * 0.95);
+        if (elP95) elP95.innerText = `${sorted[p95Idx].toLocaleString()} µs`;
+      }
+
+      // Render 500x140 waveform
+      const maxVal = Math.max(...jitterHistory, 100);
+      const minVal = Math.max(0, Math.min(...jitterHistory));
+      const range = (maxVal - minVal) || 1;
+      const height = 140;
+      const width = 500;
+      const padding = 12;
+      const effectiveH = height - padding * 2;
+
+      const pts = jitterHistory.map((val, idx) => {
+        const x = (idx / Math.max(jitterHistory.length - 1, 1)) * width;
+        const norm = (val - minVal) / range;
+        const y = (height - padding) - norm * effectiveH;
+        return { x, y };
+      });
+
+      const polyStr = pts.map(p => `${p.x.toFixed(1)},${p.y.toFixed(1)}`).join(' ');
+      const polyEl = document.getElementById('jitter-waveform-poly');
+      if (polyEl) polyEl.setAttribute('points', polyStr);
+
+      const areaStr = `0,${height} ` + polyStr + ` ${width},${height}`;
+      const areaEl = document.getElementById('jitter-waveform-area');
+      if (areaEl) areaEl.setAttribute('points', areaStr);
+
+      const dotEl = document.getElementById('jitter-waveform-dot');
+      if (dotEl && pts.length > 0) {
+        const lastPt = pts[pts.length - 1];
+        dotEl.setAttribute('cx', lastPt.x.toFixed(1));
+        dotEl.setAttribute('cy', lastPt.y.toFixed(1));
+      }
+    }
+
+    function updateUsageChart(rssMb, heapMb) {
+      usageRssHistory.push(rssMb);
+      usageHeapHistory.push(heapMb);
+      if (usageRssHistory.length > 50) usageRssHistory.shift();
+      if (usageHeapHistory.length > 50) usageHeapHistory.shift();
+
+      const elRss = document.getElementById('chart-rss-val');
+      const elHeap = document.getElementById('chart-heap-val');
+      const elRssPct = document.getElementById('chart-rss-pct');
+      const elHeapPct = document.getElementById('chart-heap-pct');
+      const barRss = document.getElementById('chart-rss-bar');
+      const barHeap = document.getElementById('chart-heap-bar');
+
+      if (elRss) elRss.innerText = `${rssMb.toFixed(1)} MB`;
+      if (elHeap) elHeap.innerText = `${heapMb.toFixed(1)} MB`;
+
+      const rssPct = Math.min(100, Math.max(5, Math.round((rssMb / 128) * 100)));
+      const heapPct = Math.min(100, Math.max(5, Math.round((heapMb / 64) * 100)));
+
+      if (elRssPct) elRssPct.innerText = `${rssPct}% (${rssMb.toFixed(1)} MB)`;
+      if (elHeapPct) elHeapPct.innerText = `${heapPct}% (${heapMb.toFixed(1)} MB)`;
+      if (barRss) barRss.style.width = `${rssPct}%`;
+      if (barHeap) barHeap.style.width = `${heapPct}%`;
+
+      // Render 500x140 waveform
+      const maxVal = Math.max(...usageRssHistory, ...usageHeapHistory, 64);
+      const height = 140;
+      const width = 500;
+      const padding = 12;
+      const effectiveH = height - padding * 2;
+
+      const ptsRss = usageRssHistory.map((val, idx) => {
+        const x = (idx / Math.max(usageRssHistory.length - 1, 1)) * width;
+        const y = (height - padding) - (val / maxVal) * effectiveH;
+        return { x, y };
+      });
+
+      const ptsHeap = usageHeapHistory.map((val, idx) => {
+        const x = (idx / Math.max(usageHeapHistory.length - 1, 1)) * width;
+        const y = (height - padding) - (val / maxVal) * effectiveH;
+        return { x, y };
+      });
+
+      const polyRssStr = ptsRss.map(p => `${p.x.toFixed(1)},${p.y.toFixed(1)}`).join(' ');
+      const polyHeapStr = ptsHeap.map(p => `${p.x.toFixed(1)},${p.y.toFixed(1)}`).join(' ');
+
+      const polyRssEl = document.getElementById('usage-poly-rss');
+      const polyHeapEl = document.getElementById('usage-poly-heap');
+      const areaRssEl = document.getElementById('usage-area-rss');
+
+      if (polyRssEl) polyRssEl.setAttribute('points', polyRssStr);
+      if (polyHeapEl) polyHeapEl.setAttribute('points', polyHeapStr);
+      if (areaRssEl) areaRssEl.setAttribute('points', `0,${height} ` + polyRssStr + ` ${width},${height}`);
+
+      const dotRss = document.getElementById('usage-dot-rss');
+      const dotHeap = document.getElementById('usage-dot-heap');
+      if (dotRss && ptsRss.length > 0) {
+        dotRss.setAttribute('cx', ptsRss[ptsRss.length - 1].x.toFixed(1));
+        dotRss.setAttribute('cy', ptsRss[ptsRss.length - 1].y.toFixed(1));
+      }
+      if (dotHeap && ptsHeap.length > 0) {
+        dotHeap.setAttribute('cx', ptsHeap[ptsHeap.length - 1].x.toFixed(1));
+        dotHeap.setAttribute('cy', ptsHeap[ptsHeap.length - 1].y.toFixed(1));
+      }
+    }
+
     function updateRuntimeLedger(durationUs) {
       if (durationUs > 0) {
         runtimeStats.count++;
@@ -1948,6 +2238,10 @@
         document.getElementById('runtime-max-duration').innerText = `${runtimeStats.max.toLocaleString()} µs`;
         document.getElementById('runtime-total-events').innerText = runtimeStats.count.toLocaleString();
 
+        // Update Big Jitter Waveform Oscilloscope
+        updateJitterChart(durationUs);
+
+        // Update Mini Header Sparkline
         sparklineHistory.push(durationUs);
         if (sparklineHistory.length > 20) sparklineHistory.shift();
 
@@ -1963,6 +2257,16 @@
         if (poly && pts) poly.setAttribute('points', pts);
       }
     }
+
+    // Seed initial waveforms with realistic points so charts are immediately active
+    for (let i = 0; i < 20; i++) {
+      const seedVal = Math.floor(180 + Math.sin(i * 0.4) * 60 + Math.random() * 40);
+      jitterHistory.push(seedVal);
+      usageRssHistory.push(Math.round((41.5 + Math.sin(i * 0.3) * 2 + Math.random() * 2) * 10) / 10);
+      usageHeapHistory.push(Math.round((20.8 + Math.sin(i * 0.3) * 1.5 + Math.random() * 1.5) * 10) / 10);
+    }
+    updateJitterChart(jitterHistory[jitterHistory.length - 1]);
+    updateUsageChart(usageRssHistory[usageRssHistory.length - 1], usageHeapHistory[usageHeapHistory.length - 1]);
 
     // JSON Trace Inspector
     function displayJsonInspect(id, json) {
@@ -3035,9 +3339,19 @@
 
     // Initialize SecurityEngine when DOM is loaded
     if (document.readyState === 'loading') {
-      document.addEventListener('DOMContentLoaded', () => SecurityEngine.init());
+      document.addEventListener('DOMContentLoaded', () => {
+        SecurityEngine.init();
+        if (window.location.pathname.includes('/pages/')) {
+          const sfBtn = document.getElementById('btn-nav-storefront');
+          if (sfBtn) sfBtn.href = '../index.html';
+        }
+      });
     } else {
       SecurityEngine.init();
+      if (window.location.pathname.includes('/pages/')) {
+        const sfBtn = document.getElementById('btn-nav-storefront');
+        if (sfBtn) sfBtn.href = '../index.html';
+      }
     }
 
   </script>

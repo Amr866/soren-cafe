@@ -71,6 +71,10 @@ export async function handleStaticRoutes(url: URL): Promise<Response | null> {
     "/login.html": "pages/login.html",
     "/register": "pages/register.html",
     "/register.html": "pages/register.html",
+    "/dashboard": "pages/dashboard.html",
+    "/dashboard.html": "pages/dashboard.html",
+    "/pages/dashboard": "pages/dashboard.html",
+    "/pages/dashboard.html": "pages/dashboard.html",
   };
 
   if (cleanRouteMap[pathname]) {
