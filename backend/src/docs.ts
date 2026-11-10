@@ -333,6 +333,71 @@ This specification covers the RESTful HTTP endpoints and live WebSocket telemetr
         },
       },
     },
+    "/api/v1/auth/forgot-password": {
+      post: {
+        summary: "درخواست بازیابی رمز عبور با ایمیل (محافظت‌شده در برابر User Enumeration و Rate Limit)",
+        requestBody: {
+          required: true,
+          content: {
+            "application/json": {
+              schema: {
+                type: "object",
+                required: ["email"],
+                properties: {
+                  email: { type: "string", format: "email", example: "user@soren.cafe" },
+                },
+              },
+            },
+          },
+        },
+        responses: {
+          200: { description: "پیام تایید عمومی با زمان انتظار مجدد (بدون افشای وجود حساب)" },
+          400: { description: "فرمت نامعتبر ایمیل" },
+          429: { description: "محدودیت نرخ ارسال درخواست" },
+        },
+      },
+    },
+    "/api/v1/auth/verify-reset-token": {
+      get: {
+        summary: "اعتبارسنجی توکن بازیابی رمز عبور",
+        parameters: [
+          {
+            name: "token",
+            in: "query",
+            required: true,
+            schema: { type: "string" },
+          },
+        ],
+        responses: {
+          200: { description: "توکن معتبر است و ایمیل ماسک‌شده کاربر برمی‌گردد" },
+          400: { description: "توکن نامعتبر، استفاده شده یا منقضی شده است" },
+        },
+      },
+    },
+    "/api/v1/auth/reset-password": {
+      post: {
+        summary: "تنظیم رمز عبور جدید با توکن یک‌بار مصرف",
+        requestBody: {
+          required: true,
+          content: {
+            "application/json": {
+              schema: {
+                type: "object",
+                required: ["token", "password"],
+                properties: {
+                  token: { type: "string" },
+                  password: { type: "string", minLength: 8, example: "NewSecretPassword123!" },
+                },
+              },
+            },
+          },
+        },
+        responses: {
+          200: { description: "رمز عبور با موفقیت به‌روزرسانی شد" },
+          400: { description: "توکن نامعتبر یا رمز عبور ضعیف" },
+        },
+      },
+    },
   },
 };
 

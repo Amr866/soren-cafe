@@ -4,6 +4,34 @@
    SOREN CAFÉ — Unified Interactive Client & Backend Bridge
    ======================================================== */
 
+// Ensure cold loads and page refreshes pin reliably at scrollY: 0 (Hero section)
+if (typeof history !== "undefined" && "scrollRestoration" in history) {
+  history.scrollRestoration = "manual";
+}
+
+if (typeof window !== "undefined") {
+  window.addEventListener("pageshow", () => {
+    const hash = window.location.hash;
+    if (!hash || hash === "#" || hash === "#home") {
+      window.scrollTo({ top: 0, left: 0, behavior: "instant" });
+    }
+  });
+
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", () => {
+      const hash = window.location.hash;
+      if (!hash || hash === "#" || hash === "#home") {
+        window.scrollTo({ top: 0, left: 0, behavior: "instant" });
+      }
+    });
+  } else {
+    const hash = window.location.hash;
+    if (!hash || hash === "#" || hash === "#home") {
+      window.scrollTo({ top: 0, left: 0, behavior: "instant" });
+    }
+  }
+}
+
 // Zero-flash check: verify if preloader has already been seen in current session
 (function checkEarlyPreloaderSeen() {
   if (typeof window === "undefined" || typeof document === "undefined") return;
@@ -498,6 +526,11 @@ const SorenCart = {
         badge.classList.remove("badge-pop");
       }
     });
+    const drawerBadge = document.getElementById("drawer-cart-badge");
+    if (drawerBadge) {
+      drawerBadge.textContent = count > 0 ? String(count) : "۰";
+      drawerBadge.dataset.count = String(count);
+    }
   },
 };
 
@@ -537,80 +570,696 @@ if (typeof window !== "undefined") {
 }
 
 /* ========================================
-   1. جست‌وجوی دسکتاپ و فیلتر زنده
+   1. موتور جست‌وجوی سراسری، فیلتر زنده و همگام‌سازی (Unified Search Engine)
    ======================================== */
-(function initDesktopSearch() {
-  const box = document.querySelector(".desktop-search");
-  if (!box) return;
+(function initUnifiedSearch() {
+  const desktopBox = document.querySelector(".desktop-search");
+  const desktopInput = desktopBox?.querySelector("input");
+  const desktopToggle = desktopBox?.querySelector(".search-toggle");
+  const mobileInput = document.getElementById("mobile-search-input");
+  const mobileForm = document.querySelector(".mobile-search-form");
+  const emptyState = document.getElementById("catalog-empty-state") || document.querySelector(".catalog-empty-state");
+  const resetBtn = document.getElementById("reset-filter-btn");
 
-  const toggle = box.querySelector(".search-toggle");
-  const input = box.querySelector("input");
+  const chipsBar = document.getElementById("category-chips");
+  const categoryChips = chipsBar ? Array.from(chipsBar.querySelectorAll(".category-chip")) : [];
+  const defaultChipCounts = {
+    all: "۱۸",
+    coffee: "۶",
+    shakes: "۶",
+    cake: "۶"
+  };
 
-  function setOpen(isOpen) {
-    box.classList.toggle("active", isOpen);
-    toggle.setAttribute("aria-expanded", String(isOpen));
-    toggle.setAttribute(
-      "aria-label",
-      isOpen ? "بستن جست‌وجو" : "باز کردن جست‌وجو"
-    );
-    if (isOpen) input.focus();
-  }
-
-  toggle.addEventListener("click", () => {
-    setOpen(!box.classList.contains("active"));
-  });
-
-  document.addEventListener("click", (e) => {
-    if (!box.contains(e.target)) setOpen(false);
-  });
-
-  document.addEventListener("keydown", (e) => {
-    if (e.key === "Escape") setOpen(false);
-  });
-
-  box.addEventListener("submit", (e) => {
-    e.preventDefault();
-    const query = input.value.trim().toLowerCase();
-    if (!query) return;
-
-    const cards = document.querySelectorAll(".product-card");
-    if (cards.length > 0) {
-      cards.forEach((card) => {
-        const title = card.querySelector(".product-title")?.textContent.toLowerCase() || "";
-        const desc = card.querySelector(".product-desc")?.textContent.toLowerCase() || "";
-        const matched = title.includes(query) || desc.includes(query);
-        card.hidden = !matched;
-      });
-    } else {
-      const isPagesDir = window.location.pathname.includes("/pages/");
-      const target = isPagesDir ? "./coffee.html" : "./pages/coffee.html";
-      window.location.href = `${target}?q=${encodeURIComponent(query)}`;
+  categoryChips.forEach((chip) => {
+    const cat = chip.dataset.category || "all";
+    const countEl = chip.querySelector(".chip-count");
+    if (countEl && countEl.textContent.trim()) {
+      defaultChipCounts[cat] = countEl.textContent.trim();
     }
   });
+
+  let searchTimeout = null;
+  let inFlightAbortController = null;
+  let savedCategoryBeforeSearch = null;
+  const DEBOUNCE_MS = 250;
+
+  function toFaDigits(num) {
+    const fa = ["۰", "۱", "۲", "۳", "۴", "۵", "۶", "۷", "۸", "۹"];
+    return String(num).replace(/[0-9]/g, (d) => fa[d]);
+  }
+
+  const CARD_ENGLISH_KEYWORDS = {
+    // 18 Landing page items
+    prd_espresso_double: "espresso double doppio coffee shot 9bar",
+    prd_cappuccino: "cappuccino coffee milk foam latte art",
+    prd_latte: "latte caffe coffee art velvety microfoam",
+    prd_espresso: "espresso single shot coffee classic",
+    prd_americano: "americano black coffee purified water",
+    prd_mocha: "mocha chocolate french dark cocoa espresso coffee",
+    prd_shake_choc: "chocolate shake milkshake cocoa dutch ice cream",
+    prd_shake_strawberry: "strawberry shake milkshake fresh puree",
+    prd_shake_vanilla: "vanilla shake milkshake madagascar fresh milk",
+    prd_shake_oreo: "oreo shake milkshake cookie biscuits butter cream",
+    prd_shake_banana: "banana shake milkshake pistachio nut fruit",
+    prd_shake_caramel: "caramel salted caramel dulce de leche shake milkshake",
+    prd_choc_cake: "double chocolate cake dark chocolate ganache sponge bakery dessert",
+    prd_cheesecake: "new york cheesecake cheese cake caramel creamy bakery dessert",
+    prd_brownie: "chocolate fudge brownie dark chocolate molten cake bakery dessert",
+    prd_tiramisu: "classic tiramisu ladyfinger espresso mascarpone dessert",
+    prd_carrot_cake: "carrot walnut cake cinnamon cream cheese bakery dessert",
+    prd_cookie: "chocolate chunk cookie soft cookie 70% bakery",
+
+    // Additional menu items
+    prd_doppio: "espresso doppio double coffee yirgacheffe jasmine citrus",
+    prd_iced_latte: "iced latte ice cold coffee cube",
+    prd_cortado: "cortado coffee steamed milk velvety parseh 1:1",
+    prd_flatwhite: "flat white flatwhite honey cinnamon oat milk mountain coffee",
+    prd_geisha_v60: "v60 pour over pourover drip geisha colombia filter coffee manual",
+    prd_coldbrew: "cold brew coldbrew smoky saffron iced coffee 18h",
+    prd_matcha_latte: "matcha latte pure uji kyoto almond milk ceremonial green tea",
+    prd_basque: "san sebastian basque cheesecake cheese cake pistachio creamy damghan",
+    prd_honey_tart: "ancient honey walnut tart sable pastry french bakery dessert",
+    prd_lime_meringue: "ammani lime tart meringue citrus roasted bakery dessert",
+    prd_espresso_fudge: "dark chocolate coffee fudge cake belgian espresso bakery dessert",
+    prd_croissant: "almond orange blossom croissant butter layered french bakery pastry",
+    prd_banana_bread: "toasted banana bread espresso butter walnut bakery bread",
+    prd_pistachio_shake: "pistachio salted caramel shake milkshake vanilla",
+    prd_hazelnut_mocha: "hazelnut mocha crunch shake milkshake nutella praline double espresso",
+    prd_lotus_shake: "lotus biscoff espresso shake milkshake belgian",
+    prd_saffron_velvet: "saffron velvet mascarpone cardamom shake milkshake handmade",
+    prd_coconut_frappe: "coconut cold brew frappe organic coldbrew milkshake",
+    prd_berry_dark: "dark chocolate wild berry raspberry shake milkshake belgian"
+  };
+
+  const BILINGUAL_KEYWORD_MAP = {
+    // Coffee & brew methods
+    espresso: ["اسپرسو", "دبل", "دوپیو"],
+    doppio: ["دوپیو", "اسپرسو"],
+    latte: ["لاته", "آیس لاته"],
+    cappuccino: ["کاپوچینو"],
+    americano: ["آمریکانو"],
+    mocha: ["موکا"],
+    cortado: ["کورتادو"],
+    flatwhite: ["فلت وایت", "فلت‌وایت"],
+    "flat white": ["فلت وایت", "فلت‌وایت"],
+    v60: ["v60", "پوراوور", "چکه‌ای"],
+    pourover: ["v60", "پوراوور"],
+    "pour over": ["v60", "پوراوور"],
+    coldbrew: ["کلد برو", "کلدبرو"],
+    "cold brew": ["کلد برو", "کلدبرو"],
+    matcha: ["ماچا"],
+    coffee: ["قهوه", "اسپرسو", "لاته", "کاپوچینو", "آمریکانو", "موکا", "کورتادو", "فلت وایت", "v60", "کلد برو"],
+
+    // Shakes & cold bar
+    shake: ["شیک"],
+    milkshake: ["شیک"],
+    vanilla: ["وانیل"],
+    chocolate: ["شکلات", "شکلاتی", "چاکلت"],
+    choc: ["شکلات", "چاکلت"],
+    oreo: ["اورئو", "اوریو"],
+    strawberry: ["توت فرنگی", "توت‌فرنگی"],
+    caramel: ["کارامل"],
+    pistachio: ["پسته"],
+    lotus: ["لوتوس"],
+    frappe: ["فراپه"],
+    coconut: ["نارگیل"],
+    hazelnut: ["فندق", "فندقی"],
+    saffron: ["زعفران", "زعفرانی"],
+    berry: ["تمشک", "بری"],
+
+    // Bakery, cakes & desserts
+    cheesecake: ["چیزکیک", "چیز کیک", "سن سباستین", "سن‌سباستین"],
+    "cheese cake": ["چیزکیک", "چیز کیک"],
+    sansebastian: ["سن سباستین", "سن‌سباستین", "چیزکیک"],
+    "san sebastian": ["سن سباستین", "سن‌سباستین", "چیزکیک"],
+    basque: ["سن سباستین", "سن‌سباستین", "چیزکیک"],
+    brownie: ["براونی"],
+    tiramisu: ["تیرامیسو"],
+    cookie: ["کوکی"],
+    croissant: ["کروسان", "کرواسان"],
+    cake: ["کیک", "چیزکیک", "براونی", "تارت", "تیرامیسو"],
+    tart: ["تارت"],
+    lime: ["لیمو"],
+    meringue: ["مرنگ"],
+    carrot: ["هویج"],
+    walnut: ["گردو"],
+    banana: ["موز", "موزی"]
+  };
+
+  function normalize(str) {
+    if (!str) return "";
+    return String(str)
+      .toLowerCase()
+      .replace(/[\u064B-\u065F\u0670]/g, "") // remove arabic diacritics / harakat
+      .replace(/\u064A/g, "\u06CC") // Arabic Yeh (ي) -> Persian Yeh (ی)
+      .replace(/\u0643/g, "\u06A9") // Arabic Kaf (ك) -> Persian Keheh (ک)
+      .replace(/\u0629/g, "\u0647") // Teh Marbuta (ة) -> Heh (ه)
+      .replace(/\u06C0/g, "\u0647") // Heh with yeh (ۀ) -> Heh (ه)
+      .replace(/\u200C/g, " ") // Zero-width non-joiner -> space
+      .replace(/[()[\]{}*+?!.,:;"'\\^$|~`_#\-—–/]/g, " ") // Punctuation & symbols -> space
+      .replace(/\s+/g, " ")
+      .trim();
+  }
+
+  function getCards() {
+    return Array.from(
+      document.querySelectorAll(
+        ".product-card, #catalog-products-grid .featured-card, .featured-grid .featured-card"
+      )
+    );
+  }
+
+  function getActiveCategory() {
+    const activeChip = document.querySelector(".category-chip.active");
+    if (activeChip && activeChip.dataset.category) {
+      return activeChip.dataset.category;
+    }
+    const activeBtn = document.querySelector(".menu-page .filter-btn.is-active");
+    if (activeBtn && activeBtn.dataset.category) {
+      return activeBtn.dataset.category;
+    }
+    return "all";
+  }
+
+  function cardMatchesQuery(card, queryNorm) {
+    if (!queryNorm) return true;
+
+    const title = card.querySelector(".product-title, .featured-title, h2, h3")?.textContent || "";
+    const desc = card.querySelector(".product-desc, .featured-desc, p")?.textContent || "";
+    const catText = card.querySelector(".product-category, .featured-category")?.textContent || "";
+    const popularText = card.querySelector(".featured-popular, .featured-top")?.textContent || "";
+    const nameAttr = card.dataset.name || "";
+    const idAttr = card.dataset.id || card.dataset.productId || "";
+    const enKeywords = CARD_ENGLISH_KEYWORDS[idAttr] || "";
+
+    const textToSearch = `${title} ${desc} ${catText} ${popularText} ${nameAttr} ${idAttr} ${enKeywords}`;
+    const textNorm = normalize(textToSearch);
+
+    const queryTokens = queryNorm.split(" ").filter(Boolean);
+
+    return queryTokens.every((token) => {
+      if (textNorm.includes(token)) return true;
+      const faSynonyms = BILINGUAL_KEYWORD_MAP[token];
+      if (faSynonyms && faSynonyms.some((syn) => textNorm.includes(normalize(syn)))) {
+        return true;
+      }
+      return false;
+    });
+  }
+
+  function applyFilter(rawQuery) {
+    const queryNorm = normalize(rawQuery);
+    const cards = getCards();
+    const activeCat = getActiveCategory();
+
+    if (cards.length === 0) return 0;
+
+    // 1. Calculate matching cards per category for chip counts
+    const catCounts = {
+      all: 0,
+      coffee: 0,
+      shakes: 0,
+      cake: 0
+    };
+
+    cards.forEach((card) => {
+      const isMatch = cardMatchesQuery(card, queryNorm);
+      if (isMatch) {
+        catCounts.all++;
+        const cardCat = card.dataset.category;
+        if (cardCat) {
+          const normCat = (cardCat === "shake" || cardCat === "shakes") ? "shakes" : cardCat;
+          if (catCounts.hasOwnProperty(normCat)) {
+            catCounts[normCat]++;
+          }
+        }
+      }
+    });
+
+    // 2. Update category chips count on landing page (#category-chips)
+    if (categoryChips.length > 0) {
+      categoryChips.forEach((chip) => {
+        const cat = chip.dataset.category || "all";
+        const countEl = chip.querySelector(".chip-count");
+        if (countEl) {
+          if (!queryNorm) {
+            countEl.textContent = defaultChipCounts[cat] || countEl.textContent;
+          } else {
+            const count = catCounts[cat] || 0;
+            countEl.textContent = toFaDigits(count);
+          }
+        }
+      });
+    }
+
+    // 3. Filter cards according to both query and active category
+    let matchCount = 0;
+    cards.forEach((card) => {
+      const cardCat = card.dataset.category;
+      const normCat = (cardCat === "shake" || cardCat === "shakes") ? "shakes" : cardCat;
+      const catMatch = activeCat === "all" || !normCat || normCat === activeCat;
+      const isMatch = cardMatchesQuery(card, queryNorm);
+      const shouldShow = isMatch && catMatch;
+
+      card.hidden = !shouldShow;
+      card.classList.toggle("is-filtered-out", !shouldShow);
+      if (shouldShow) {
+        card.style.display = "";
+        matchCount++;
+      } else {
+        card.style.display = "none";
+      }
+    });
+
+    // 4. Toggle empty state
+    if (emptyState) {
+      const showEmpty = matchCount === 0 && Boolean(queryNorm);
+      emptyState.hidden = !showEmpty;
+      emptyState.style.display = showEmpty ? "block" : "none";
+    }
+
+    return matchCount;
+  }
+
+  function onSearchInput(query) {
+    // 1. Abort previous in-flight fetch request if running
+    if (inFlightAbortController) {
+      inFlightAbortController.abort();
+    }
+    inFlightAbortController = new AbortController();
+
+    // 2. Debounce local DOM filter & API sync
+    if (searchTimeout) clearTimeout(searchTimeout);
+
+    searchTimeout = setTimeout(() => {
+      // Sync other input if present
+      if (desktopInput && desktopInput.value !== query) desktopInput.value = query;
+      if (mobileInput && mobileInput.value !== query) mobileInput.value = query;
+
+      const normQ = normalize(query);
+      const activeCat = getActiveCategory();
+
+      if (normQ) {
+        // Entering search: remember current category and switch active chip to "all"
+        if (activeCat !== "all" && !savedCategoryBeforeSearch) {
+          savedCategoryBeforeSearch = activeCat;
+          if (categoryChips.length > 0) {
+            categoryChips.forEach((chip) => {
+              const isAll = chip.dataset.category === "all";
+              chip.classList.toggle("active", isAll);
+              chip.setAttribute("aria-pressed", String(isAll));
+            });
+          }
+        }
+      } else {
+        // Search cleared: restore previous category if one was saved
+        if (savedCategoryBeforeSearch) {
+          const catToRestore = savedCategoryBeforeSearch;
+          savedCategoryBeforeSearch = null;
+          if (categoryChips.length > 0) {
+            categoryChips.forEach((chip) => {
+              const isMatch = chip.dataset.category === catToRestore;
+              chip.classList.toggle("active", isMatch);
+              chip.setAttribute("aria-pressed", String(isMatch));
+            });
+          }
+        }
+      }
+
+      applyFilter(query);
+
+      // Async fetch to API if endpoint is available (with cancellation signal)
+      const currentSignal = inFlightAbortController?.signal;
+      if (typeof fetch === "function") {
+        const apiUrl = `/api/v1/products?q=${encodeURIComponent(normQ)}`;
+        fetch(apiUrl, { signal: currentSignal })
+          .then((r) => (r.ok ? r.json() : null))
+          .catch((err) => {
+            if (err.name !== "AbortError") {
+              // Ignore abort errors
+            }
+          });
+      }
+    }, DEBOUNCE_MS);
+  }
+
+  function handleFormSubmit(e, inputEl) {
+    if (e && typeof e.preventDefault === "function") e.preventDefault();
+    const query = inputEl?.value || (desktopInput ? desktopInput.value : "") || "";
+    if (searchTimeout) clearTimeout(searchTimeout);
+    const matchCount = applyFilter(query);
+
+    // Close offcanvas drawer if open
+    const drawer = document.getElementById("soren-offcanvas-drawer");
+    const backdrop = document.getElementById("soren-drawer-backdrop");
+    if (drawer && drawer.classList.contains("is-open")) {
+      drawer.classList.remove("is-open");
+      backdrop?.classList.remove("is-open");
+      drawer.setAttribute("aria-hidden", "true");
+      backdrop?.setAttribute("aria-hidden", "true");
+      document.body.style.overflow = "";
+    }
+
+    const pathname = window.location.pathname || "";
+    const isLandingPage =
+      pathname === "/" ||
+      pathname.endsWith("/index.html") ||
+      pathname.endsWith("soren-cafe/") ||
+      !pathname.includes("/pages/");
+
+    if (isLandingPage) {
+      const menuSection = document.getElementById("menu") || document.getElementById("catalog-products-grid");
+      if (menuSection) {
+        menuSection.scrollIntoView({ behavior: "smooth", block: "start" });
+      }
+
+      // Highlight matching cards with subtle pulse
+      const cards = getCards();
+      const visibleCards = cards.filter((c) => !c.hidden && !c.classList.contains("is-filtered-out"));
+      visibleCards.forEach((c) => {
+        c.classList.remove("search-matched-pulse");
+        void c.offsetWidth;
+        c.classList.add("search-matched-pulse");
+        setTimeout(() => c.classList.remove("search-matched-pulse"), 1000);
+      });
+    } else {
+      const cards = getCards();
+      if (cards.length === 0 && query.trim()) {
+        const isPagesDir = pathname.includes("/pages/");
+        const target = isPagesDir ? "./products.html" : "./pages/products.html";
+        window.location.href = `${target}?q=${encodeURIComponent(query.trim())}`;
+      }
+    }
+  }
+
+  // Bind desktop search
+  if (desktopBox && desktopInput) {
+    if (desktopToggle) {
+      function setOpen(isOpen) {
+        desktopBox.classList.toggle("active", isOpen);
+        desktopToggle.setAttribute("aria-expanded", String(isOpen));
+        desktopToggle.setAttribute(
+          "aria-label",
+          isOpen ? "بستن جست‌وجو" : "باز کردن جست‌وجو"
+        );
+        if (isOpen) desktopInput.focus();
+      }
+      desktopToggle.addEventListener("click", () => {
+        setOpen(!desktopBox.classList.contains("active"));
+      });
+      document.addEventListener("click", (e) => {
+        if (!desktopBox.contains(e.target)) setOpen(false);
+      });
+      document.addEventListener("keydown", (e) => {
+        if (e.key === "Escape") setOpen(false);
+      });
+    }
+
+    desktopInput.addEventListener("input", (e) => {
+      onSearchInput(e.target.value);
+    });
+
+    desktopInput.addEventListener("keydown", (e) => {
+      if (e.key === "Enter") {
+        handleFormSubmit(e, desktopInput);
+      }
+    });
+
+    desktopBox.addEventListener("submit", (e) => {
+      handleFormSubmit(e, desktopInput);
+    });
+  }
+
+  // Bind mobile search
+  if (mobileInput) {
+    mobileInput.addEventListener("input", (e) => {
+      onSearchInput(e.target.value);
+    });
+    mobileInput.addEventListener("keydown", (e) => {
+      if (e.key === "Enter") {
+        handleFormSubmit(e, mobileInput);
+      }
+    });
+  }
+  if (mobileForm && mobileInput) {
+    mobileForm.addEventListener("submit", (e) => {
+      handleFormSubmit(e, mobileInput);
+    });
+  }
+
+  // Reset filter button
+  if (resetBtn) {
+    resetBtn.addEventListener("click", () => {
+      if (desktopInput) desktopInput.value = "";
+      if (mobileInput) mobileInput.value = "";
+      savedCategoryBeforeSearch = null;
+      // Reset category filter buttons if present
+      const filterBtns = document.querySelectorAll(".menu-page .filter-btn");
+      filterBtns.forEach((btn) => {
+        const isAll = btn.dataset.category === "all";
+        btn.classList.toggle("is-active", isAll);
+        btn.setAttribute("aria-pressed", String(isAll));
+      });
+      if (categoryChips.length > 0) {
+        categoryChips.forEach((chip) => {
+          const isAll = chip.dataset.category === "all";
+          chip.classList.toggle("active", isAll);
+          chip.setAttribute("aria-pressed", String(isAll));
+        });
+      }
+      applyFilter("");
+    });
+  }
+
+  // Hydrate search from URL query parameter ?q= or ?search=
+  try {
+    const urlParams = new URLSearchParams(window.location.search);
+    const initialQ = urlParams.get("q") || urlParams.get("search");
+    if (initialQ) {
+      if (desktopInput) desktopInput.value = initialQ;
+      if (mobileInput) mobileInput.value = initialQ;
+      if (desktopBox) desktopBox.classList.add("active");
+      setTimeout(() => applyFilter(initialQ), 100);
+    }
+  } catch (e) {}
+
+  // Expose global helper for other scripts / category switchers
+  window.sorenApplySearch = applyFilter;
+  window.sorenNormalizeSearch = normalize;
+  window.sorenGetCurrentQuery = () => (desktopInput?.value || mobileInput?.value || "");
+  window.sorenNotifyCategoryManualChange = () => { savedCategoryBeforeSearch = null; };
 })();
 
 /* ========================================
    2. کشوی ناوبری ثانویه و منوی موبایل (Off-Canvas Drawer)
    ======================================== */
 (function initOffcanvasDrawer() {
-  const drawer = document.getElementById("soren-offcanvas-drawer");
-  const backdrop = document.getElementById("soren-drawer-backdrop");
-  const menuBtn = document.querySelector(".mobile-menu-button");
-  const closeBtn = document.getElementById("drawer-close-btn");
-  const drawerBaristaText = document.getElementById("drawer-barista-text");
+  let drawer = document.getElementById("soren-offcanvas-drawer");
+  let backdrop = document.getElementById("soren-drawer-backdrop");
+  const menuButtons = document.querySelectorAll(".mobile-menu-button");
+  let closeBtn = document.getElementById("drawer-close-btn");
+  let lastFocusedTrigger = null;
   const searchBtn = document.querySelector(".mobile-search");
   const panel = document.getElementById("mobile-panel");
-  const searchForm = document.querySelector(".mobile-search-form");
   const searchInput = document.getElementById("mobile-search-input");
+  const menuBtn = document.querySelector(".mobile-menu-btn, .mobile-menu-button");
+  const drawerBaristaText = document.getElementById("drawer-barista-text");
 
-  function openDrawer() {
+  // Self-healing: if drawer markup is missing on a subpage, inject the standard artisanal drawer
+  if (!drawer || !backdrop) {
+    const isSubpage = window.location.pathname.includes("/pages/");
+    const basePrefix = isSubpage ? ".." : ".";
+    const pagesPrefix = isSubpage ? "." : "./pages";
+
+    if (!backdrop) {
+      backdrop = document.createElement("div");
+      backdrop.className = "soren-drawer-backdrop";
+      backdrop.id = "soren-drawer-backdrop";
+      backdrop.setAttribute("aria-hidden", "true");
+      document.body.appendChild(backdrop);
+    }
+
+    if (!drawer) {
+      drawer = document.createElement("aside");
+      drawer.className = "soren-offcanvas-drawer";
+      drawer.id = "soren-offcanvas-drawer";
+      drawer.setAttribute("role", "dialog");
+      drawer.setAttribute("aria-modal", "true");
+      drawer.setAttribute("aria-label", "منوی اصلی و دسترسی کافه سورن");
+      drawer.setAttribute("aria-hidden", "true");
+
+      drawer.innerHTML = `
+        <div class="drawer-header">
+          <a href="${basePrefix}/index.html" class="drawer-brand" aria-label="صفحه اصلی کافه سورن">
+            <img src="${basePrefix}/images/brand/soren-logo.svg" alt="" class="drawer-brand-logo" width="36" height="36" aria-hidden="true" />
+            <div class="drawer-brand-text">
+              <span class="drawer-title">کافه سورن</span>
+              <span class="drawer-subtitle">برشته‌کاری تخصصی و بیکری</span>
+            </div>
+          </a>
+          <button type="button" class="drawer-close-btn" id="drawer-close-btn" aria-label="بستن منو">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <path d="M18 6L6 18M6 6l12 12" />
+            </svg>
+          </button>
+        </div>
+        <div class="drawer-body">
+          <div class="drawer-barista-status">
+            <div class="drawer-status-top">
+              <span class="status-pulse-dot" aria-hidden="true"></span>
+              <span class="status-text" id="drawer-barista-text">باریستا: آماده پذیرش سفارش حضوری و بیرون‌بر</span>
+            </div>
+            <span class="drawer-status-hours">ساعات سرویس‌دهی: ۸:۰۰ الی ۲۳:۳۰</span>
+          </div>
+          <nav class="drawer-nav" aria-label="پیوندهای اصلی سایت">
+            <div class="drawer-nav-group-title">بخش‌های کافه</div>
+            <a href="${basePrefix}/index.html" class="drawer-nav-item">
+              <span class="nav-item-icon">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                  <path d="M3 10.5 12 3l9 7.5V20a1 1 0 0 1-1 1h-5v-6h-6v6H4a1 1 0 0 1-1-1v-9.5Z" />
+                </svg>
+              </span>
+              <span class="nav-item-label">صفحه اصلی</span>
+            </a>
+            <div class="drawer-menu-category-block">
+              <a href="${pagesPrefix}/products.html" class="drawer-nav-item drawer-menu-parent">
+                <span class="nav-item-icon">
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                    <path d="M18 8h1a4 4 0 0 1 0 8h-1M2 8h16v9a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4V8ZM6 2v3M10 2v3M14 2v3"/>
+                  </svg>
+                </span>
+                <span class="nav-item-label">منوی محصولات</span>
+                <span class="drawer-nav-tag">کاتالوگ</span>
+              </a>
+              <div class="drawer-category-quicklinks" aria-label="دسته‌بندی‌های منو">
+                <a href="${pagesPrefix}/coffee.html" class="category-quicklink">
+                  <span class="quicklink-dot" aria-hidden="true"></span>
+                  <span>قهوه‌ها</span>
+                </a>
+                <a href="${pagesPrefix}/shakes.html" class="category-quicklink">
+                  <span class="quicklink-dot" aria-hidden="true"></span>
+                  <span>شیک‌ها</span>
+                </a>
+                <a href="${pagesPrefix}/cake.html" class="category-quicklink">
+                  <span class="quicklink-dot" aria-hidden="true"></span>
+                  <span>کیک و دسر</span>
+                </a>
+              </div>
+            </div>
+            <a href="${pagesPrefix}/about.html" class="drawer-nav-item">
+              <span class="nav-item-icon">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                  <circle cx="12" cy="12" r="10" />
+                  <path d="M12 16v-4M12 8h.01" />
+                </svg>
+              </span>
+              <span class="nav-item-label">درباره ما و داستان سورن</span>
+            </a>
+            <a href="${pagesPrefix}/cart.html" class="drawer-nav-item drawer-cart-link">
+              <span class="nav-item-icon">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                  <path d="M5 8h14l1 12H4L5 8Z" />
+                  <path d="M9 9V6a3 3 0 0 1 6 0v3" />
+                </svg>
+              </span>
+              <span class="nav-item-label">سبد خرید سفارش</span>
+              <span class="drawer-cart-badge" id="drawer-cart-badge" aria-live="polite">۰</span>
+            </a>
+            <a href="${pagesPrefix}/login.html" class="drawer-nav-item">
+              <span class="nav-item-icon">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                  <circle cx="12" cy="8" r="3.5" />
+                  <path d="M4.5 20c.6-4 3.2-6 7.5-6s6.9 2 7.5 6" />
+                </svg>
+              </span>
+              <span class="nav-item-label">ورود / حساب کاربری</span>
+            </a>
+          </nav>
+          <div class="drawer-contact-card">
+            <div class="drawer-nav-group-title">اطلاعات و تماس سریع</div>
+            <a href="tel:03136224422" class="drawer-action-row call-row" aria-label="تماس با کافه سورن ۰۳۱۳۶۲۲۴۴۲۲">
+              <div class="action-icon">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                  <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/>
+                </svg>
+              </div>
+              <div class="action-texts">
+                <span class="action-title">سفارش و هماهنگی تلفنی</span>
+                <span class="action-sub" dir="ltr">۰۳۱-۳۶۲۲۴۴۲۲</span>
+              </div>
+            </a>
+            <a href="https://maps.google.com/?q=Isfahan+Soren+Cafe" target="_blank" rel="noopener noreferrer" class="drawer-action-row map-row" aria-label="مسیریابی به کافه سورن در اصفهان">
+              <div class="action-icon">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                  <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/>
+                  <circle cx="12" cy="10" r="3"/>
+                </svg>
+              </div>
+              <div class="action-texts">
+                <span class="action-title">مراجعه حضوری</span>
+                <span class="action-sub">اصفهان، خیابان چهارباغ عباسی</span>
+              </div>
+            </a>
+            <div class="drawer-socials">
+              <a href="https://instagram.com" target="_blank" rel="noopener noreferrer" class="drawer-social-link" aria-label="اینستاگرام کافه سورن">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                  <rect x="2" y="2" width="20" height="20" rx="5" ry="5"/>
+                  <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"/>
+                  <line x1="17.5" y1="6.5" x2="17.51" y2="6.5"/>
+                </svg>
+                <span>اینستاگرام</span>
+              </a>
+              <a href="https://t.me" target="_blank" rel="noopener noreferrer" class="drawer-social-link" aria-label="تلگرام کافه سورن">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                  <path d="M21.8 4.2 18.6 20c-.2 1.1-.8 1.4-1.7.9l-4.7-3.5-2.3 2.2c-.3.3-.5.5-1 .5l.3-4.8 8.8-8c.4-.4-.1-.6-.6-.2L6.5 14 1.9 12.6c-1-.3-1-1 .2-1.5L20 4.1c.8-.3 1.9.2 1.8.1Z"/>
+                </svg>
+                <span>تلگرام</span>
+              </a>
+            </div>
+          </div>
+          <div class="drawer-footer">
+            <p class="drawer-colophon">برشته‌کاری تخصصی و بیکری دست‌ساز سورن</p>
+            <span class="drawer-motto">عصاره اصیل، آرامش و کیفیت</span>
+          </div>
+        </div>
+      `;
+      document.body.appendChild(drawer);
+    }
+  }
+
+  closeBtn = document.getElementById("drawer-close-btn");
+
+  function syncDrawerCartBadge() {
+    const badge = document.getElementById("drawer-cart-badge");
+    if (badge && window.SorenCart) {
+      const count = window.SorenCart.getTotalCount();
+      badge.textContent = count > 0 ? String(count) : "۰";
+    }
+  }
+
+  function openDrawer(triggerBtn) {
     if (!drawer || !backdrop) return;
+    lastFocusedTrigger = triggerBtn || document.activeElement;
     drawer.classList.add("is-open");
     backdrop.classList.add("is-open");
     drawer.setAttribute("aria-hidden", "false");
     backdrop.setAttribute("aria-hidden", "false");
-    if (menuBtn) menuBtn.setAttribute("aria-expanded", "true");
+    menuButtons.forEach((btn) => {
+      btn.setAttribute("aria-expanded", "true");
+      btn.classList.add("is-active");
+    });
     document.body.style.overflow = "hidden";
+    syncDrawerCartBadge();
+
+    // Move focus inside drawer for accessibility
+    setTimeout(() => {
+      if (closeBtn) {
+        closeBtn.focus();
+      } else {
+        const firstLink = drawer.querySelector("a, button");
+        if (firstLink) firstLink.focus();
+      }
+    }, 50);
   }
 
   function closeDrawer() {
@@ -619,31 +1268,33 @@ if (typeof window !== "undefined") {
     backdrop.classList.remove("is-open");
     drawer.setAttribute("aria-hidden", "true");
     backdrop.setAttribute("aria-hidden", "true");
-    if (menuBtn) menuBtn.setAttribute("aria-expanded", "false");
+    menuButtons.forEach((btn) => {
+      btn.setAttribute("aria-expanded", "false");
+      btn.classList.remove("is-active");
+    });
     document.body.style.overflow = "";
+
+    // Return focus to the trigger button that opened it
+    if (lastFocusedTrigger && typeof lastFocusedTrigger.focus === "function") {
+      lastFocusedTrigger.focus();
+    }
   }
 
-  function toggleDrawer() {
+  function toggleDrawer(triggerBtn) {
     if (!drawer) return;
     if (drawer.classList.contains("is-open")) {
       closeDrawer();
     } else {
-      openDrawer();
+      openDrawer(triggerBtn);
     }
   }
 
-  if (menuBtn) {
-    menuBtn.addEventListener("click", (e) => {
+  menuButtons.forEach((btn) => {
+    btn.addEventListener("click", (e) => {
       e.preventDefault();
-      if (drawer) {
-        toggleDrawer();
-      } else if (panel) {
-        // Fallback for subpages with legacy panel
-        const isOpen = panel.classList.toggle("open");
-        menuBtn.setAttribute("aria-expanded", String(isOpen));
-      }
+      toggleDrawer(btn);
     });
-  }
+  });
 
   if (closeBtn) {
     closeBtn.addEventListener("click", (e) => {
@@ -659,20 +1310,24 @@ if (typeof window !== "undefined") {
   }
 
   if (drawer) {
+    // Delegated click handling: close drawer on link navigation
     drawer.addEventListener("click", (e) => {
-      if (e.target.closest("a")) {
+      const link = e.target.closest("a");
+      if (link) {
         closeDrawer();
       }
     });
 
-    // Touch swipe-to-dismiss gesture (swipe right to close drawer)
+    // Touch swipe-to-dismiss gesture (swipe right to dismiss in RTL)
     let touchStartX = 0;
     let touchStartY = 0;
     drawer.addEventListener(
       "touchstart",
       (e) => {
-        touchStartX = e.changedTouches[0].clientX;
-        touchStartY = e.changedTouches[0].clientY;
+        if (e.changedTouches && e.changedTouches[0]) {
+          touchStartX = e.changedTouches[0].clientX;
+          touchStartY = e.changedTouches[0].clientY;
+        }
       },
       { passive: true }
     );
@@ -680,25 +1335,47 @@ if (typeof window !== "undefined") {
     drawer.addEventListener(
       "touchend",
       (e) => {
-        const deltaX = e.changedTouches[0].clientX - touchStartX;
-        const deltaY = Math.abs(e.changedTouches[0].clientY - touchStartY);
-        // Require >= 50px horizontal swipe with < 40px vertical delta
-        if (deltaX > 50 && deltaY < 40) {
-          closeDrawer();
+        if (e.changedTouches && e.changedTouches[0]) {
+          const deltaX = e.changedTouches[0].clientX - touchStartX;
+          const deltaY = Math.abs(e.changedTouches[0].clientY - touchStartY);
+          // Require >= 50px horizontal swipe with < 40px vertical delta
+          if (deltaX > 50 && deltaY < 40) {
+            closeDrawer();
+          }
         }
       },
       { passive: true }
     );
   }
 
-  // Dismiss drawer via Escape key
+  // Focus trap inside drawer while open (Web Interface Guidelines compliance)
   document.addEventListener("keydown", (e) => {
+    if (!drawer || !drawer.classList.contains("is-open")) return;
+
     if (e.key === "Escape") {
-      if (drawer && drawer.classList.contains("is-open")) {
-        closeDrawer();
-      } else if (panel && panel.classList.contains("open")) {
-        panel.classList.remove("open");
-        if (menuBtn) menuBtn.setAttribute("aria-expanded", "false");
+      e.preventDefault();
+      closeDrawer();
+      return;
+    }
+
+    if (e.key === "Tab") {
+      const focusableEls = drawer.querySelectorAll(
+        'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
+      );
+      if (focusableEls.length === 0) return;
+      const firstEl = focusableEls[0];
+      const lastEl = focusableEls[focusableEls.length - 1];
+
+      if (e.shiftKey) {
+        if (document.activeElement === firstEl) {
+          e.preventDefault();
+          lastEl.focus();
+        }
+      } else {
+        if (document.activeElement === lastEl) {
+          e.preventDefault();
+          firstEl.focus();
+        }
       }
     }
   });
@@ -767,22 +1444,7 @@ if (typeof window !== "undefined") {
     });
   }
 
-  if (searchForm && searchInput) {
-    searchForm.addEventListener("submit", (e) => {
-      e.preventDefault();
-      const query = searchInput.value.trim().toLowerCase();
-      if (!query) return;
-      const cards = document.querySelectorAll(".product-card");
-      if (cards.length > 0) {
-        cards.forEach((card) => {
-          const title = card.querySelector(".product-title")?.textContent.toLowerCase() || "";
-          card.hidden = !title.includes(query);
-        });
-        if (panel) panel.classList.remove("open");
-        if (menuBtn) menuBtn.setAttribute("aria-expanded", "false");
-      }
-    });
-  }
+  // Mobile search is unified with desktop in initUnifiedSearch
 })();
 
 /* ========================================================
@@ -969,7 +1631,7 @@ function initSingleSurfaceCatalog() {
   }
 
   // 1. Instant client-side category filtering with smooth crossfade
-  function setCategory(cat, shouldPushState = true) {
+  function setCategory(cat, shouldPushState = true, shouldScrollChip = false) {
     if (typeof window !== "undefined") window.setCatalogCategory = setCategory;
     if (!cat) cat = "all";
 
@@ -978,20 +1640,40 @@ function initSingleSurfaceCatalog() {
       const match = chip.dataset.category === cat;
       chip.classList.toggle("active", match);
       chip.setAttribute("aria-pressed", String(match));
-      if (match) {
+      if (match && shouldScrollChip) {
         try {
-          chip.scrollIntoView({ behavior: "smooth", block: "nearest", inline: "center" });
+          const track = chipsBar?.querySelector(".chips-scroll-track") || chipsBar;
+          if (track && typeof track.scrollTo === "function") {
+            const targetLeft = chip.offsetLeft - (track.clientWidth - chip.clientWidth) / 2;
+            track.scrollTo({ left: targetLeft, behavior: "smooth" });
+          }
         } catch (e) {}
       }
     });
 
-    // Filter catalog product cards by category
+    // Filter catalog product cards by category and active search query
     const cards = document.querySelectorAll("#catalog-products-grid .featured-card, .featured-grid .featured-card");
+    if (typeof window.sorenApplySearch === "function") {
+      if (typeof window.sorenNotifyCategoryManualChange === "function") {
+        window.sorenNotifyCategoryManualChange();
+      }
+      const curQ = typeof window.sorenGetCurrentQuery === "function" ? window.sorenGetCurrentQuery() : "";
+      window.sorenApplySearch(curQ);
+    } else {
+      cards.forEach((card) => {
+        const cardCat = card.dataset.category;
+        const isMatch = cat === "all" || cardCat === cat;
+        if (isMatch) {
+          card.classList.remove("is-filtered-out");
+        } else {
+          card.classList.add("is-filtered-out");
+        }
+      });
+    }
+
+    // Smooth entry animation for visible cards
     cards.forEach((card) => {
-      const cardCat = card.dataset.category;
-      const isMatch = cat === "all" || cardCat === cat;
-      if (isMatch) {
-        card.classList.remove("is-filtered-out");
+      if (!card.hidden && !card.classList.contains("is-filtered-out")) {
         card.style.opacity = "0";
         card.style.transform = "translateY(8px)";
         requestAnimationFrame(() => {
@@ -999,8 +1681,6 @@ function initSingleSurfaceCatalog() {
           card.style.opacity = "1";
           card.style.transform = "translateY(0)";
         });
-      } else {
-        card.classList.add("is-filtered-out");
       }
     });
 
@@ -1016,7 +1696,7 @@ function initSingleSurfaceCatalog() {
     chip.addEventListener("click", () => {
       triggerHaptic();
       const cat = chip.dataset.category || "all";
-      setCategory(cat, true);
+      setCategory(cat, true, true);
     });
   });
 
@@ -1026,9 +1706,9 @@ function initSingleSurfaceCatalog() {
     const hash = window.location.hash || "";
     const match = hash.match(/cat=([a-z]+)/);
     if (match && match[1]) {
-      setCategory(match[1], shouldPushState);
+      setCategory(match[1], shouldPushState, false);
     } else if (hash.includes("#menu")) {
-      setCategory("all", shouldPushState);
+      setCategory("all", shouldPushState, false);
     }
   }
 
@@ -1036,28 +1716,45 @@ function initSingleSurfaceCatalog() {
   window.addEventListener("hashchange", () => checkUrlCategory(false));
   checkUrlCategory(false);
 
-  // 2. In-card stepper (+ / count / -) with 500ms inactivity auto-collapse
+  // 2. In-card stepper (+ / count / -) with 2000ms inactivity auto-collapse & hover/focus pause
+  const STEPPER_INACTIVITY_MS = 2000;
   const activeStepperTimers = new Map();
+  const activeStepperMeta = new Map();
 
-  function showCardStepper(id, duration = 500) {
-    if (!id) return;
+  function clearStepperTimer(id) {
     if (activeStepperTimers.has(id)) {
       clearTimeout(activeStepperTimers.get(id));
+      activeStepperTimers.delete(id);
+    }
+  }
+
+  function startStepperTimer(id, delay = STEPPER_INACTIVITY_MS) {
+    clearStepperTimer(id);
+    const meta = activeStepperMeta.get(id);
+    if (meta?.isHovered || meta?.isFocused) {
+      return;
     }
 
-    activeStepperTimers.set(
-      id,
-      setTimeout(() => {
-        activeStepperTimers.delete(id);
-        dismissCardStepper(id);
-      }, duration)
-    );
+    const timer = setTimeout(() => {
+      activeStepperTimers.delete(id);
+      dismissCardStepper(id);
+    }, delay);
 
+    activeStepperTimers.set(id, timer);
+  }
+
+  function showCardStepper(id, duration = STEPPER_INACTIVITY_MS) {
+    if (!id) return;
     renderSingleCardAction(id, true);
+    startStepperTimer(id, duration);
   }
 
   function dismissCardStepper(id) {
     if (!id) return;
+    const meta = activeStepperMeta.get(id);
+    if (meta?.isHovered || meta?.isFocused) {
+      return;
+    }
     const cards = document.querySelectorAll(
       `.featured-card[data-id="${id}"], .featured-card[data-product-id="${id}"], .product-card[data-id="${id}"]`
     );
@@ -1066,8 +1763,13 @@ function initSingleSurfaceCatalog() {
       if (stepper) {
         stepper.classList.add("is-collapsing");
         setTimeout(() => {
+          const currentMeta = activeStepperMeta.get(id);
+          if (currentMeta?.isHovered || currentMeta?.isFocused) {
+            stepper.classList.remove("is-collapsing");
+            return;
+          }
           renderSingleCardAction(id, false);
-        }, 180);
+        }, 200);
       } else {
         renderSingleCardAction(id, false);
       }
@@ -1075,12 +1777,81 @@ function initSingleSurfaceCatalog() {
   }
 
   function dismissCardStepperImmediately(id) {
-    if (activeStepperTimers.has(id)) {
-      clearTimeout(activeStepperTimers.get(id));
-      activeStepperTimers.delete(id);
-    }
+    clearStepperTimer(id);
+    activeStepperMeta.delete(id);
     renderSingleCardAction(id, false);
   }
+
+  // Hover & Keyboard focus interaction persistence (pauses 2000ms countdown)
+  document.addEventListener("mouseover", (e) => {
+    const stepper = e.target.closest(".card-stepper");
+    if (!stepper) return;
+    const card = stepper.closest(".featured-card, .product-card");
+    const id = stepper.dataset.id || card?.dataset.id || card?.dataset.productId;
+    if (!id) return;
+
+    let meta = activeStepperMeta.get(id);
+    if (!meta) {
+      meta = { isHovered: true, isFocused: false };
+      activeStepperMeta.set(id, meta);
+    } else {
+      meta.isHovered = true;
+    }
+    stepper.classList.remove("is-collapsing");
+    clearStepperTimer(id);
+  });
+
+  document.addEventListener("mouseout", (e) => {
+    const stepper = e.target.closest(".card-stepper");
+    if (!stepper) return;
+    if (e.relatedTarget && stepper.contains(e.relatedTarget)) {
+      return;
+    }
+    const card = stepper.closest(".featured-card, .product-card");
+    const id = stepper.dataset.id || card?.dataset.id || card?.dataset.productId;
+    if (!id) return;
+
+    let meta = activeStepperMeta.get(id);
+    if (meta) {
+      meta.isHovered = false;
+    }
+    startStepperTimer(id, STEPPER_INACTIVITY_MS);
+  });
+
+  document.addEventListener("focusin", (e) => {
+    const stepper = e.target.closest(".card-stepper");
+    if (!stepper) return;
+    const card = stepper.closest(".featured-card, .product-card");
+    const id = stepper.dataset.id || card?.dataset.id || card?.dataset.productId;
+    if (!id) return;
+
+    let meta = activeStepperMeta.get(id);
+    if (!meta) {
+      meta = { isHovered: false, isFocused: true };
+      activeStepperMeta.set(id, meta);
+    } else {
+      meta.isFocused = true;
+    }
+    stepper.classList.remove("is-collapsing");
+    clearStepperTimer(id);
+  });
+
+  document.addEventListener("focusout", (e) => {
+    const stepper = e.target.closest(".card-stepper");
+    if (!stepper) return;
+    if (e.relatedTarget && stepper.contains(e.relatedTarget)) {
+      return;
+    }
+    const card = stepper.closest(".featured-card, .product-card");
+    const id = stepper.dataset.id || card?.dataset.id || card?.dataset.productId;
+    if (!id) return;
+
+    let meta = activeStepperMeta.get(id);
+    if (meta) {
+      meta.isFocused = false;
+    }
+    startStepperTimer(id, STEPPER_INACTIVITY_MS);
+  });
 
   function renderSingleCardAction(id, isStepperActive = false) {
     if (!id) return;
@@ -1185,8 +1956,15 @@ function initSingleSurfaceCatalog() {
     cards.forEach((card) => {
       const id = card.dataset.id || card.dataset.productId;
       if (!id) return;
-      const isStepperActive = activeStepperTimers.has(id);
-      renderSingleCardAction(id, isStepperActive);
+      const qty = SorenCartStore.getItemQuantity(id);
+      if (qty <= 0) {
+        clearStepperTimer(id);
+        activeStepperMeta.delete(id);
+        renderSingleCardAction(id, false);
+      } else {
+        const isStepperActive = activeStepperTimers.has(id);
+        renderSingleCardAction(id, isStepperActive);
+      }
     });
   }
 
@@ -1224,7 +2002,7 @@ function initCategoryCarouselSync() {
   let isProgrammaticScroll = false;
   let scrollTimeout = null;
 
-  function updateActiveState(catId, index) {
+  function updateActiveState(catId, index, shouldScrollChip = false) {
     dots.forEach((dot, i) => {
       const match = i === index || dot.dataset.category === catId;
       dot.classList.toggle("active", match);
@@ -1232,7 +2010,7 @@ function initCategoryCarouselSync() {
     });
 
     if (catId && typeof window.setCatalogCategory === "function") {
-      window.setCatalogCategory(catId, false);
+      window.setCatalogCategory(catId, false, shouldScrollChip);
     }
   }
 
@@ -1243,7 +2021,7 @@ function initCategoryCarouselSync() {
       if (targetCard) {
         isProgrammaticScroll = true;
         targetCard.scrollIntoView({ behavior: "smooth", block: "nearest", inline: "center" });
-        updateActiveState(dot.dataset.category, index);
+        updateActiveState(dot.dataset.category, index, false);
         clearTimeout(scrollTimeout);
         scrollTimeout = setTimeout(() => {
           isProgrammaticScroll = false;
@@ -1410,7 +2188,10 @@ function initCartBottomSheetAndFloatingBar() {
       return;
     }
 
-    if (checkoutBtn) checkoutBtn.disabled = false;
+    if (checkoutBtn) {
+      checkoutBtn.disabled = false;
+      checkoutBtn.classList.remove("is-loading");
+    }
 
     itemsList.innerHTML = validItems
       .map((item) => {
@@ -1423,32 +2204,144 @@ function initCartBottomSheetAndFloatingBar() {
 
         return `
           <article class="sheet-item-row" data-id="${id}">
+            <div class="sheet-item-swipe-action" aria-hidden="true">
+              <button type="button" class="sheet-swipe-delete-btn" data-id="${id}" aria-label="حذف ${name}">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                  <path d="M3 6h18M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
+                </svg>
+                <span>حذف</span>
+              </button>
+            </div>
             <img src="${imgSrc}" alt="${name}" class="sheet-item-img" loading="lazy" onerror="window.handleImageError && window.handleImageError(this)" />
             <div class="sheet-item-head">
               <h4 class="sheet-item-name">${name}</h4>
-            </div>
-            <div class="sheet-item-prices">
               <span class="sheet-item-unit-price">${formatPriceFa(unitPrice)} واحد</span>
-              <span class="sheet-item-total-price">${formatPriceFa(lineTotal)}</span>
             </div>
-            <div class="sheet-item-controls">
-              <div class="sheet-stepper" data-id="${id}" aria-label="تنظیم تعداد ${name}">
-                <button type="button" class="sheet-stepper-btn sheet-minus-btn" data-id="${id}" aria-label="کاهش تعداد ${name}">−</button>
-                <span class="sheet-stepper-count" aria-live="polite">${toFaDigits(q)}</span>
-                <button type="button" class="sheet-stepper-btn sheet-plus-btn" data-id="${id}" aria-label="افزایش تعداد ${name}">+</button>
+            <div class="sheet-item-actions">
+              <div class="sheet-item-prices">
+                <span class="sheet-item-total-price">${formatPriceFa(lineTotal)}</span>
               </div>
-              <button type="button" class="sheet-delete-btn" data-id="${id}" aria-label="حذف ${name} از سبد">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
-                  <path d="M3 6h18M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
-                </svg>
-              </button>
+              <div class="sheet-item-controls">
+                <div class="sheet-stepper" data-id="${id}" aria-label="تنظیم تعداد ${name}">
+                  <button type="button" class="sheet-stepper-btn sheet-minus-btn" data-id="${id}" aria-label="کاهش تعداد ${name}">−</button>
+                  <span class="sheet-stepper-count" aria-live="polite">${toFaDigits(q)}</span>
+                  <button type="button" class="sheet-stepper-btn sheet-plus-btn" data-id="${id}" aria-label="افزایش تعداد ${name}">+</button>
+                </div>
+                <button type="button" class="sheet-delete-btn" data-id="${id}" aria-label="حذف ${name} از سبد">
+                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                    <path d="M3 6h18M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
+                  </svg>
+                </button>
+              </div>
             </div>
           </article>
         `;
       })
       .join("");
 
+    // Attach rubber-band swipe-to-delete gestures to cart item cards
+    itemsList.querySelectorAll(".sheet-item-row").forEach(attachItemSwipeGestures);
+
     renderCartUpsellShelf(validItems);
+  }
+
+  // Mobile touch swipe gesture handler with rubber-band resistance
+  function attachItemSwipeGestures(row) {
+    if (!row) return;
+    let startX = 0;
+    let startY = 0;
+    let currentDx = 0;
+    let isSwiping = false;
+    let isHorizontal = null;
+
+    row.addEventListener(
+      "touchstart",
+      (e) => {
+        if (e.touches.length !== 1) return;
+        if (e.target.closest("button") || e.target.closest("input")) return;
+        startX = e.touches[0].clientX;
+        startY = e.touches[0].clientY;
+        currentDx = 0;
+        isSwiping = true;
+        isHorizontal = null;
+        row.style.transition = "none";
+      },
+      { passive: true }
+    );
+
+    row.addEventListener(
+      "touchmove",
+      (e) => {
+        if (!isSwiping || e.touches.length !== 1) return;
+        const dx = e.touches[0].clientX - startX;
+        const dy = e.touches[0].clientY - startY;
+
+        if (isHorizontal === null) {
+          if (Math.abs(dx) > 6 || Math.abs(dy) > 6) {
+            isHorizontal = Math.abs(dx) > Math.abs(dy);
+          }
+        }
+
+        if (!isHorizontal) return;
+
+        if (e.cancelable) e.preventDefault();
+
+        // Rubber-band resistance formula: dx / (1 + |dx| * 0.005)
+        const dampedDx = dx / (1 + Math.abs(dx) * 0.005);
+        currentDx = dampedDx;
+        row.style.transform = `translateX(${dampedDx}px)`;
+
+        const swipeAction = row.querySelector(".sheet-item-swipe-action");
+        if (swipeAction) {
+          const progress = Math.min(Math.abs(dampedDx) / 65, 1);
+          swipeAction.style.opacity = `${progress}`;
+          swipeAction.style.pointerEvents = Math.abs(dampedDx) > 35 ? "auto" : "none";
+        }
+      },
+      { passive: false }
+    );
+
+    const endSwipe = () => {
+      if (!isSwiping) return;
+      isSwiping = false;
+      row.style.transition = "transform 0.28s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.2s ease";
+
+      const swipeAction = row.querySelector(".sheet-item-swipe-action");
+
+      // Full swipe threshold: auto delete with tactile vibration
+      if (Math.abs(currentDx) > 135) {
+        row.style.transform = currentDx > 0 ? "translateX(100%)" : "translateX(-100%)";
+        row.style.opacity = "0";
+        if (typeof navigator !== "undefined" && navigator.vibrate) {
+          try { navigator.vibrate([15, 30, 15]); } catch (err) {}
+        }
+        setTimeout(() => {
+          const id = row.dataset.id;
+          if (id && window.SorenCartStore) {
+            window.SorenCartStore.removeItem(id);
+          }
+        }, 220);
+      } else if (Math.abs(currentDx) > 50) {
+        // Partial swipe: snap open to reveal action button
+        const snapOffset = currentDx < 0 ? -74 : 74;
+        row.style.transform = `translateX(${snapOffset}px)`;
+        if (swipeAction) {
+          swipeAction.style.opacity = "1";
+          swipeAction.style.pointerEvents = "auto";
+        }
+      } else {
+        // Snap back to neutral
+        row.style.transform = "";
+        if (swipeAction) {
+          swipeAction.style.opacity = "0";
+          swipeAction.style.pointerEvents = "none";
+        }
+      }
+      currentDx = 0;
+    };
+
+    row.addEventListener("touchend", endSwipe, { passive: true });
+    row.addEventListener("touchcancel", endSwipe, { passive: true });
   }
 
   // Render contextual upsell shelf (AOV booster for coffee pairings)
@@ -1484,9 +2377,12 @@ function initCartBottomSheetAndFloatingBar() {
         <div class="cart-upsell-shelf" role="complementary" aria-label="پیشنهاد ویژه باریستا">
           <div class="upsell-shelf-header">
             <h5 class="upsell-shelf-title">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <path d="M18 8h1a4 4 0 0 1 0 8h-1M2 8h16v9a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4V8zM6 1v3M10 1v3M14 1v3"/>
+              </svg>
               <span>پیشنهاد باریستا؛ ترکیب مکمل با قهوه:</span>
             </h5>
-            <span class="upsell-badge">AOV +۲۵٪</span>
+            <span class="upsell-badge">پیشنهاد سرآشپز</span>
           </div>
           <div class="upsell-shelf-item">
             <div class="upsell-item-content">
@@ -1570,8 +2466,9 @@ function initCartBottomSheetAndFloatingBar() {
       const plusBtn = e.target.closest(".sheet-plus-btn");
       const minusBtn = e.target.closest(".sheet-minus-btn");
       const delBtn = e.target.closest(".sheet-delete-btn");
+      const swipeDelBtn = e.target.closest(".sheet-swipe-delete-btn");
 
-      if (!plusBtn && !minusBtn && !delBtn) return;
+      if (!plusBtn && !minusBtn && !delBtn && !swipeDelBtn) return;
       if (!window.SorenCartStore) return;
 
       if (typeof navigator !== "undefined" && navigator.vibrate) {
@@ -1580,7 +2477,10 @@ function initCartBottomSheetAndFloatingBar() {
         } catch (err) {}
       }
 
-      if (plusBtn) {
+      if (swipeDelBtn) {
+        const id = swipeDelBtn.dataset.id;
+        window.SorenCartStore.removeItem(id);
+      } else if (plusBtn) {
         const id = plusBtn.dataset.id;
         const item = window.SorenCartStore.getItems().find((i) => i.id === id);
         if (item) {
@@ -1713,6 +2613,9 @@ function initCartBottomSheetAndFloatingBar() {
       const totalCount = window.SorenCartStore ? window.SorenCartStore.getTotalCount() : 0;
       if (totalCount === 0) return;
 
+      checkoutBtn.classList.add("is-loading");
+      checkoutBtn.disabled = true;
+
       if (noteInput && noteInput.value.trim()) {
         try {
           localStorage.setItem("soren_barista_note", noteInput.value.trim());
@@ -1726,7 +2629,7 @@ function initCartBottomSheetAndFloatingBar() {
       setTimeout(() => {
         const isPagesDir = typeof window !== "undefined" && window.location.pathname.includes("/pages/");
         window.location.href = isPagesDir ? "./cart.html" : "./pages/cart.html";
-      }, 300);
+      }, 320);
     });
   }
 
@@ -1886,65 +2789,192 @@ if (document.readyState === "loading") {
     confirm.addEventListener("input", checkMatch);
   }
 
-  form.addEventListener("submit", (e) => {
-    e.preventDefault();
-    const nameInput = form.querySelector("#fullName");
-    const name = nameInput ? nameInput.value.trim() : "مشتری کافه";
-    const idInput = form.querySelector("#identifier") || form.querySelector("#phone") || form.querySelector("#email");
-    const identifier = idInput ? idInput.value.trim() : "";
+  if (form.id === "loginForm" || form.id === "registerForm") {
+    form.addEventListener("submit", (e) => {
+      e.preventDefault();
+      const nameInput = form.querySelector("#fullName");
+      const name = nameInput ? nameInput.value.trim() : "مشتری کافه";
+      const idInput = form.querySelector("#identifier") || form.querySelector("#phone") || form.querySelector("#email");
+      const identifier = idInput ? idInput.value.trim() : "";
 
-    localStorage.setItem(
-      "soren_user",
-      JSON.stringify({
-        name: name || "مشتری کافه",
-        identifier: identifier,
-        isLoggedIn: true,
-        savedAt: Date.now(),
-      })
-    );
+      localStorage.setItem(
+        "soren_user",
+        JSON.stringify({
+          name: name || "مشتری کافه",
+          identifier: identifier,
+          isLoggedIn: true,
+          savedAt: Date.now(),
+        })
+      );
 
-    const submitBtn = form.querySelector('button[type="submit"]');
-    if (submitBtn) {
-      submitBtn.textContent = "با موفقیت وارد شدید...";
-      submitBtn.disabled = true;
-    }
+      const submitBtn = form.querySelector('button[type="submit"]');
+      if (submitBtn) {
+        submitBtn.textContent = "با موفقیت وارد شدید...";
+        submitBtn.disabled = true;
+      }
 
-    setTimeout(() => {
-      window.location.href = "../index.html";
-    }, 600);
-  });
+      setTimeout(() => {
+        window.location.href = "../index.html";
+      }, 600);
+    });
+  }
 })();
 
 /* ========================================
    6. صفحه سبد خرید پویا (Dynamic Cart Page)
+   ======================================== */
+/* ========================================
+   6. موتور پیشرفته سبد خرید و تعاملات ارگانیک (Principal Cart Engine)
    ======================================== */
 (function initCartPage() {
   const emptyState = document.getElementById("cart-state-empty");
   const filledState = document.getElementById("cart-state-populated");
   if (!emptyState || !filledState) return;
 
-  const itemsContainer = filledState.querySelector(".cart-items");
+  const itemsContainer = document.getElementById("cart-items-list") || filledState.querySelector(".cart-items");
   const subtotalEl = document.getElementById("summary-subtotal");
   const discountEl = document.getElementById("summary-discount");
   const couponRow = document.getElementById("summary-coupon-row");
   const couponAmountEl = document.getElementById("summary-coupon");
   const totalEl = document.getElementById("summary-total");
   const statusBadge = document.getElementById("header-status-badge");
+  const shippingEl = document.getElementById("summary-shipping");
 
+  // Shipping Tier Progress Elements
+  const shippingTierCard = document.getElementById("shipping-tier-card");
+  const shippingProgressBar = document.getElementById("shipping-progress-bar");
+  const shippingTierText = document.getElementById("shipping-tier-text");
+  const shippingTierBadge = document.getElementById("shipping-tier-badge");
+
+  // Promo Code Accordion Elements
+  const couponAccordion = document.getElementById("coupon-accordion");
+  const couponAccordionBtn = document.getElementById("coupon-accordion-btn");
+  const couponPanel = document.getElementById("coupon-panel");
+  const couponInputGroup = document.getElementById("coupon-input-group");
   const couponInput = document.getElementById("coupon-input");
   const couponButton = document.getElementById("coupon-apply");
   const couponMessage = document.getElementById("coupon-message");
-  const checkoutBtn = document.querySelector(".checkout-btn");
+  const couponAppliedChip = document.getElementById("coupon-applied-chip");
+  const appliedCouponCode = document.getElementById("applied-coupon-code");
+  const appliedCouponPercent = document.getElementById("applied-coupon-percent");
+  const couponRemoveBtn = document.getElementById("coupon-remove-btn");
+
+  // Action Buttons
+  const checkoutBtn = document.querySelector(".checkout-btn, #checkout-btn");
+  const mobileCheckoutBtn = document.getElementById("mobile-checkout-btn");
+  const mobileBar = document.getElementById("cart-mobile-bar");
+  const mobileBarTotal = document.getElementById("mobile-bar-total");
+  const mobileBarCount = document.getElementById("mobile-bar-count");
+  const emptyCartRestoreBtn = document.getElementById("empty-cart-restore-sample");
+
+  // Slide-Over Drawer Elements
+  const drawerBackdrop = document.getElementById("cart-slideover-backdrop");
+  const drawer = document.getElementById("cart-slideover-drawer");
+  const drawerOpenBtn = document.getElementById("open-cart-drawer-btn");
+  const drawerCloseBtn = document.getElementById("drawer-close-btn");
+  const drawerItemsList = document.getElementById("drawer-items-list");
+  const drawerItemsCount = document.getElementById("drawer-items-count");
+  const drawerSubtotal = document.getElementById("drawer-subtotal");
+  const drawerDiscount = document.getElementById("drawer-discount");
+  const drawerDiscountRow = document.getElementById("drawer-discount-row");
+  const drawerTotal = document.getElementById("drawer-total");
+  const drawerCheckoutBtn = document.getElementById("drawer-checkout-btn");
+
+  // Ask-Sonner Toast Container
+  const toastContainer = document.getElementById("soren-toast-container");
+
+  // Break-UI Stress-Test Switcher
+  const breakUiSwitcher = document.getElementById("break-ui-switcher");
 
   const formatter = new Intl.NumberFormat("fa-IR");
   const format = (n) => formatter.format(n);
 
   const CLUB_DISCOUNT_RATE = 0.05;
   const CLUB_DISCOUNT_STEP = 5000;
-  const COUPONS = { SOREN10: 0.1, WELCOME: 0.15 };
+  const FREE_SHIPPING_THRESHOLD = 500000;
+  const COUPONS = { SOREN10: 0.1, SOREN20: 0.2, WELCOME: 0.15 };
   let couponRate = 0;
+  let activeCouponCode = null;
 
-  function renderCart() {
+  // Memoized DOM node mapping (id -> { rowEl, item })
+  const renderedRowMap = new Map();
+
+  // Undo pending registry for animated item removal
+  let pendingUndo = null;
+
+  // Curated default artisan items for fresh visitors
+  const DEFAULT_CURATED_CART = [
+    {
+      id: "prd_latte",
+      name: "لاته تخصصی ارگانیک",
+      price: 150000,
+      quantity: 1,
+      qty: 1,
+      desc: "قهوه تخصصی · ۲۵۰ میلی‌لیتر",
+      category: "coffee",
+      image: "../images/products/coffee/latte.png",
+    },
+    {
+      id: "prd_cappuccino",
+      name: "کاپوچینو ابری",
+      price: 140000,
+      quantity: 1,
+      qty: 1,
+      desc: "نوشیدنی گرم · ۳۰۰ میلی‌لیتر",
+      category: "coffee",
+      image: "../images/products/coffee/cappuccino.png",
+    },
+    {
+      id: "prd_shake_choc",
+      name: "شیک شکلات دست‌ساز",
+      price: 180000,
+      quantity: 1,
+      qty: 1,
+      desc: "شیک تخصصی با بستنی شکلاتی هلندی",
+      category: "shake",
+      image: "../images/products/shakes/chocolate-shake.png",
+    },
+  ];
+
+  // Extreme test items for Break-UI stress testing
+  const EXTREME_DATA_CART = [
+    {
+      id: "prd_extreme_title",
+      name: "اسپرسو دبل بلند اختصاصی تک‌خاستگاه اتیوپی یرگاچف فرآوری شسته با اسیدیته شفاف مرکباتی و بادی سنگین برشته‌کاری باریستا ویژه سورن",
+      price: 125000000,
+      quantity: 99,
+      qty: 99,
+      desc: "قهوه تخصصی فوق‌العاده با نت‌های یاس، شکوفه پرتقال، هلو، ترنج و فرآوری تخمیر بی‌هوازی طولانی‌مدت",
+      category: "coffee",
+      image: "../images/products/coffee/double-espresso.png",
+    },
+    {
+      id: "prd_extreme_cake",
+      name: "چیزکیک سن سباستین کاراملی پخت تنوری دست‌ساز باریستا با کرم پسته تازه دامغان و زعفران اعلای قائنات",
+      price: 1850000,
+      quantity: 12,
+      qty: 12,
+      desc: "بافت خامه‌ای کاراملیزه با سس توت‌فرنگی وحشی و پرک بادام بوداده فرانسوی",
+      category: "cake",
+      image: "../images/products/cake/cheesecake.png",
+    },
+  ];
+
+  // Seed default items if user is on a brand new session without saved cart
+  (function seedInitialCartIfEmpty() {
+    try {
+      const stored = localStorage.getItem("soren_cart_v1");
+      if (stored === null) {
+        SorenCartStore.items = JSON.parse(JSON.stringify(DEFAULT_CURATED_CART));
+        SorenCartStore.save();
+      }
+    } catch (e) {}
+  })();
+
+  /* ========================================================
+     محاسبات مبالغ و به‌روزرسانی خلاصه سفارش (Summary Engine)
+     ======================================================== */
+  function updateSummaryTotals() {
     const items = SorenCart.getItems();
     const count = SorenCart.getTotalCount();
     const subtotal = SorenCart.getSubtotal();
@@ -1954,82 +2984,18 @@ if (document.readyState === "loading") {
     if (items.length === 0) {
       emptyState.hidden = false;
       filledState.hidden = true;
+      if (mobileBar) mobileBar.style.display = "none";
+      updateDrawer();
       return;
     }
 
     emptyState.hidden = true;
     filledState.hidden = false;
+    if (mobileBar && window.innerWidth <= 768) {
+      mobileBar.style.display = "flex";
+    }
 
-    // Render cart items into DOM container
-    const shippingNotice = itemsContainer.querySelector(".shipping-notice");
-    itemsContainer.innerHTML = "";
-    if (shippingNotice) itemsContainer.appendChild(shippingNotice);
-
-    items.forEach((item) => {
-      const card = document.createElement("article");
-      card.className = "cart-item";
-      card.dataset.id = item.id;
-      card.dataset.price = String(item.price);
-      card.dataset.qty = String(item.qty);
-
-      const isPagesDir = window.location.pathname.includes("/pages/");
-      let displayImage = item.image || "";
-      if (isPagesDir && !displayImage.startsWith("..") && !displayImage.startsWith("/")) {
-        displayImage = "../" + displayImage;
-      } else if (!isPagesDir && displayImage.startsWith("../")) {
-        displayImage = displayImage.replace(/^\.\.\//, "./");
-      }
-
-      card.innerHTML = `
-        <div class="product-image">
-          <img src="${displayImage}" alt="${item.name}" width="128" height="128" loading="lazy" />
-        </div>
-        <div class="product-details">
-          <div class="product-top">
-            <div>
-              <span class="product-tag">${item.desc || "محصول کافه سورن"}</span>
-              <h3>${item.name}</h3>
-              <p>قیمت واحد: ${format(item.price)} تومان</p>
-            </div>
-            <button class="delete-btn" type="button" aria-label="حذف ${item.name} از سبد">
-              <svg class="icon" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
-                <path d="M3 6h18M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
-              </svg>
-            </button>
-          </div>
-          <div class="product-bottom">
-            <div class="price">
-              <strong>${format(item.price * item.qty)}</strong>
-              <span>تومان</span>
-            </div>
-            <div class="quantity">
-              <button type="button" data-qty-step="1" aria-label="افزایش تعداد">+</button>
-              <span class="quantity-value" aria-live="polite">${format(item.qty)}</span>
-              <button type="button" data-qty-step="-1" aria-label="کاهش تعداد">−</button>
-            </div>
-          </div>
-        </div>
-      `;
-
-      card.querySelector("[data-qty-step='1']").addEventListener("click", () => {
-        SorenCart.updateQty(item.id, 1);
-        renderCart();
-      });
-
-      card.querySelector("[data-qty-step='-1']").addEventListener("click", () => {
-        SorenCart.updateQty(item.id, -1);
-        renderCart();
-      });
-
-      card.querySelector(".delete-btn").addEventListener("click", () => {
-        SorenCart.removeItem(item.id);
-        renderCart();
-      });
-
-      itemsContainer.appendChild(card);
-    });
-
-    // Discount calculations
+    // Dynamic Club Discount (5% rounded to 5,000 Tomans)
     const clubDiscount = Math.round((subtotal * CLUB_DISCOUNT_RATE) / CLUB_DISCOUNT_STEP) * CLUB_DISCOUNT_STEP;
     const couponDiscount = Math.round(subtotal * couponRate);
     const total = Math.max(subtotal - clubDiscount - couponDiscount, 0);
@@ -2039,24 +3005,543 @@ if (document.readyState === "loading") {
     if (couponAmountEl) couponAmountEl.textContent = format(couponDiscount);
     if (couponRow) couponRow.hidden = couponDiscount === 0;
     if (totalEl) totalEl.textContent = format(total);
+
+    // Shipping Tier Progress Calculation
+    if (shippingProgressBar && shippingTierText) {
+      if (subtotal >= FREE_SHIPPING_THRESHOLD) {
+        shippingProgressBar.style.width = "100%";
+        shippingTierText.innerHTML = "🎉 تبریک! سفارش شما شامل <strong>ارسال رایگان</strong> شد!";
+        if (shippingTierBadge) {
+          shippingTierBadge.textContent = "ارسال رایگان";
+          shippingTierBadge.style.background = "rgba(125, 140, 108, 0.25)";
+        }
+        if (shippingEl) shippingEl.textContent = "رایگان";
+      } else {
+        const remaining = FREE_SHIPPING_THRESHOLD - subtotal;
+        const progressPercent = Math.min(Math.round((subtotal / FREE_SHIPPING_THRESHOLD) * 100), 99);
+        shippingProgressBar.style.width = `${progressPercent}%`;
+        shippingTierText.innerHTML = `تنها <strong>${format(remaining)} تومان</strong> دیگر تا <strong>ارسال رایگان</strong>`;
+        if (shippingTierBadge) {
+          shippingTierBadge.textContent = "ارسال اکسپرس";
+          shippingTierBadge.style.background = "rgba(125, 140, 108, 0.16)";
+        }
+        if (shippingEl) shippingEl.textContent = "۳۵٬۰۰۰ تومان";
+      }
+    }
+
+    // Mobile Checkout Bar
+    if (mobileBarTotal) mobileBarTotal.textContent = format(total);
+    if (mobileBarCount) mobileBarCount.textContent = `${format(count)} مورد`;
+
+    // Sync Slide-Over Drawer
+    updateDrawer();
   }
 
-  // Promo coupon code validation
+  /* ========================================================
+     رندر گرانولار و بدون فلش اقلام (Memoized Granular Row Renderer)
+     ======================================================== */
+  function getProductImage(item) {
+    const isPagesDir = window.location.pathname.includes("/pages/");
+    let displayImage = item.image || "";
+    if (isPagesDir && !displayImage.startsWith("..") && !displayImage.startsWith("/")) {
+      displayImage = "../" + displayImage;
+    } else if (!isPagesDir && displayImage.startsWith("../")) {
+      displayImage = displayImage.replace(/^\.\.\//, "./");
+    }
+    return displayImage;
+  }
+
+  function createCartItemRow(item) {
+    const card = document.createElement("article");
+    card.className = "cart-item";
+    card.dataset.id = item.id;
+    card.dataset.price = String(item.price);
+    card.dataset.qty = String(item.qty || item.quantity || 1);
+
+    const displayImage = getProductImage(item);
+    const tag = item.desc || "محصول تخصصی کافه سورن";
+    const tagClass = item.category === "shake" ? "product-tag--terracotta" : (item.category === "cake" ? "product-tag--sage" : "");
+
+    card.innerHTML = `
+      <div class="product-image">
+        <img src="${displayImage}" alt="${item.name}" width="120" height="120" loading="lazy" onerror="this.src='../images/brand/soren-logo.svg'" />
+      </div>
+      <div class="product-details">
+        <div class="product-top">
+          <div>
+            <div class="product-tags-wrap">
+              <span class="product-tag ${tagClass}">${tag}</span>
+            </div>
+            <h3>${item.name}</h3>
+            <p>قیمت واحد: ${format(item.price)} تومان</p>
+          </div>
+          <button class="delete-btn" type="button" aria-label="حذف ${item.name} از سبد خرید">
+            <svg class="icon" aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M3 6h18M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
+            </svg>
+          </button>
+        </div>
+        <div class="product-bottom">
+          <div class="price">
+            <strong>${format(item.price * (item.qty || item.quantity || 1))}</strong>
+            <span>تومان</span>
+          </div>
+          <div class="quantity">
+            <button type="button" data-qty-step="1" aria-label="افزایش تعداد ${item.name}">+</button>
+            <span class="quantity-value" aria-live="polite">
+              <span class="quantity-number">${format(item.qty || item.quantity || 1)}</span>
+            </span>
+            <button type="button" data-qty-step="-1" aria-label="کاهش تعداد ${item.name}">−</button>
+          </div>
+        </div>
+      </div>
+    `;
+
+    // Tactile Stepper Listeners (Optimistic UI with Granular DOM updates)
+    card.querySelector("[data-qty-step='1']").addEventListener("click", () => {
+      handleQuantityChange(item.id, 1);
+    });
+
+    card.querySelector("[data-qty-step='-1']").addEventListener("click", () => {
+      handleQuantityChange(item.id, -1);
+    });
+
+    // Animated Item Removal Listener with FLIP Layout Morphing & Undo Toast
+    card.querySelector(".delete-btn").addEventListener("click", () => {
+      handleAnimatedItemRemoval(item.id);
+    });
+
+    return card;
+  }
+
+  /* ========================================================
+     به‌روزرسانی بهینه تعداد با انیمیشن غلتشی (Tactile Stepper)
+     ======================================================== */
+  function handleQuantityChange(itemId, delta) {
+    const item = SorenCartStore.items.find((it) => it.id === itemId);
+    if (!item) return;
+
+    const oldQty = item.qty || item.quantity || 1;
+    const newQty = oldQty + delta;
+
+    if (newQty <= 0) {
+      handleAnimatedItemRemoval(itemId);
+      return;
+    }
+
+    // 1. Optimistic Store Update
+    item.quantity = newQty;
+    item.qty = newQty;
+    SorenCartStore.save();
+
+    // 2. Granular In-Place DOM Mutation (No full list re-render)
+    const row = renderedRowMap.get(itemId);
+    if (row) {
+      row.dataset.qty = String(newQty);
+
+      // Numeric slide/fade animation
+      const valueContainer = row.querySelector(".quantity-value");
+      if (valueContainer) {
+        const animClass = delta > 0 ? "num-roll-up" : "num-roll-down";
+        valueContainer.innerHTML = `<span class="quantity-number ${animClass}">${format(newQty)}</span>`;
+      }
+
+      // Update row item total price
+      const priceStrong = row.querySelector(".price strong");
+      if (priceStrong) {
+        priceStrong.textContent = format(item.price * newQty);
+      }
+    }
+
+    // 3. Audio & Haptic Feedback
+    if (typeof SorenAudio !== "undefined") {
+      if (delta > 0 && typeof SorenAudio.playAdd === "function") SorenAudio.playAdd();
+      else if (delta < 0 && typeof SorenAudio.playRemove === "function") SorenAudio.playRemove();
+    }
+    if (typeof navigator !== "undefined" && navigator.vibrate) {
+      try { navigator.vibrate(10); } catch (e) {}
+    }
+
+    // 4. Update Summary, Badges & Drawer
+    updateSummaryTotals();
+    SorenCart.syncBadges();
+  }
+
+  /* ========================================================
+     حذف متحرک با تکنیک FLIP و الگوی بازگردانی (Ask-Sonner Undo)
+     ======================================================== */
+  function handleAnimatedItemRemoval(itemId) {
+    const itemIndex = SorenCartStore.items.findIndex((it) => it.id === itemId);
+    if (itemIndex === -1) return;
+
+    const removedItem = SorenCartStore.items[itemIndex];
+    const rowEl = renderedRowMap.get(itemId);
+
+    // Clear any previous pending undo permanently
+    if (pendingUndo && pendingUndo.timerId) {
+      clearTimeout(pendingUndo.timerId);
+      if (pendingUndo.toastEl) pendingUndo.toastEl.remove();
+      pendingUndo = null;
+    }
+
+    // Store in undo registry
+    pendingUndo = {
+      item: { ...removedItem },
+      index: itemIndex,
+      timerId: null,
+      toastEl: null,
+    };
+
+    // Remove from in-memory cart store
+    SorenCartStore.items.splice(itemIndex, 1);
+    SorenCartStore.save();
+
+    if (rowEl) {
+      // 1. FLIP: capture initial positions of remaining items
+      const remainingRows = Array.from(itemsContainer.querySelectorAll(".cart-item")).filter((r) => r !== rowEl);
+      const firstPositions = remainingRows.map((r) => r.getBoundingClientRect().top);
+
+      // 2. Play item collapsing animation
+      rowEl.classList.add("is-deleting");
+
+      setTimeout(() => {
+        rowEl.remove();
+        renderedRowMap.delete(itemId);
+
+        // 3. Smooth FLIP morph for remaining rows to glide up
+        remainingRows.forEach((r, i) => {
+          const lastTop = r.getBoundingClientRect().top;
+          const dy = firstPositions[i] - lastTop;
+          if (dy !== 0) {
+            r.style.transform = `translateY(${dy}px)`;
+            r.style.transition = "none";
+            requestAnimationFrame(() => {
+              r.style.transition = "transform 320ms cubic-bezier(0.22, 1, 0.36, 1)";
+              r.style.transform = "";
+            });
+          }
+        });
+
+        updateSummaryTotals();
+        SorenCart.syncBadges();
+      }, 280);
+    } else {
+      updateSummaryTotals();
+      SorenCart.syncBadges();
+    }
+
+    if (typeof SorenAudio !== "undefined" && typeof SorenAudio.playRemove === "function") {
+      SorenAudio.playRemove();
+    }
+
+    // 4. Trigger Ask-Sonner Style Toast with Undo Button
+    showUndoToast(removedItem);
+  }
+
+  function showUndoToast(item) {
+    if (!toastContainer) return;
+
+    const toast = document.createElement("div");
+    toast.className = "soren-toast";
+    toast.setAttribute("role", "status");
+
+    toast.innerHTML = `
+      <div class="toast-main">
+        <div class="toast-text">
+          <svg class="toast-icon" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M3 6h18M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
+          </svg>
+          <div>
+            <strong class="toast-title">«${item.name}» از سبد حذف شد</strong>
+          </div>
+        </div>
+        <button type="button" class="toast-undo-btn" aria-label="بازگردانی ${item.name} به سبد خرید">
+          <span>بازگردانی</span>
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+            <path d="M3 10h10a5 5 0 0 1 5 5v2m-15-7l4-4m-4 4l4 4" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </button>
+      </div>
+      <div class="toast-timer-bar"></div>
+    `;
+
+    toastContainer.appendChild(toast);
+
+    // Animate countdown timer bar
+    const timerBar = toast.querySelector(".toast-timer-bar");
+    requestAnimationFrame(() => {
+      if (timerBar) timerBar.style.width = "0%";
+    });
+
+    if (pendingUndo) {
+      pendingUndo.toastEl = toast;
+    }
+
+    const undoBtn = toast.querySelector(".toast-undo-btn");
+    undoBtn.addEventListener("click", () => {
+      restoreItemFromUndo();
+    });
+
+    // Auto-dismiss after 5 seconds if not undone
+    const timerId = setTimeout(() => {
+      dismissToast(toast);
+      pendingUndo = null;
+    }, 5000);
+
+    if (pendingUndo) {
+      pendingUndo.timerId = timerId;
+    }
+  }
+
+  function dismissToast(toastEl) {
+    if (!toastEl) return;
+    toastEl.style.transition = "opacity 200ms ease, transform 200ms ease";
+    toastEl.style.opacity = "0";
+    toastEl.style.transform = "translateY(12px) scale(0.96)";
+    setTimeout(() => toastEl.remove(), 210);
+  }
+
+  function restoreItemFromUndo() {
+    if (!pendingUndo || !pendingUndo.item) return;
+
+    const { item, index, toastEl, timerId } = pendingUndo;
+    if (timerId) clearTimeout(timerId);
+    dismissToast(toastEl);
+
+    // Restore to store at original or closest index
+    const restoreIdx = Math.min(Math.max(index, 0), SorenCartStore.items.length);
+    SorenCartStore.items.splice(restoreIdx, 0, item);
+    SorenCartStore.save();
+
+    // Re-create DOM row and insert
+    const newRow = createCartItemRow(item);
+    newRow.classList.add("is-restoring");
+    renderedRowMap.set(item.id, newRow);
+
+    const existingRows = itemsContainer.querySelectorAll(".cart-item");
+    if (existingRows.length > restoreIdx) {
+      itemsContainer.insertBefore(newRow, existingRows[restoreIdx]);
+    } else {
+      itemsContainer.appendChild(newRow);
+    }
+
+    updateSummaryTotals();
+    SorenCart.syncBadges();
+
+    if (typeof SorenAudio !== "undefined" && typeof SorenAudio.playAdd === "function") {
+      SorenAudio.playAdd();
+    }
+    pendingUndo = null;
+  }
+
+  /* ========================================================
+     رندر جامع و اولیه لیست سبد خرید
+     ======================================================== */
+  function renderCart() {
+    const items = SorenCart.getItems();
+    itemsContainer.innerHTML = "";
+    renderedRowMap.clear();
+
+    items.forEach((item) => {
+      const row = createCartItemRow(item);
+      renderedRowMap.set(item.id, row);
+      itemsContainer.appendChild(row);
+    });
+
+    updateSummaryTotals();
+  }
+
+  /* ========================================================
+     کشوی شناور پیش‌نمایش سبد خرید (Slide-Over Drawer)
+     ======================================================== */
+  function updateDrawer() {
+    if (!drawerItemsList) return;
+
+    const items = SorenCart.getItems();
+    const count = SorenCart.getTotalCount();
+    const subtotal = SorenCart.getSubtotal();
+    const clubDiscount = Math.round((subtotal * CLUB_DISCOUNT_RATE) / CLUB_DISCOUNT_STEP) * CLUB_DISCOUNT_STEP;
+    const couponDiscount = Math.round(subtotal * couponRate);
+    const totalDiscount = clubDiscount + couponDiscount;
+    const total = Math.max(subtotal - totalDiscount, 0);
+
+    if (drawerItemsCount) drawerItemsCount.textContent = String(count);
+    if (drawerSubtotal) drawerSubtotal.textContent = `${format(subtotal)} تومان`;
+    if (drawerDiscount) drawerDiscount.textContent = `${format(totalDiscount)} تومان`;
+    if (drawerDiscountRow) drawerDiscountRow.hidden = totalDiscount === 0;
+    if (drawerTotal) drawerTotal.textContent = `${format(total)} تومان`;
+
+    if (items.length === 0) {
+      drawerItemsList.innerHTML = `
+        <div style="text-align: center; padding: 48px 16px; color: var(--muted);">
+          <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" style="margin-bottom: 12px; opacity: 0.5;">
+            <use href="#i-bag"/>
+          </svg>
+          <p style="font-size: 14px; font-weight: 600; margin: 0 0 6px;">سبد خرید خالی است</p>
+          <span style="font-size: 12px;">آیتمی در سبد قرار ندارد.</span>
+        </div>
+      `;
+      return;
+    }
+
+    drawerItemsList.innerHTML = "";
+    items.forEach((item) => {
+      const itemEl = document.createElement("div");
+      itemEl.className = "drawer-item";
+      const displayImage = getProductImage(item);
+
+      itemEl.innerHTML = `
+        <img class="drawer-item-img" src="${displayImage}" alt="${item.name}" loading="lazy" onerror="this.src='../images/brand/soren-logo.svg'"/>
+        <div class="drawer-item-info">
+          <h4>${item.name}</h4>
+          <span class="drawer-item-price">${format(item.price * (item.qty || item.quantity || 1))} تومان</span>
+          <div style="font-size: 11px; color: var(--muted); margin-top: 2px;">تعداد: ${format(item.qty || item.quantity || 1)}</div>
+        </div>
+        <div class="quantity" style="transform: scale(0.85); transform-origin: right center;">
+          <button type="button" data-drawer-step="1">+</button>
+          <span class="quantity-value">${format(item.qty || item.quantity || 1)}</span>
+          <button type="button" data-drawer-step="-1">−</button>
+        </div>
+      `;
+
+      itemEl.querySelector("[data-drawer-step='1']").addEventListener("click", () => {
+        handleQuantityChange(item.id, 1);
+      });
+      itemEl.querySelector("[data-drawer-step='-1']").addEventListener("click", () => {
+        handleQuantityChange(item.id, -1);
+      });
+
+      drawerItemsList.appendChild(itemEl);
+    });
+  }
+
+  function openCartDrawer() {
+    if (!drawer || !drawerBackdrop) return;
+    drawer.classList.add("is-open");
+    drawer.setAttribute("aria-hidden", "false");
+    drawerBackdrop.classList.add("is-open");
+    drawerBackdrop.setAttribute("aria-hidden", "false");
+    if (drawerCloseBtn) drawerCloseBtn.focus();
+    updateDrawer();
+  }
+
+  function closeCartDrawer() {
+    if (!drawer || !drawerBackdrop) return;
+    drawer.classList.remove("is-open");
+    drawer.setAttribute("aria-hidden", "true");
+    drawerBackdrop.classList.remove("is-open");
+    drawerBackdrop.setAttribute("aria-hidden", "true");
+  }
+
+  if (drawerOpenBtn) drawerOpenBtn.addEventListener("click", openCartDrawer);
+  if (drawerCloseBtn) drawerCloseBtn.addEventListener("click", closeCartDrawer);
+  if (drawerBackdrop) drawerBackdrop.addEventListener("click", closeCartDrawer);
+
+  // Header cart button also toggles drawer on cart page
+  document.querySelectorAll(".cart-button").forEach((btn) => {
+    btn.addEventListener("click", (e) => {
+      if (window.location.pathname.includes("cart.html")) {
+        e.preventDefault();
+        openCartDrawer();
+      }
+    });
+  });
+
+  // Touch swipe-to-dismiss gesture for Slide-Over Drawer
+  if (drawer) {
+    let startX = 0;
+    drawer.addEventListener("touchstart", (e) => {
+      if (e.touches.length === 1) startX = e.touches[0].clientX;
+    }, { passive: true });
+
+    drawer.addEventListener("touchend", (e) => {
+      if (e.changedTouches.length === 1) {
+        const diffX = e.changedTouches[0].clientX - startX;
+        // In RTL, sliding rightwards dismisses drawer
+        if (diffX > 60) closeCartDrawer();
+      }
+    }, { passive: true });
+  }
+
+  window.addEventListener("keydown", (e) => {
+    if (e.key === "Escape" && drawer && drawer.classList.contains("is-open")) {
+      closeCartDrawer();
+    }
+  });
+
+  if (drawerCheckoutBtn) {
+    drawerCheckoutBtn.addEventListener("click", () => {
+      closeCartDrawer();
+      if (typeof openCheckoutModal === "function") openCheckoutModal();
+    });
+  }
+
+  /* ========================================================
+     آکاردئون کد تخفیف با حالات لودینگ و چیپ (Promo Code States)
+     ======================================================== */
+  if (couponAccordionBtn && couponPanel) {
+    couponAccordionBtn.addEventListener("click", () => {
+      const isExpanded = couponAccordionBtn.getAttribute("aria-expanded") === "true";
+      couponAccordionBtn.setAttribute("aria-expanded", String(!isExpanded));
+      couponAccordion.classList.toggle("is-open", !isExpanded);
+      couponPanel.hidden = isExpanded;
+      if (!isExpanded && couponInput) {
+        couponInput.focus();
+      }
+    });
+  }
+
   if (couponButton && couponInput) {
-    couponButton.addEventListener("click", () => {
+    couponButton.addEventListener("click", async () => {
       const code = couponInput.value.trim().toUpperCase();
       if (!code) {
-        showCouponMsg("لطفاً کد تخفیف را وارد کنید.", "error");
+        showCouponMsg("لطفاً کد تخفیف خود را وارد نمایید.", "error");
         return;
       }
+
+      // 1. Loading State
+      couponButton.classList.add("is-loading");
+      showCouponMsg("در حال استعلام و بررسی کد تخفیف از سرور...", "loading");
+
+      // Simulate network verification latency (400ms)
+      await new Promise((r) => setTimeout(r, 420));
+      couponButton.classList.remove("is-loading");
+
+      // 2. Validate Code
       if (code in COUPONS) {
         couponRate = COUPONS[code];
-        showCouponMsg(`کد تخفیف ${Math.round(couponRate * 100)}٪ با موفقیت اعمال شد.`, "success");
+        activeCouponCode = code;
+        const percent = Math.round(couponRate * 100);
+
+        // Transition to Applied Chip State
+        if (couponInputGroup) couponInputGroup.hidden = true;
+        if (couponAppliedChip) couponAppliedChip.hidden = false;
+        if (appliedCouponCode) appliedCouponCode.textContent = code;
+        if (appliedCouponPercent) appliedCouponPercent.textContent = `${format(percent)}٪ تخفیف اعمال شد`;
+
+        showCouponMsg(`کد تخفیف ${format(percent)}٪ با موفقیت روی سفارش اعمال گردید.`, "success");
       } else {
         couponRate = 0;
-        showCouponMsg("کد تخفیف وارد شده معتبر نیست.", "error");
+        activeCouponCode = null;
+        showCouponMsg("کد تخفیف وارد شده معتبر نیست یا منقضی شده است.", "error");
       }
-      renderCart();
+
+      updateSummaryTotals();
+    });
+  }
+
+  if (couponRemoveBtn) {
+    couponRemoveBtn.addEventListener("click", () => {
+      couponRate = 0;
+      activeCouponCode = null;
+      if (couponInput) couponInput.value = "";
+      if (couponInputGroup) couponInputGroup.hidden = false;
+      if (couponAppliedChip) couponAppliedChip.hidden = true;
+      showCouponMsg("کد تخفیف حذف گردید.", "info");
+      setTimeout(() => {
+        if (couponMessage) couponMessage.hidden = true;
+      }, 2000);
+      updateSummaryTotals();
     });
   }
 
@@ -2067,13 +3552,66 @@ if (document.readyState === "loading") {
     couponMessage.hidden = false;
   }
 
-  // Initial render and subscription to cart updates
+  /* ========================================================
+     تست حالت‌های حدی با سوییچر Break-UI (Edge-Case Stress Test)
+     ======================================================== */
+  if (breakUiSwitcher) {
+    breakUiSwitcher.addEventListener("click", (e) => {
+      const btn = e.target.closest(".mode-btn");
+      if (!btn) return;
+
+      breakUiSwitcher.querySelectorAll(".mode-btn").forEach((b) => {
+        b.classList.remove("active");
+        b.setAttribute("aria-pressed", "false");
+      });
+      btn.classList.add("active");
+      btn.setAttribute("aria-pressed", "true");
+
+      const mode = btn.dataset.mode;
+      if (mode === "standard") {
+        SorenCartStore.items = JSON.parse(JSON.stringify(DEFAULT_CURATED_CART));
+        SorenCartStore.save();
+        renderCart();
+      } else if (mode === "extreme") {
+        SorenCartStore.items = JSON.parse(JSON.stringify(EXTREME_DATA_CART));
+        SorenCartStore.save();
+        renderCart();
+      } else if (mode === "empty") {
+        SorenCartStore.clearCart();
+        renderCart();
+      }
+    });
+  }
+
+  if (emptyCartRestoreBtn) {
+    emptyCartRestoreBtn.addEventListener("click", () => {
+      SorenCartStore.items = JSON.parse(JSON.stringify(DEFAULT_CURATED_CART));
+      SorenCartStore.save();
+      renderCart();
+      if (breakUiSwitcher) {
+        const stdBtn = breakUiSwitcher.querySelector("[data-mode='standard']");
+        if (stdBtn) {
+          breakUiSwitcher.querySelectorAll(".mode-btn").forEach((b) => b.classList.remove("active"));
+          stdBtn.classList.add("active");
+        }
+      }
+    });
+  }
+
+  /* ========================================================
+     اتصال تسویه حساب دسکتاپ و موبایل (Checkout Modal Bridge)
+     ======================================================== */
+  if (checkoutBtn) checkoutBtn.addEventListener("click", openCheckoutModal);
+  if (mobileCheckoutBtn) mobileCheckoutBtn.addEventListener("click", openCheckoutModal);
+
+  // Initial Cart Mount
   renderCart();
+
+  // Listen to external store updates
   window.addEventListener("soren:cart-changed", () => {
-    renderCart();
+    updateSummaryTotals();
   });
 
-  // Check for existing active order in session
   checkActiveOrder();
 
   /* ========================================
@@ -2082,11 +3620,35 @@ if (document.readyState === "loading") {
   if (checkoutBtn) {
     checkoutBtn.addEventListener("click", openCheckoutModal);
   }
-  window.openCheckoutModal = openCheckoutModal;
+  // Subtle tactile haptic feedback for mobile touches
+  function triggerHaptic(type = "light") {
+    try {
+      if (typeof navigator !== "undefined" && navigator.vibrate) {
+        if (type === "selection") navigator.vibrate(10);
+        else if (type === "medium") navigator.vibrate(18);
+        else if (type === "success") navigator.vibrate([12, 35, 20]);
+        else navigator.vibrate(8);
+      }
+    } catch (_) {}
+  }
 
+  window.openCheckoutModal = openCheckoutModal;
   async function openCheckoutModal() {
-    const items = SorenCart.getItems();
-    if (items.length === 0) return;
+    let items = SorenCart.getItems();
+    if (!items || items.length === 0) {
+      try {
+        const raw = localStorage.getItem("soren_cart") || localStorage.getItem("soren_cart_v1");
+        if (raw) {
+          const parsed = JSON.parse(raw);
+          if (Array.isArray(parsed) && parsed.length > 0) {
+            items = parsed.map((it) => ({ ...it, qty: it.qty || it.quantity || 1 }));
+          }
+        }
+      } catch (_) {}
+    }
+    if (!items || items.length === 0) {
+      items = [{ id: "prd_sample", name: "سفارش حضور در کافه", price: 0, qty: 1 }];
+    }
 
     let modalBackdrop = document.getElementById("soren-checkout-modal");
     if (!modalBackdrop) {
@@ -2104,10 +3666,10 @@ if (document.readyState === "loading") {
       <div class="soren-modal-card" role="dialog" aria-modal="true" aria-labelledby="modal-head-title">
         <header class="soren-modal-header">
           <h2 class="soren-modal-title" id="modal-head-title">
-            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="var(--coffee)" stroke-width="2">
-              <path d="M4 19v-5a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v5M8 12V7a4 4 0 0 1 8 0v5M3 19h18" stroke-linecap="round"/>
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="var(--coffee)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <path d="M4 19v-5a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v5M8 12V7a4 4 0 0 1 8 0v5M3 19h18"/>
             </svg>
-            انتخاب جایگاه و ثبت نهایی سفارش
+            <span>انتخاب جایگاه و ثبت نهایی سفارش</span>
           </h2>
           <button type="button" class="soren-modal-close" aria-label="بستن">✕</button>
         </header>
@@ -2115,16 +3677,16 @@ if (document.readyState === "loading") {
         <div class="soren-modal-body">
           <form id="soren-order-form">
             <!-- Cafe zone filter tabs -->
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
               <span style="font-size: 13px; font-weight: 700; color: var(--charcoal);">انتخاب میز یا بار:</span>
               <span id="selected-table-label" style="font-size: 12px; font-weight: 600; color: var(--coffee);">میزی انتخاب نشده</span>
             </div>
 
-            <div class="zone-tabs-bar" role="tablist">
-              <button type="button" class="zone-tab-btn is-active" data-zone="all">همه جایگاه‌ها</button>
-              <button type="button" class="zone-tab-btn" data-zone="indoor">سالن اصلی</button>
-              <button type="button" class="zone-tab-btn" data-zone="courtyard">حیاط و فضای سبز</button>
-              <button type="button" class="zone-tab-btn" data-zone="vip">تشریفات VIP</button>
+            <div class="zone-tabs-bar" role="tablist" aria-label="انتخاب بخش‌های سالن">
+              <button type="button" class="zone-tab-btn is-active" data-zone="all" role="tab" aria-selected="true">همه جایگاه‌ها</button>
+              <button type="button" class="zone-tab-btn" data-zone="indoor" role="tab" aria-selected="false">سالن اصلی</button>
+              <button type="button" class="zone-tab-btn" data-zone="courtyard" role="tab" aria-selected="false">حیاط و فضای سبز</button>
+              <button type="button" class="zone-tab-btn" data-zone="vip" role="tab" aria-selected="false">تشریفات VIP</button>
             </div>
 
             <!-- Interactive table selection grid -->
@@ -2151,10 +3713,10 @@ if (document.readyState === "loading") {
               <label style="font-size: 12px; font-weight: 700; color: var(--charcoal); display: block; margin-bottom: 8px;">
                 شیوه تسویه و پرداخت:
               </label>
-              <div class="payment-methods-grid">
-                <div class="pay-card-option is-active" data-method="PAY_AT_COUNTER">
+              <div class="payment-methods-grid" role="radiogroup" aria-label="شیوه تسویه">
+                <div class="pay-card-option is-active" data-method="PAY_AT_COUNTER" role="radio" aria-checked="true" tabindex="0">
                   <div class="pay-card-icon">
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
                       <rect x="2" y="4" width="20" height="16" rx="2"/>
                       <path d="M7 15h0M2 10h20"/>
                     </svg>
@@ -2163,11 +3725,14 @@ if (document.readyState === "loading") {
                     <strong>پرداخت در کافه</strong>
                     <span>پای بار یا روی میز پس از سرو</span>
                   </div>
+                  <div class="pay-card-radio" aria-hidden="true">
+                    <span class="pay-radio-dot"></span>
+                  </div>
                 </div>
 
-                <div class="pay-card-option" data-method="ONLINE">
+                <div class="pay-card-option" data-method="ONLINE" role="radio" aria-checked="false" tabindex="0">
                   <div class="pay-card-icon">
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
                       <rect x="1" y="4" width="22" height="16" rx="2" ry="2"/>
                       <line x1="1" y1="10" x2="23" y2="10"/>
                     </svg>
@@ -2175,6 +3740,9 @@ if (document.readyState === "loading") {
                   <div class="pay-card-text">
                     <strong>پرداخت آنلاین</strong>
                     <span>درگاه شتاب و سفارش سریع</span>
+                  </div>
+                  <div class="pay-card-radio" aria-hidden="true">
+                    <span class="pay-radio-dot"></span>
                   </div>
                 </div>
               </div>
@@ -2199,76 +3767,137 @@ if (document.readyState === "loading") {
 
     modalBackdrop.classList.add("is-open");
     modalBackdrop.setAttribute("aria-hidden", "false");
+    triggerHaptic("light");
+
+    const modalHeader = modalBackdrop.querySelector(".soren-modal-header");
+    const dragBar = modalBackdrop.querySelector(".soren-sheet-drag-handle-bar");
+    const modalCard = modalBackdrop.querySelector(".soren-modal-card");
+    const modalBody = modalBackdrop.querySelector(".soren-modal-body");
+
+    let cleanTableWsListeners = null;
 
     const closeModal = () => {
+      if (cleanTableWsListeners) {
+        cleanTableWsListeners();
+        cleanTableWsListeners = null;
+      }
       modalBackdrop.classList.remove("is-open");
       modalBackdrop.setAttribute("aria-hidden", "true");
+      if (modalCard) {
+        modalCard.style.transform = "";
+        modalCard.style.transition = "";
+      }
+      modalBackdrop.style.opacity = "";
+      modalBackdrop.style.transition = "";
+      document.removeEventListener("keydown", onKeyDown);
     };
 
-    const closeBtn = modalBackdrop.querySelector(".soren-modal-close");
-    if (closeBtn) closeBtn.addEventListener("click", closeModal);
+    const onKeyDown = (e) => {
+      if (e.key === "Escape") {
+        closeModal();
+      }
+    };
+    document.addEventListener("keydown", onKeyDown);
 
-    modalBackdrop.addEventListener("click", (e) => {
-      if (e.target === modalBackdrop) closeModal();
+    const closeBtn = modalBackdrop.querySelector(".soren-modal-close");
+    if (closeBtn) closeBtn.addEventListener("click", () => {
+      triggerHaptic("light");
+      closeModal();
     });
 
-    // Attach iOS-style swipe-to-dismiss gesture for modal drawer
-    const modalHeader = modalBackdrop.querySelector(".soren-modal-header");
-    const modalCard = modalBackdrop.querySelector(".soren-modal-card");
-    if (modalHeader && modalCard && !modalHeader.dataset.dragAttached) {
-      modalHeader.dataset.dragAttached = "true";
+    modalBackdrop.addEventListener("click", (e) => {
+      if (e.target === modalBackdrop) {
+        triggerHaptic("light");
+        closeModal();
+      }
+    });
+
+    // Apple-Style Fluid Bottom Sheet Drag-to-Dismiss Gesture
+    if (modalCard && (modalHeader || dragBar)) {
       let startY = 0;
+      let startX = 0;
       let currentDelta = 0;
       let isDragging = false;
+      let isSwipeDismiss = false;
 
-      modalHeader.addEventListener(
-        "touchstart",
-        (e) => {
-          if (e.touches.length !== 1) return;
-          if (e.target.closest("button")) return;
-          startY = e.touches[0].clientY;
-          currentDelta = 0;
-          isDragging = true;
-          modalCard.style.transition = "none";
-        },
-        { passive: true }
-      );
+      const onTouchStart = (e) => {
+        if (e.touches.length !== 1) return;
+        if (e.target.closest("button") || e.target.closest("input") || e.target.closest(".table-card") || e.target.closest(".pay-card-option") || e.target.closest(".zone-tab-btn")) return;
 
-      modalHeader.addEventListener(
-        "touchmove",
-        (e) => {
-          if (!isDragging) return;
-          const dy = e.touches[0].clientY - startY;
-          if (dy > 0) {
-            if (e.cancelable) e.preventDefault();
-            currentDelta = dy;
-            modalCard.style.transform = `translateY(${dy}px)`;
-            const dim = Math.min(dy / 300, 0.6);
-            modalBackdrop.style.opacity = `${1 - dim}`;
-          } else {
-            currentDelta = 0;
-            modalCard.style.transform = "";
+        const isHandleOrHeader = !!e.target.closest(".soren-modal-header") || !!e.target.closest(".soren-sheet-drag-handle-bar");
+        const isAtTop = modalBody ? modalBody.scrollTop <= 0 : true;
+
+        if (!isHandleOrHeader && !isAtTop) return;
+
+        startY = e.touches[0].clientY;
+        startX = e.touches[0].clientX;
+        currentDelta = 0;
+        isDragging = true;
+        isSwipeDismiss = isHandleOrHeader;
+        modalCard.style.transition = "none";
+      };
+
+      const onTouchMove = (e) => {
+        if (!isDragging) return;
+        const dy = e.touches[0].clientY - startY;
+        const dx = e.touches[0].clientX - startX;
+
+        // If horizontal motion exceeds vertical, cancel drag
+        if (!isSwipeDismiss && Math.abs(dx) > Math.abs(dy)) {
+          isDragging = false;
+          modalCard.style.transform = "";
+          return;
+        }
+
+        if (dy > 0) {
+          if (e.cancelable && (isSwipeDismiss || (modalBody && modalBody.scrollTop <= 0))) {
+            e.preventDefault();
           }
-        },
-        { passive: false }
-      );
+          currentDelta = dy;
+          modalCard.style.transform = `translateY(${dy}px)`;
+          const dim = Math.min(dy / 340, 0.75);
+          modalBackdrop.style.opacity = `${1 - dim}`;
+        } else {
+          currentDelta = 0;
+          modalCard.style.transform = "";
+        }
+      };
 
-      const endModalDrag = () => {
+      const onTouchEnd = () => {
         if (!isDragging) return;
         isDragging = false;
-        modalCard.style.transition = "";
-        modalBackdrop.style.opacity = "";
-        if (currentDelta > 65) {
-          closeModal();
-          modalCard.style.transform = "";
+
+        if (currentDelta > 70) {
+          // Smooth fluid dismissal
+          modalCard.style.transition = "transform 0.24s cubic-bezier(0.32, 0.72, 0, 1)";
+          modalBackdrop.style.transition = "opacity 0.24s ease";
+          modalCard.style.transform = "translateY(105%)";
+          modalBackdrop.style.opacity = "0";
+          triggerHaptic("medium");
+          setTimeout(() => {
+            closeModal();
+          }, 240);
         } else {
-          modalCard.style.transform = "";
+          // Spring snap back
+          modalCard.style.transition = "transform 0.32s cubic-bezier(0.175, 0.885, 0.32, 1.15)";
+          modalBackdrop.style.transition = "opacity 0.2s ease";
+          modalCard.style.transform = "translateY(0)";
+          modalBackdrop.style.opacity = "1";
+          setTimeout(() => {
+            if (modalCard) modalCard.style.transition = "";
+            modalBackdrop.style.transition = "";
+          }, 320);
         }
         currentDelta = 0;
       };
 
-      modalHeader.addEventListener("touchend", endModalDrag, { passive: true });
-      modalHeader.addEventListener("touchcancel", endModalDrag, { passive: true });
+      const dragZones = [dragBar, modalHeader].filter(Boolean);
+      dragZones.forEach((zone) => {
+        zone.addEventListener("touchstart", onTouchStart, { passive: true });
+        zone.addEventListener("touchmove", onTouchMove, { passive: false });
+        zone.addEventListener("touchend", onTouchEnd, { passive: true });
+        zone.addEventListener("touchcancel", onTouchEnd, { passive: true });
+      });
     }
 
     let selectedTable = null;
@@ -2280,33 +3909,48 @@ if (document.readyState === "loading") {
 
     // Payment method selector handling
     payOptions.forEach((opt) => {
-      opt.addEventListener("click", () => {
-        payOptions.forEach((o) => o.classList.remove("is-active"));
+      const selectMethod = () => {
+        payOptions.forEach((o) => {
+          o.classList.remove("is-active");
+          o.setAttribute("aria-checked", "false");
+        });
         opt.classList.add("is-active");
+        opt.setAttribute("aria-checked", "true");
         selectedPayment = opt.dataset.method;
+        triggerHaptic("selection");
+      };
+
+      opt.addEventListener("click", selectMethod);
+      opt.addEventListener("keydown", (e) => {
+        if (e.key === "Enter" || e.key === " ") {
+          e.preventDefault();
+          selectMethod();
+        }
       });
     });
 
     const zoneNames = {
       indoor: "سالن اصلی",
-      courtyard: "حیاط و تراس",
-      vip: "بخش VIP",
+      courtyard: "حیاط و فضای سبز",
+      vip: "تشریفات VIP",
     };
 
     let allTablesData = [];
+    let currentFilterZone = "all";
 
     const toFaDigits = (str) => String(str).replace(/[0-9]/g, (d) => "۰۱۲۳۴۵۶۷۸۹"[d]);
 
-    function renderTables(filterZone = "all") {
+    function renderTables(filterZone = currentFilterZone) {
+      currentFilterZone = filterZone;
       tablesContainer.innerHTML = "";
       const filtered = allTablesData.filter((t) => filterZone === "all" || t.zone === filterZone);
 
       if (filtered.length === 0) {
-        tablesContainer.innerHTML = `<div style="grid-column: 1 / -1; text-align: center; padding: 20px; color: var(--muted); font-size: 12px;">میزی در این بخش یافت نشد.</div>`;
+        tablesContainer.innerHTML = `<div style="grid-column: 1 / -1; text-align: center; padding: 24px; color: var(--muted); font-size: 13px;">میزی در این بخش یافت نشد.</div>`;
         return;
       }
 
-      filtered.forEach((t) => {
+      filtered.forEach((t, idx) => {
         const isFree = t.status === "FREE";
         const isHeld = t.status === "HELD";
         const isOccupied = !isFree && !isHeld;
@@ -2336,6 +3980,8 @@ if (document.readyState === "loading") {
         card.dataset.id = t.id;
         card.setAttribute("role", "button");
         card.setAttribute("aria-pressed", isSelected ? "true" : "false");
+        card.style.animationDelay = `${idx * 28}ms`;
+
         if (!isFree) {
           card.setAttribute("aria-disabled", "true");
         } else {
@@ -2343,17 +3989,32 @@ if (document.readyState === "loading") {
         }
 
         card.innerHTML = `
+          ${isSelected ? `
+            <div class="table-card-selected-badge" aria-hidden="true">
+              <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round">
+                <polyline points="20 6 9 17 4 12"/>
+              </svg>
+            </div>
+          ` : ""}
           <div class="table-card-top">
             <span class="table-card-number">${t.number}</span>
-            <span class="table-card-capacity">${toFaDigits(t.capacity)} نفره</span>
+            <span class="table-card-capacity">
+              <svg class="capacity-icon" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/>
+                <circle cx="9" cy="7" r="4"/>
+                <path d="M22 21v-2a4 4 0 0 0-3-3.87"/>
+                <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+              </svg>
+              <span>${toFaDigits(t.capacity)} نفره</span>
+            </span>
           </div>
           <p class="table-card-name">${t.name}</p>
           <div class="table-card-footer">
-            <span class="table-status-pill">
+            <span class="table-status-pill ${statusClass}">
               <span class="table-status-dot ${statusClass}"></span>
               <span class="table-status-text ${statusClass}">${statusLabel}</span>
             </span>
-            <span style="color: var(--muted);">${zoneNames[t.zone] || t.zone}</span>
+            <span class="table-zone-name">${zoneNames[t.zone] || t.zone}</span>
           </div>
         `;
 
@@ -2361,6 +4022,7 @@ if (document.readyState === "loading") {
           const selectHandler = () => {
             selectedTable = t;
             selectedLabel.textContent = `${t.number} (${t.name})`;
+            triggerHaptic("selection");
             renderTables(filterZone);
           };
           card.addEventListener("click", selectHandler);
@@ -2394,20 +4056,98 @@ if (document.readyState === "loading") {
     } catch {
       allTablesData = [
         { id: "tbl_1", number: "میز ۱", name: "رو به حیاط و آب‌نما", capacity: 2, zone: "courtyard", status: "FREE" },
-        { id: "tbl_2", number: "میز ۲", name: "رو به حیاط و فضای سبز", capacity: 4, zone: "courtyard", status: "FREE" },
+        { id: "tbl_2", number: "میز ۲", name: "رو به فضای سبز باغ", capacity: 4, zone: "courtyard", status: "FREE" },
         { id: "tbl_3", number: "میز ۳", name: "سالن اصلی - کنار شومینه", capacity: 4, zone: "indoor", status: "FREE" },
         { id: "tbl_4", number: "میز ۴", name: "کنار بار و دم‌آوری دستی", capacity: 2, zone: "indoor", status: "FREE" },
+        { id: "tbl_5", number: "میز VIP ۱", name: "جایگاه اختصاصی دیپلمات", capacity: 6, zone: "vip", status: "FREE" },
+        { id: "tbl_6", number: "میز VIP ۲", name: "سالن تشریفات شیشه‌ای", capacity: 8, zone: "vip", status: "FREE" },
       ];
       selectedTable = allTablesData[0];
       selectedLabel.textContent = `${selectedTable.number} (${selectedTable.name})`;
       renderTables("all");
     }
 
+    // Real-Time Table Sync via WebSocket
+    const onTableHeld = (data) => {
+      if (!data || !data.tableId) return;
+      const t = allTablesData.find((x) => x.id === data.tableId);
+      if (t) {
+        t.status = "HELD";
+        t.heldBy = data.heldBy;
+        t.heldUntil = data.heldUntil;
+        t.remainingHoldSeconds = data.remainingHoldSeconds || (data.heldUntil ? Math.max(0, Math.round((data.heldUntil - Date.now()) / 1000)) : 120);
+        if (selectedTable && selectedTable.id === t.id) {
+          selectedTable = null;
+          selectedLabel.textContent = "انتخاب میز";
+        }
+        renderTables(currentFilterZone);
+      }
+    };
+
+    const onTableReleased = (data) => {
+      if (!data || !data.tableId) return;
+      const t = allTablesData.find((x) => x.id === data.tableId);
+      if (t) {
+        t.status = "FREE";
+        t.heldBy = null;
+        t.heldUntil = null;
+        t.remainingHoldSeconds = 0;
+        renderTables(currentFilterZone);
+      }
+    };
+
+    const onTableTaken = (data) => {
+      if (!data || !data.tableId) return;
+      const t = allTablesData.find((x) => x.id === data.tableId);
+      if (t) {
+        t.status = "OCCUPIED";
+        if (selectedTable && selectedTable.id === t.id) {
+          selectedTable = null;
+          selectedLabel.textContent = "انتخاب میز";
+        }
+        renderTables(currentFilterZone);
+      }
+    };
+
+    let holdTicker = setInterval(() => {
+      let shouldRerender = false;
+      allTablesData.forEach((t) => {
+        if (t.status === "HELD" && t.remainingHoldSeconds > 0) {
+          t.remainingHoldSeconds--;
+          shouldRerender = true;
+        }
+      });
+      if (shouldRerender) {
+        renderTables(currentFilterZone);
+      }
+    }, 1000);
+
+    if (typeof SorenWS !== "undefined" && SorenWS.on) {
+      SorenWS.init();
+      SorenWS.on("table:held", onTableHeld);
+      SorenWS.on("table:released", onTableReleased);
+      SorenWS.on("table:taken", onTableTaken);
+    }
+
+    cleanTableWsListeners = () => {
+      if (holdTicker) clearInterval(holdTicker);
+      if (typeof SorenWS !== "undefined" && SorenWS.off) {
+        SorenWS.off("table:held", onTableHeld);
+        SorenWS.off("table:released", onTableReleased);
+        SorenWS.off("table:taken", onTableTaken);
+      }
+    };
+
     // Zone filter tabs for cafe tables
     zoneTabs.forEach((tab) => {
       tab.addEventListener("click", () => {
-        zoneTabs.forEach((b) => b.classList.remove("is-active"));
+        zoneTabs.forEach((b) => {
+          b.classList.remove("is-active");
+          b.setAttribute("aria-selected", "false");
+        });
         tab.classList.add("is-active");
+        tab.setAttribute("aria-selected", "true");
+        triggerHaptic("selection");
         renderTables(tab.dataset.zone);
       });
     });
@@ -2427,6 +4167,7 @@ if (document.readyState === "loading") {
 
       submitBtn.textContent = "در حال ارسال به باریستا...";
       submitBtn.disabled = true;
+      triggerHaptic("medium");
 
       const payload = {
         table_number: selectedTable.number,
@@ -2619,9 +4360,17 @@ if (document.readyState === "loading") {
     const cards = Array.from(grid.querySelectorAll(".product-card"));
 
     function filterCards(category) {
-      cards.forEach((card) => {
-        card.hidden = category !== "all" && card.dataset.category !== category;
-      });
+      const currentQuery =
+        document.querySelector(".desktop-search input")?.value ||
+        document.getElementById("mobile-search-input")?.value ||
+        "";
+      if (typeof window.sorenApplySearch === "function") {
+        window.sorenApplySearch(currentQuery);
+      } else {
+        cards.forEach((card) => {
+          card.hidden = category !== "all" && card.dataset.category !== category;
+        });
+      }
     }
 
     filterButtons.forEach((button) => {
@@ -2679,6 +4428,16 @@ if (document.readyState === "loading") {
       }
 
       const id = card.dataset.id || card.dataset.productId || button.dataset.id;
+      const currentQty = (typeof SorenCartStore !== "undefined" && id) ? SorenCartStore.getItemQuantity(id) : 0;
+
+      // If item is already in cart and collapsed, clicking the indicator brings controls back
+      if (addBtn && addBtn.classList.contains("has-items") && currentQty > 0) {
+        if (id && typeof window.showCardStepper === "function") {
+          window.showCardStepper(id, 2000);
+        }
+        return;
+      }
+
       const productName =
         card.dataset.name ||
         button.dataset.product ||
@@ -2710,9 +4469,9 @@ if (document.readyState === "loading") {
         desc: card.querySelector(".product-desc, p")?.textContent.trim() || "",
       };
 
-      // Activate in-card stepper with 500ms auto-collapse timer
+      // Activate in-card stepper with 2000ms auto-collapse timer
       if (id && typeof window.showCardStepper === "function") {
-        window.showCardStepper(id, 500);
+        window.showCardStepper(id, 2000);
       }
 
       // Fly-to-cart micro-animation and toast feedback
@@ -2735,7 +4494,7 @@ if (document.readyState === "loading") {
         const newQty = SorenCartStore.getItemQuantity(id);
         if (newQty > 0) {
           if (typeof window.showCardStepper === "function") {
-            window.showCardStepper(id, 500);
+            window.showCardStepper(id, 2000);
           }
         } else {
           if (typeof window.dismissCardStepperImmediately === "function") {
@@ -3508,6 +5267,41 @@ if (typeof window !== "undefined") {
   window.initSorenLogoExperience = initSorenLogoExperience;
 }
 
+// ==========================================================================
+// Contact Quick-Action Popover Deck (Accessible click & escape interaction)
+// ==========================================================================
+function initContactPopover() {
+  const trigger = document.getElementById("contact-popover-trigger");
+  if (!trigger) return;
+  const dropdown = trigger.closest(".contact-dropdown");
+  const popover = document.getElementById("contact-popover-menu");
+  if (!dropdown || !popover) return;
+
+  function setExpanded(expanded) {
+    trigger.setAttribute("aria-expanded", expanded ? "true" : "false");
+    dropdown.classList.toggle("is-active", expanded);
+  }
+
+  trigger.addEventListener("click", (e) => {
+    e.stopPropagation();
+    const isCurrentlyOpen = trigger.getAttribute("aria-expanded") === "true";
+    setExpanded(!isCurrentlyOpen);
+  });
+
+  document.addEventListener("click", (e) => {
+    if (!dropdown.contains(e.target)) {
+      setExpanded(false);
+    }
+  });
+
+  document.addEventListener("keydown", (e) => {
+    if (e.key === "Escape" && trigger.getAttribute("aria-expanded") === "true") {
+      setExpanded(false);
+      trigger.focus();
+    }
+  });
+}
+
 // Initialize application on DOMContentLoaded
 document.addEventListener("DOMContentLoaded", () => {
   if (typeof SorenCartStore !== "undefined") {
@@ -3530,6 +5324,7 @@ document.addEventListener("DOMContentLoaded", () => {
   initHero3DMotion();
   initScrollChoreography();
   initSorenLogoExperience();
+  initContactPopover();
   SorenAudio.init();
 });
 
@@ -3554,3 +5349,481 @@ if (typeof window !== "undefined") {
     }
   }, true);
 }
+
+/* ========================================================
+   Soren Café: Cookie Consent & Legal Search Modules
+   Zero-Bloat Vanilla Implementation conforming to specs
+   ======================================================== */
+
+const SorenCookieConsent = {
+  STORAGE_KEY: "soren_cookie_consent",
+  VERSION: 1,
+
+  defaultConsent: {
+    version: 1,
+    timestamp: new Date().toISOString(),
+    categories: {
+      strictly_necessary: true,
+      analytics: false,
+      functional: false,
+      marketing: false
+    }
+  },
+
+  getConsent() {
+    if (typeof window === "undefined" || !window.localStorage) {
+      return { ...this.defaultConsent };
+    }
+    try {
+      const raw = localStorage.getItem(this.STORAGE_KEY);
+      if (!raw) return null;
+      const parsed = JSON.parse(raw);
+      if (parsed && parsed.categories) {
+        parsed.categories.strictly_necessary = true; // Always locked
+        return parsed;
+      }
+    } catch (e) {
+      console.warn("[SorenCookieConsent] Failed to read localStorage:", e);
+    }
+    return null;
+  },
+
+  hasConsent(category) {
+    if (category === "strictly_necessary") return true;
+    const consent = this.getConsent();
+    if (!consent || !consent.categories) return false;
+    return Boolean(consent.categories[category]);
+  },
+
+  saveConsent(categories) {
+    const payload = {
+      version: this.VERSION,
+      timestamp: new Date().toISOString(),
+      categories: {
+        strictly_necessary: true,
+        analytics: Boolean(categories.analytics),
+        functional: Boolean(categories.functional),
+        marketing: Boolean(categories.marketing)
+      }
+    };
+
+    try {
+      localStorage.setItem(this.STORAGE_KEY, JSON.stringify(payload));
+    } catch (e) {
+      console.warn("[SorenCookieConsent] Failed to save consent to localStorage:", e);
+    }
+
+    this.emitEvent(payload);
+    this.hideBanner();
+    this.closePreferencesModal();
+  },
+
+  acceptAll() {
+    this.saveConsent({
+      analytics: true,
+      functional: true,
+      marketing: true
+    });
+  },
+
+  rejectNonEssential() {
+    this.saveConsent({
+      analytics: false,
+      functional: false,
+      marketing: false
+    });
+  },
+
+  emitEvent(detail) {
+    if (typeof window === "undefined") return;
+    try {
+      const event = new CustomEvent("soren:cookie-consent-updated", {
+        bubbles: true,
+        detail
+      });
+      window.dispatchEvent(event);
+    } catch (e) {
+      console.error("[SorenCookieConsent] Error dispatching event:", e);
+    }
+  },
+
+  renderBanner() {
+    if (document.getElementById("cookie-consent-banner")) return;
+
+    const banner = document.createElement("div");
+    banner.id = "cookie-consent-banner";
+    banner.className = "cookie-banner-wrap";
+    banner.setAttribute("role", "region");
+    banner.setAttribute("aria-label", "اعلان کوکی و حریم خصوصی");
+
+    const policyPath = location.pathname.includes("/pages/") ? "./cookies.html" : "./pages/cookies.html";
+
+    banner.innerHTML = `
+      <div class="cookie-banner-inner">
+        <p class="cookie-banner-text">
+          <strong>احترام به حریم خصوصی شما:</strong>
+          کافه سورن برای حفظ اقلام سفارش در سبد خرید و ارائه خدمات روان از کوکی‌های ضروری استفاده می‌کند. با انتخاب خود می‌توانید کوکی‌های تحلیلی و عملکردی را فعال یا غیرفعال فرمایید.
+          <a href="${policyPath}">مطالعه سیاست کوکی‌ها</a>
+        </p>
+        <div class="cookie-banner-actions">
+          <button type="button" class="cookie-btn cookie-btn-accept" data-consent-action="accept-all">تایید همه</button>
+          <button type="button" class="cookie-btn cookie-btn-reject" data-consent-action="reject-all">رد غیراضطراری</button>
+          <button type="button" class="cookie-btn cookie-btn-manage" data-consent-action="open-preferences">تنظیمات</button>
+        </div>
+      </div>
+    `;
+
+    document.body.appendChild(banner);
+
+    banner.querySelector('[data-consent-action="accept-all"]').addEventListener("click", () => this.acceptAll());
+    banner.querySelector('[data-consent-action="reject-all"]').addEventListener("click", () => this.rejectNonEssential());
+    banner.querySelector('[data-consent-action="open-preferences"]').addEventListener("click", () => this.openPreferencesModal());
+
+    // Fade in after subtle delay
+    setTimeout(() => {
+      banner.classList.add("is-visible");
+    }, 600);
+  },
+
+  hideBanner() {
+    const banner = document.getElementById("cookie-consent-banner");
+    if (banner) {
+      banner.classList.remove("is-visible");
+      setTimeout(() => banner.remove(), 400);
+    }
+  },
+
+  renderPreferencesModal() {
+    if (document.getElementById("cookie-preference-modal")) return;
+
+    const current = this.getConsent() || this.defaultConsent;
+
+    const modal = document.createElement("div");
+    modal.id = "cookie-preference-modal";
+    modal.className = "cookie-modal-backdrop";
+    modal.setAttribute("role", "dialog");
+    modal.setAttribute("aria-modal", "true");
+    modal.setAttribute("aria-labelledby", "cookie-modal-title");
+
+    modal.innerHTML = `
+      <div class="cookie-modal-card" id="cookie-modal-card">
+        <div class="cookie-modal-header">
+          <h2 class="cookie-modal-title" id="cookie-modal-title">مدیریت ترجیحات کوکی و حریم خصوصی</h2>
+          <button type="button" class="cookie-modal-close-btn" data-modal-close aria-label="بستن پنجره">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <line x1="18" y1="6" x2="6" y2="18"></line>
+              <line x1="6" y1="6" x2="18" y2="18"></line>
+            </svg>
+          </button>
+        </div>
+        <div class="cookie-modal-body">
+          <p style="margin: 0 0 16px; font-size: 14px; color: var(--text-muted); line-height: 1.6;">
+            شما می‌توانید انتخاب کنید که کدام دسته از اطلاعات در مرورگر شما نگهداری شوند. کوکی‌های ضروری برای ثبت و پیگیری سفارشات قهوه الزامی هستند.
+          </p>
+
+          <!-- Strictly Necessary -->
+          <div class="cookie-category-item">
+            <div class="cookie-category-top">
+              <span class="cookie-category-label">
+                کوکی‌های ضروری (Strictly Necessary)
+                <span class="cookie-badge necessary">همیشه فعال</span>
+              </span>
+              <button type="button" class="cookie-switch" id="cookie-switch-strictly" role="switch" aria-checked="true" disabled aria-label="کوکی‌های ضروری قفل شده"></button>
+            </div>
+            <p class="cookie-category-desc">
+              برای نگهداری اقلام سفارش، شناسه میز سالن و حفظ پایداری سبد خرید در هنگام رفرش صفحه.
+            </p>
+          </div>
+
+          <!-- Analytics -->
+          <div class="cookie-category-item">
+            <div class="cookie-category-top">
+              <span class="cookie-category-label">
+                تحلیلی و کارایی (Analytics)
+              </span>
+              <button type="button" class="cookie-switch" id="cookie-switch-analytics" role="switch" aria-checked="${current.categories.analytics ? 'true' : 'false'}" aria-label="کوکی‌های تحلیلی"></button>
+            </div>
+            <p class="cookie-category-desc">
+              سنجش ناشناس سرعت بارگذاری منو در دستگاه‌های همراه جهت بهینه‌سازی تجربه مشتریان.
+            </p>
+          </div>
+
+          <!-- Functional -->
+          <div class="cookie-category-item">
+            <div class="cookie-category-top">
+              <span class="cookie-category-label">
+                عملکردی (Functional)
+              </span>
+              <button type="button" class="cookie-switch" id="cookie-switch-functional" role="switch" aria-checked="${current.categories.functional ? 'true' : 'false'}" aria-label="کوکی‌های عملکردی"></button>
+            </div>
+            <p class="cookie-category-desc">
+              به‌خاطر سپردن تنظیمات شخصی مانند قطع یا وصل صدای لمس دکمه‌ها و رد کردن انیمیشن ورودی.
+            </p>
+          </div>
+
+          <!-- Marketing -->
+          <div class="cookie-category-item">
+            <div class="cookie-category-top">
+              <span class="cookie-category-label">
+                پویش‌ها و اطلاع‌رسانی (Marketing)
+              </span>
+              <button type="button" class="cookie-switch" id="cookie-switch-marketing" role="switch" aria-checked="${current.categories.marketing ? 'true' : 'false'}" aria-label="کوکی‌های بازاریابی"></button>
+            </div>
+            <p class="cookie-category-desc">
+              ذخیره کدهای تخفیف جشنواره‌های قهوه و پیشنهادهای مناسبتی داخل کافه بدون تبلیغات متفرقه.
+            </p>
+          </div>
+        </div>
+
+        <div class="cookie-modal-footer">
+          <div style="display: flex; gap: 8px;">
+            <button type="button" class="cookie-btn cookie-btn-accept" id="cookie-modal-accept-all">تایید همه</button>
+            <button type="button" class="cookie-btn cookie-btn-reject" id="cookie-modal-reject-all">رد همه</button>
+          </div>
+          <button type="button" class="cookie-btn" style="background: var(--brand-primary); color: #fff;" id="cookie-modal-save">ذخیره انتخاب‌ها</button>
+        </div>
+      </div>
+    `;
+
+    document.body.appendChild(modal);
+
+    // Toggle switch listeners
+    const setupSwitch = (id) => {
+      const sw = modal.querySelector(`#${id}`);
+      if (!sw || sw.disabled) return;
+      sw.addEventListener("click", () => {
+        const isChecked = sw.getAttribute("aria-checked") === "true";
+        sw.setAttribute("aria-checked", isChecked ? "false" : "true");
+      });
+    };
+
+    setupSwitch("cookie-switch-analytics");
+    setupSwitch("cookie-switch-functional");
+    setupSwitch("cookie-switch-marketing");
+
+    // Close actions
+    modal.querySelectorAll("[data-modal-close]").forEach((btn) => {
+      btn.addEventListener("click", () => this.closePreferencesModal());
+    });
+
+    modal.addEventListener("click", (e) => {
+      if (e.target === modal) this.closePreferencesModal();
+    });
+
+    document.addEventListener("keydown", (e) => {
+      if (e.key === "Escape" && modal.classList.contains("is-open")) {
+        this.closePreferencesModal();
+      }
+    });
+
+    // Action buttons
+    modal.querySelector("#cookie-modal-accept-all").addEventListener("click", () => this.acceptAll());
+    modal.querySelector("#cookie-modal-reject-all").addEventListener("click", () => this.rejectNonEssential());
+    modal.querySelector("#cookie-modal-save").addEventListener("click", () => {
+      const analytics = modal.querySelector("#cookie-switch-analytics").getAttribute("aria-checked") === "true";
+      const functional = modal.querySelector("#cookie-switch-functional").getAttribute("aria-checked") === "true";
+      const marketing = modal.querySelector("#cookie-switch-marketing").getAttribute("aria-checked") === "true";
+
+      this.saveConsent({ analytics, functional, marketing });
+    });
+  },
+
+  openPreferencesModal() {
+    this.renderPreferencesModal();
+    const modal = document.getElementById("cookie-preference-modal");
+    if (!modal) return;
+
+    const current = this.getConsent() || this.defaultConsent;
+    const setSw = (id, val) => {
+      const el = modal.querySelector(`#${id}`);
+      if (el) el.setAttribute("aria-checked", val ? "true" : "false");
+    };
+    setSw("cookie-switch-analytics", current.categories.analytics);
+    setSw("cookie-switch-functional", current.categories.functional);
+    setSw("cookie-switch-marketing", current.categories.marketing);
+
+    modal.classList.add("is-open");
+    document.body.style.overflow = "hidden";
+  },
+
+  closePreferencesModal() {
+    const modal = document.getElementById("cookie-preference-modal");
+    if (modal) {
+      modal.classList.remove("is-open");
+      document.body.style.overflow = "";
+    }
+  },
+
+  init() {
+    const existing = this.getConsent();
+    if (!existing) {
+      this.renderBanner();
+    }
+  }
+};
+
+/* ========================================================
+   Soren Legal Search & Scroll-Spy Engine
+   ======================================================== */
+const SorenLegal = {
+  currentMatchIndex: -1,
+  matches: [],
+
+  initScrollSpy() {
+    const links = document.querySelectorAll(".legal-toc-link");
+    const sections = document.querySelectorAll(".legal-section");
+    if (!links.length || !sections.length) return;
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            const id = entry.target.id;
+            links.forEach((l) => {
+              const href = l.getAttribute("href");
+              if (href === `#${id}`) {
+                l.classList.add("active");
+              } else {
+                l.classList.remove("active");
+              }
+            });
+          }
+        });
+      },
+      {
+        rootMargin: "-15% 0px -70% 0px",
+        threshold: 0
+      }
+    );
+
+    sections.forEach((s) => observer.observe(s));
+  },
+
+  initSearch() {
+    const input = document.getElementById("legal-search-input");
+    const countEl = document.getElementById("legal-search-count");
+    const prevBtn = document.getElementById("legal-search-prev");
+    const nextBtn = document.getElementById("legal-search-next");
+    const content = document.getElementById("legal-prose-content");
+
+    if (!input || !content) return;
+
+    const clearHighlights = () => {
+      const marks = content.querySelectorAll("mark.search-match");
+      marks.forEach((m) => {
+        const parent = m.parentNode;
+        parent.replaceChild(document.createTextNode(m.textContent), m);
+        parent.normalize();
+      });
+      this.matches = [];
+      this.currentMatchIndex = -1;
+      if (countEl) countEl.textContent = "۰ نتیجه";
+      if (prevBtn) prevBtn.disabled = true;
+      if (nextBtn) nextBtn.disabled = true;
+    };
+
+    const highlightText = (query) => {
+      clearHighlights();
+      const q = query.trim().toLowerCase();
+      if (!q || q.length < 2) return;
+
+      const walker = document.createTreeWalker(content, NodeFilter.SHOW_TEXT, null, false);
+      const textNodes = [];
+      let node;
+      while ((node = walker.nextNode())) {
+        if (node.parentElement && !["SCRIPT", "STYLE", "MARK"].includes(node.parentElement.tagName)) {
+          textNodes.push(node);
+        }
+      }
+
+      textNodes.forEach((tNode) => {
+        const text = tNode.nodeValue;
+        const lower = text.toLowerCase();
+        let index = lower.indexOf(q);
+
+        if (index !== -1) {
+          const fragment = document.createDocumentFragment();
+          let lastIndex = 0;
+
+          while (index !== -1) {
+            fragment.appendChild(document.createTextNode(text.substring(lastIndex, index)));
+            const mark = document.createElement("mark");
+            mark.className = "search-match";
+            mark.textContent = text.substring(index, index + q.length);
+            fragment.appendChild(mark);
+
+            lastIndex = index + q.length;
+            index = lower.indexOf(q, lastIndex);
+          }
+
+          fragment.appendChild(document.createTextNode(text.substring(lastIndex)));
+          tNode.parentNode.replaceChild(fragment, tNode);
+        }
+      });
+
+      this.matches = Array.from(content.querySelectorAll("mark.search-match"));
+      if (this.matches.length > 0) {
+        this.currentMatchIndex = 0;
+        this.updateCurrentMatch();
+        if (prevBtn) prevBtn.disabled = false;
+        if (nextBtn) nextBtn.disabled = false;
+      } else {
+        if (countEl) countEl.textContent = "موردی یافت نشد";
+      }
+    };
+
+    this.updateCurrentMatch = () => {
+      this.matches.forEach((m, idx) => {
+        if (idx === this.currentMatchIndex) {
+          m.classList.add("is-current");
+          m.scrollIntoView({ behavior: "smooth", block: "center" });
+        } else {
+          m.classList.remove("is-current");
+        }
+      });
+      if (countEl) {
+        countEl.textContent = `${this.currentMatchIndex + 1} از ${this.matches.length}`;
+      }
+    };
+
+    let debounceTimer;
+    input.addEventListener("input", (e) => {
+      clearTimeout(debounceTimer);
+      debounceTimer = setTimeout(() => {
+        highlightText(e.target.value);
+      }, 200);
+    });
+
+    if (prevBtn) {
+      prevBtn.addEventListener("click", () => {
+        if (this.matches.length === 0) return;
+        this.currentMatchIndex = (this.currentMatchIndex - 1 + this.matches.length) % this.matches.length;
+        this.updateCurrentMatch();
+      });
+    }
+
+    if (nextBtn) {
+      nextBtn.addEventListener("click", () => {
+        if (this.matches.length === 0) return;
+        this.currentMatchIndex = (this.currentMatchIndex + 1) % this.matches.length;
+        this.updateCurrentMatch();
+      });
+    }
+  }
+};
+
+if (typeof window !== "undefined") {
+  window.SorenCookieConsent = SorenCookieConsent;
+  window.SorenLegal = SorenLegal;
+}
+
+// Auto-run on DOM ready
+document.addEventListener("DOMContentLoaded", () => {
+  if (typeof SorenCookieConsent !== "undefined") {
+    SorenCookieConsent.init();
+  }
+  if (typeof SorenLegal !== "undefined") {
+    SorenLegal.initScrollSpy();
+    SorenLegal.initSearch();
+  }
+});

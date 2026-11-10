@@ -18,6 +18,7 @@
     "test:integration": "bun --cwd backend test tests/integration",
     "test:security": "node scripts/run-security-test.mjs",
     "test:security:manual": "bun --filter soren-cafe-backend test:security",
+    "test:auth": "bun scripts/verify-password-reset-flow.mjs",
     "test:load": "bun --filter soren-cafe-backend test:load",
     "test:static": "node scripts/verify-responsive.mjs --static-only",
     "test:responsive": "node scripts/verify-responsive.mjs",

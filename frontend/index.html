@@ -25,15 +25,14 @@
     <link rel="preload" href="./fonts/Peyda-Bold.woff2" as="font" type="font/woff2" crossorigin />
     <link rel="stylesheet" href="./css/style.css?v=2.1-peyda-fix" />
 
-    <!-- Fallback: ensure artwork is visible when JavaScript is disabled -->
-    <noscript>
-      <style>
-        .artwork-reveal {
-          opacity: 1;
-          transform: none;
-        }
-      </style>
-    </noscript>
+    <script>
+      if (typeof history !== "undefined" && "scrollRestoration" in history) {
+        history.scrollRestoration = "manual";
+      }
+      if (!window.location.hash || window.location.hash === "#" || window.location.hash === "#home") {
+        window.scrollTo(0, 0);
+      }
+    </script>
   </head>
 
   <body>
@@ -87,7 +86,123 @@
           </div>
 
           <a class="nav-link" href="./pages/about.html">درباره ما</a>
-          <a class="nav-link" href="#">تماس با ما</a>
+
+          <!-- Quick-Action Contact Popover Dropdown -->
+          <div class="dropdown contact-dropdown">
+            <button
+              class="contact-trigger"
+              type="button"
+              id="contact-popover-trigger"
+              aria-haspopup="true"
+              aria-expanded="false"
+              aria-label="اطلاعات تماس و دسترسی سریع به کافه سورن"
+            >
+              <span>تماس با ما</span>
+              <svg
+                class="chevron"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="1.8"
+                aria-hidden="true"
+              >
+                <path
+                  d="m6 9 6 6 6-6"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                />
+              </svg>
+            </button>
+
+            <div
+              class="dropdown-menu contact-popover"
+              id="contact-popover-menu"
+              role="region"
+              aria-label="اطلاعات تماس سریع کافه سورن"
+            >
+              <!-- Live Hospitality Status Header -->
+              <div class="contact-popover-header">
+                <div class="popover-status-badge">
+                  <span class="status-pulse-dot" aria-hidden="true"></span>
+                  <span class="status-badge-text">هم‌اکنون باز است</span>
+                </div>
+                <span class="popover-hours">سرویس‌دهی: ۸:۰۰ الی ۲۳:۳۰</span>
+              </div>
+
+              <!-- Quick Action Cards -->
+              <div class="contact-popover-body">
+                <!-- Direct Phone Call Action -->
+                <a
+                  href="tel:03136224422"
+                  class="contact-quick-item call-action"
+                  aria-label="تماس تلفنی با کافه سورن ۰۳۱۳۶۲۲۴۴۲۲"
+                >
+                  <div class="quick-item-icon">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                      <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/>
+                    </svg>
+                  </div>
+                  <div class="quick-item-content">
+                    <span class="quick-item-title">تماس و سفارش تلفنی</span>
+                    <span class="quick-item-sub" dir="ltr">۰۳۱-۳۶۲۲۴۴۲۲</span>
+                  </div>
+                  <span class="quick-item-action-badge">تماس</span>
+                </a>
+
+                <!-- Location & GPS Navigation Action -->
+                <a
+                  href="https://maps.google.com/?q=Isfahan+Soren+Cafe"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  class="contact-quick-item map-action"
+                  aria-label="مسیریابی آدرس کافه سورن روی نقشه"
+                >
+                  <div class="quick-item-icon">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                      <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/>
+                      <circle cx="12" cy="10" r="3"/>
+                    </svg>
+                  </div>
+                  <div class="quick-item-content">
+                    <span class="quick-item-title">مسیریابی حضوری</span>
+                    <span class="quick-item-sub">اصفهان، خیابان چهارباغ عباسی</span>
+                  </div>
+                  <span class="quick-item-action-badge">نقشه</span>
+                </a>
+              </div>
+
+              <!-- Social & Direct Channels -->
+              <div class="contact-popover-footer">
+                <a
+                  href="https://instagram.com"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  class="popover-social-btn"
+                  aria-label="اینستاگرام کافه سورن"
+                >
+                  <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                    <rect x="3" y="3" width="18" height="18" rx="5" />
+                    <circle cx="12" cy="12" r="4" />
+                    <circle cx="17.5" cy="6.5" r="0.8" fill="currentColor" />
+                  </svg>
+                  <span>اینستاگرام</span>
+                </a>
+
+                <a
+                  href="https://t.me"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  class="popover-social-btn"
+                  aria-label="کانال و پشتیبانی تلگرام کافه سورن"
+                >
+                  <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor" aria-hidden="true">
+                    <path d="M21.8 4.2 18.6 20c-.2 1.1-.8 1.4-1.7.9l-4.7-3.5-2.3 2.2c-.3.3-.5.5-1 .5l.3-4.8 8.8-8c.4-.4-.1-.6-.6-.2L6.5 14 1.9 12.6c-1-.3-1-1 .2-1.5L20 4.1c.8-.3 1.9.2 1.8.1Z"/>
+                  </svg>
+                  <span>تلگرام</span>
+                </a>
+              </div>
+            </div>
+          </div>
         </nav>
 
         <!-- Header Actions & Search -->
@@ -181,135 +296,203 @@
           <button
             class="icon-button mobile-menu-button"
             type="button"
-            aria-label="باز و بسته کردن منو"
+            aria-label="باز و بسته کردن منوی ناوبری کافه"
             aria-expanded="false"
             aria-controls="soren-offcanvas-drawer"
           >
             <svg
+              class="hamburger-icon"
               viewBox="0 0 24 24"
               fill="none"
               stroke="currentColor"
-              stroke-width="1.8"
+              stroke-width="2"
+              stroke-linecap="round"
               aria-hidden="true"
             >
-              <path d="M4 7h16M4 12h16M4 17h16" stroke-linecap="round" />
+              <line class="line line-top" x1="4" y1="7" x2="20" y2="7" />
+              <line class="line line-mid" x1="4" y1="12" x2="20" y2="12" />
+              <line class="line line-bot" x1="4" y1="17" x2="20" y2="17" />
             </svg>
           </button>
         </div>
       </div>
-      <!-- Mobile Navigation Panel -->
-      <div class="mobile-panel" id="mobile-panel">
-        <div class="mobile-panel-inner">
-          <form class="mobile-search-form" role="search">
-            <svg
-              class="search-icon"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              stroke-width="1.8"
-              aria-hidden="true"
-            >
-              <circle cx="10.8" cy="10.8" r="6.8" />
-              <path d="m16 16 4.5 4.5" stroke-linecap="round" />
-            </svg>
-            <input
-              id="mobile-search-input"
-              type="search"
-              aria-label="جست‌وجو در منوی کافه"
-              placeholder="جست‌وجو در منوی کافه..."
-            />
-          </form>
-
-          <nav class="mobile-links" aria-label="منوی موبایل">
-            <a class="active" href="#home" aria-current="page">خانه</a>
-            <span class="mobile-links-label">محصولات</span>
-            <div class="mobile-products">
-              <a href="./pages/products.html">همه محصولات</a>
-              <a href="./pages/coffee.html">قهوه‌ها</a>
-              <a href="./pages/shakes.html">شیک‌ها</a>
-              <a href="./pages/cake.html">کیک و دسر</a>
-            </div>
-            <a href="./pages/about.html">درباره ما</a>
-            <a href="#site-footer">تماس با ما</a>
-          </nav>
-        </div>
-      </div>
     </header>
 
-    <!-- Mobile Off-Canvas Drawer (Cafe Information & Hospitality) -->
+    <!-- ========================================================
+         منوی کشویی موبایل (Artisan Off-Canvas Drawer)
+         طراحی اختصاصی کافه سورن — Neo-Artisanal & Accessible
+         ======================================================== -->
     <div class="soren-drawer-backdrop" id="soren-drawer-backdrop" aria-hidden="true"></div>
-    <aside class="soren-offcanvas-drawer" id="soren-offcanvas-drawer" aria-label="منوی اطلاعات کافه" aria-hidden="true">
+    <aside
+      class="soren-offcanvas-drawer"
+      id="soren-offcanvas-drawer"
+      role="dialog"
+      aria-modal="true"
+      aria-label="منوی اصلی و دسترسی کافه سورن"
+      aria-hidden="true"
+    >
+      <!-- هدر کشو: برند و دکمه بستن -->
       <div class="drawer-header">
-        <div class="drawer-brand">
-          <span class="drawer-title">کافه سورن</span>
-          <span class="drawer-subtitle">برشته‌کاری تخصصی و بیکری</span>
-        </div>
-        <button type="button" class="drawer-close-btn" id="drawer-close-btn" aria-label="بستن منو">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
-            <path d="M18 6L6 18M6 6l12 12" stroke-linecap="round"/>
+        <a href="#home" class="drawer-brand" aria-label="صفحه اصلی کافه سورن">
+          <img
+            src="./images/brand/soren-logo.svg"
+            alt=""
+            class="drawer-brand-logo"
+            width="36"
+            height="36"
+            aria-hidden="true"
+          />
+          <div class="drawer-brand-text">
+            <span class="drawer-title">کافه سورن</span>
+            <span class="drawer-subtitle">برشته‌کاری تخصصی و بیکری</span>
+          </div>
+        </a>
+        <button
+          type="button"
+          class="drawer-close-btn"
+          id="drawer-close-btn"
+          aria-label="بستن منو"
+        >
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M18 6L6 18M6 6l12 12" />
           </svg>
         </button>
       </div>
 
       <div class="drawer-body">
-        <!-- Live Barista & Kitchen Status Indicator -->
+        <!-- وضعیت زنده بار و پذیرایی -->
         <div class="drawer-barista-status">
-          <span class="status-pulse-dot"></span>
-          <span class="status-text" id="drawer-barista-text">باریستا: آماده پذیرش سفارش حضوری و بیرون‌بر</span>
+          <div class="drawer-status-top">
+            <span class="status-pulse-dot" aria-hidden="true"></span>
+            <span class="status-text" id="drawer-barista-text">باریستا: آماده پذیرش سفارش حضوری و بیرون‌بر</span>
+          </div>
+          <span class="drawer-status-hours">ساعات سرویس‌دهی: ۸:۰۰ الی ۲۳:۳۰</span>
         </div>
 
-        <!-- Secondary Navigation Links -->
-        <nav class="drawer-nav" aria-label="لینک‌های کافه">
-          <a href="#about-soren" class="drawer-nav-item">
+        <!-- ناوبری اصلی -->
+        <nav class="drawer-nav" aria-label="پیوندهای اصلی سایت">
+          <div class="drawer-nav-group-title">بخش‌های کافه</div>
+
+          <a href="#home" class="drawer-nav-item active" aria-current="page">
             <span class="nav-item-icon">
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                <path d="M18 8h1a4 4 0 0 1 0 8h-1M2 8h16v9a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4V8ZM6 2v3M10 2v3M14 2v3"/>
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <path d="M3 10.5 12 3l9 7.5V20a1 1 0 0 1-1 1h-5v-6h-6v6H4a1 1 0 0 1-1-1v-9.5Z" />
               </svg>
             </span>
-            <span>داستان و فلسفه سورن</span>
+            <span class="nav-item-label">صفحه اصلی</span>
           </a>
+
+          <!-- منوی کاتالوگ محصولات با دسته‌بندی سریع -->
+          <div class="drawer-menu-category-block">
+            <a href="./pages/products.html" class="drawer-nav-item drawer-menu-parent">
+              <span class="nav-item-icon">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                  <path d="M18 8h1a4 4 0 0 1 0 8h-1M2 8h16v9a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4V8ZM6 2v3M10 2v3M14 2v3"/>
+                </svg>
+              </span>
+              <span class="nav-item-label">منوی محصولات</span>
+              <span class="drawer-nav-tag">کاتالوگ</span>
+            </a>
+
+            <div class="drawer-category-quicklinks" aria-label="دسته‌بندی‌های منو">
+              <a href="./pages/coffee.html" class="category-quicklink">
+                <span class="quicklink-dot" aria-hidden="true"></span>
+                <span>قهوه‌ها</span>
+              </a>
+              <a href="./pages/shakes.html" class="category-quicklink">
+                <span class="quicklink-dot" aria-hidden="true"></span>
+                <span>شیک‌ها</span>
+              </a>
+              <a href="./pages/cake.html" class="category-quicklink">
+                <span class="quicklink-dot" aria-hidden="true"></span>
+                <span>کیک و دسر</span>
+              </a>
+            </div>
+          </div>
+
           <a href="./pages/about.html" class="drawer-nav-item">
             <span class="nav-item-icon">
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                <path d="M12 2v20M2 12h20M4.93 4.93l14.14 14.14M4.93 19.07l14.14-14.14"/>
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <circle cx="12" cy="12" r="10" />
+                <path d="M12 16v-4M12 8h.01" />
               </svg>
             </span>
-            <span>درباره ما و تیم برشته‌کاری</span>
+            <span class="nav-item-label">درباره ما و داستان سورن</span>
           </a>
-          <a href="#menu" class="drawer-nav-item">
+
+          <a href="./pages/cart.html" class="drawer-nav-item drawer-cart-link">
             <span class="nav-item-icon">
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                <path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1-2.5-2.5Z"/>
-                <path d="M6 6h10M6 10h10"/>
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <path d="M5 8h14l1 12H4L5 8Z" />
+                <path d="M9 9V6a3 3 0 0 1 6 0v3" />
               </svg>
             </span>
-            <span>مشاهده کاتالوگ محصولات</span>
+            <span class="nav-item-label">سبد خرید سفارش</span>
+            <span class="drawer-cart-badge" id="drawer-cart-badge" aria-live="polite">۰</span>
+          </a>
+
+          <a href="./pages/login.html" class="drawer-nav-item">
+            <span class="nav-item-icon">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <circle cx="12" cy="8" r="3.5" />
+                <path d="M4.5 20c.6-4 3.2-6 7.5-6s6.9 2 7.5 6" />
+              </svg>
+            </span>
+            <span class="nav-item-label">ورود / حساب کاربری</span>
           </a>
         </nav>
 
-        <!-- Opening Hours & Contact Details -->
-        <div class="drawer-info-block">
-          <h4 class="drawer-info-title">ساعات پذیرایی حضوری</h4>
-          <p class="drawer-info-text">همه‌روزه از ساعت ۸:۰۰ صبح الی ۲۳:۳۰ شب</p>
-          <p class="drawer-info-text">سفارش بیرون‌بر و اسنپ‌باکس فعال است</p>
+        <!-- دسترسی سریع و اطلاعات پذیرایی -->
+        <div class="drawer-contact-card">
+          <div class="drawer-nav-group-title">اطلاعات و تماس سریع</div>
+
+          <a href="tel:03136224422" class="drawer-action-row call-row" aria-label="تماس با کافه سورن ۰۳۱۳۶۲۲۴۴۲۲">
+            <div class="action-icon">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/>
+              </svg>
+            </div>
+            <div class="action-texts">
+              <span class="action-title">سفارش و هماهنگی تلفنی</span>
+              <span class="action-sub" dir="ltr">۰۳۱-۳۶۲۲۴۴۲۲</span>
+            </div>
+          </a>
+
+          <a href="https://maps.google.com/?q=Isfahan+Soren+Cafe" target="_blank" rel="noopener noreferrer" class="drawer-action-row map-row" aria-label="مسیریابی به کافه سورن در اصفهان">
+            <div class="action-icon">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/>
+                <circle cx="12" cy="10" r="3"/>
+              </svg>
+            </div>
+            <div class="action-texts">
+              <span class="action-title">مراجعه حضوری</span>
+              <span class="action-sub">اصفهان، خیابان چهارباغ عباسی</span>
+            </div>
+          </a>
+
+          <div class="drawer-socials">
+            <a href="https://instagram.com" target="_blank" rel="noopener noreferrer" class="drawer-social-link" aria-label="اینستاگرام کافه سورن">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <rect x="2" y="2" width="20" height="20" rx="5" ry="5"/>
+                <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"/>
+                <line x1="17.5" y1="6.5" x2="17.51" y2="6.5"/>
+              </svg>
+              <span>اینستاگرام</span>
+            </a>
+            <a href="https://t.me" target="_blank" rel="noopener noreferrer" class="drawer-social-link" aria-label="تلگرام کافه سورن">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                <path d="M21.8 4.2 18.6 20c-.2 1.1-.8 1.4-1.7.9l-4.7-3.5-2.3 2.2c-.3.3-.5.5-1 .5l.3-4.8 8.8-8c.4-.4-.1-.6-.6-.2L6.5 14 1.9 12.6c-1-.3-1-1 .2-1.5L20 4.1c.8-.3 1.9.2 1.8.1Z"/>
+              </svg>
+              <span>تلگرام</span>
+            </a>
+          </div>
         </div>
 
-        <div class="drawer-info-block">
-          <h4 class="drawer-info-title">تماس و شبکه‌های اجتماعی</h4>
-          <a href="tel:02188888888" class="drawer-contact-link">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-              <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/>
-            </svg>
-            <span>تماس با کافه</span>
-          </a>
-          <a href="https://instagram.com" target="_blank" rel="noopener noreferrer" class="drawer-contact-link">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-              <rect x="2" y="2" width="20" height="20" rx="5" ry="5"/>
-              <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"/>
-              <line x1="17.5" y1="6.5" x2="17.51" y2="6.5"/>
-            </svg>
-            <span>اینستاگرام سورن</span>
-          </a>
+        <!-- پاورقی برند درون کشو -->
+        <div class="drawer-footer">
+          <p class="drawer-colophon">برشته‌کاری تخصصی و بیکری دست‌ساز سورن</p>
+          <span class="drawer-motto">عصاره اصیل، آرامش و کیفیت</span>
         </div>
       </div>
     </aside>
@@ -1531,7 +1714,8 @@
             <ul>
               <li><a href="./index.html">خانه</a></li>
               <li><a href="./pages/about.html">درباره ما</a></li>
-              <li><a href="#">تماس با ما</a></li>
+              <li><a href="./pages/terms.html">شرایط و قوانین</a></li>
+              <li><a href="./pages/cookies.html">سیاست کوکی‌ها</a></li>
             </ul>
           </nav>
 
@@ -1635,7 +1819,7 @@
           <!-- Touch Quick Action Controls (Call / Map) -->
           <div class="footer-actions-row">
             <a
-              href="tel:02188884422"
+              href="tel:03136224422"
               class="footer-action-btn footer-btn-call"
               aria-label="تماس تلفنی مستقیم با کافه سورن"
             >
@@ -1646,7 +1830,7 @@
             </a>
 
             <a
-              href="https://maps.google.com/?q=Tehran+Soren+Cafe"
+              href="https://maps.google.com/?q=Isfahan+Soren+Cafe"
               target="_blank"
               rel="noopener noreferrer"
               class="footer-action-btn footer-btn-map"
@@ -1895,26 +2079,16 @@
           <input type="text" id="sheet-order-note" class="sheet-note-input" placeholder="مثلاً: شیر کم‌چرب، بدون شکر، دمای سرو ملایم..." />
         </div>
 
-        <!-- Cart Total & Summary Breakdown -->
-        <div class="sheet-summary-box">
-          <div class="summary-line">
-            <span>مجموع اقلام</span>
-            <strong id="sheet-subtotal-price">۰ تومان</strong>
-          </div>
-          <div class="summary-line discount-line">
-            <span>تخفیف ویژه سورن</span>
-            <strong id="sheet-discount-price">۰ تومان</strong>
-          </div>
-          <div class="summary-line total-line">
-            <span>مبلغ نهایی قابل پرداخت</span>
-            <strong id="sheet-final-price">۰ تومان</strong>
-          </div>
-        </div>
       </div>
 
       <div class="sheet-footer">
+        <div class="sheet-total-row">
+          <span class="sheet-total-label">مبلغ کل سفارش</span>
+          <strong class="sheet-total-price" id="sheet-final-price">۰ تومان</strong>
+        </div>
         <button type="button" class="sheet-checkout-btn" id="sheet-checkout-btn">
-          <span>تکمیل سفارش و پرداخت آنلاین</span>
+          <span class="checkout-spinner" aria-hidden="true"></span>
+          <span class="checkout-btn-text">تکمیل سفارش و پرداخت آنلاین</span>
           <span class="checkout-btn-arrow" aria-hidden="true">←</span>
         </button>
         <a href="./pages/cart.html" class="sheet-full-cart-link">مشاهده صفحه کامل سبد خرید</a>

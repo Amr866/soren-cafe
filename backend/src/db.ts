@@ -1,5 +1,6 @@
 import { Database } from "bun:sqlite";
 import { join } from "path";
+import { normalizeSearchText } from "./routes/helpers.ts";
 
 // Initialize SQLite database in WAL mode for maximum concurrent read/write performance
 const dbPath = join(import.meta.dir, "../soren.db");
@@ -60,9 +61,29 @@ db.exec(`
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP
   );
 
+  CREATE TABLE IF NOT EXISTS users (
+    id TEXT PRIMARY KEY,
+    name TEXT NOT NULL,
+    email TEXT NOT NULL UNIQUE COLLATE NOCASE,
+    password_hash TEXT NOT NULL,
+    role TEXT DEFAULT 'customer',
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+  );
+
+  CREATE TABLE IF NOT EXISTS password_resets (
+    id TEXT PRIMARY KEY,
+    email TEXT NOT NULL COLLATE NOCASE,
+    token TEXT NOT NULL UNIQUE,
+    expires_at INTEGER NOT NULL,
+    used INTEGER NOT NULL DEFAULT 0,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+  );
+
   CREATE INDEX IF NOT EXISTS idx_orders_status ON orders(status);
   CREATE INDEX IF NOT EXISTS idx_orders_table ON orders(table_number);
   CREATE INDEX IF NOT EXISTS idx_tables_status ON tables(status);
+  CREATE INDEX IF NOT EXISTS idx_password_resets_token ON password_resets(token);
+  CREATE INDEX IF NOT EXISTS idx_password_resets_email ON password_resets(email);
 `);
 
 export interface Product {
@@ -142,13 +163,27 @@ if (tableCountCheck.count === 0) {
 
 // ---------------- Database Operations ----------------
 
-export function getAllProducts(category?: string): Product[] {
-  if (category) {
+export function getAllProducts(category?: string, query?: string): Product[] {
+  let products: Product[];
+  if (category && category !== "all") {
     const stmt = db.prepare("SELECT * FROM products WHERE category = ? ORDER BY price ASC");
-    return stmt.all(category) as Product[];
+    products = stmt.all(category) as Product[];
+  } else {
+    const stmt = db.prepare("SELECT * FROM products ORDER BY category, price ASC");
+    products = stmt.all() as Product[];
   }
-  const stmt = db.prepare("SELECT * FROM products ORDER BY category, price ASC");
-  return stmt.all() as Product[];
+
+  const normQuery = normalizeSearchText(query);
+  if (!normQuery) {
+    return products;
+  }
+
+  return products.filter((p) => {
+    const nameNorm = normalizeSearchText(p.name);
+    const descNorm = normalizeSearchText(p.description);
+    const tagsNorm = normalizeSearchText(p.tags);
+    return nameNorm.includes(normQuery) || descNorm.includes(normQuery) || tagsNorm.includes(normQuery);
+  });
 }
 
 export function getProductById(id: string): Product | null {
@@ -557,4 +592,118 @@ export function cleanExpiredTableHolds(): string[] {
   }
 
   return expiredRows.map((r) => r.id);
+}
+
+// ---------------- Authentication & Password Reset Layer ----------------
+
+export interface UserRecord {
+  id: string;
+  name: string;
+  email: string;
+  password_hash: string;
+  role: string;
+  created_at: string;
+}
+
+export interface PasswordResetRecord {
+  id: string;
+  email: string;
+  token: string;
+  expires_at: number;
+  used: number;
+  created_at: string;
+}
+
+export function getUserByEmail(email: string): UserRecord | null {
+  if (!email || typeof email !== "string") return null;
+  const stmt = db.prepare("SELECT * FROM users WHERE email = ? COLLATE NOCASE");
+  return (stmt.get(email.trim().toLowerCase()) as UserRecord) || null;
+}
+
+export function createUser(name: string, email: string, passwordHash: string, role = "customer"): UserRecord {
+  const id = `usr_${Math.random().toString(36).substring(2, 10)}`;
+  const stmt = db.prepare(`
+    INSERT INTO users (id, name, email, password_hash, role)
+    VALUES (?, ?, ?, ?, ?)
+  `);
+  stmt.run(id, name.trim(), email.trim().toLowerCase(), passwordHash, role);
+  return getUserByEmail(email)!;
+}
+
+export function createPasswordReset(email: string, ttlMs = 15 * 60 * 1000): { token: string; expiresAt: number } {
+  const id = `rst_${Math.random().toString(36).substring(2, 10)}`;
+  const bytes = new Uint8Array(24);
+  crypto.getRandomValues(bytes);
+  const token = Array.from(bytes)
+    .map((b) => b.toString(16).padStart(2, "0"))
+    .join("");
+  const expiresAt = Date.now() + ttlMs;
+
+  const stmt = db.prepare(`
+    INSERT INTO password_resets (id, email, token, expires_at, used)
+    VALUES (?, ?, ?, ?, 0)
+  `);
+  stmt.run(id, email.trim().toLowerCase(), token, expiresAt);
+  return { token, expiresAt };
+}
+
+export function getResetRecordByToken(token: string): PasswordResetRecord | null {
+  if (!token || typeof token !== "string") return null;
+  const stmt = db.prepare("SELECT * FROM password_resets WHERE token = ?");
+  return (stmt.get(token.trim()) as PasswordResetRecord) || null;
+}
+
+export function verifyResetToken(token: string): { valid: boolean; email?: string; reason?: string } {
+  if (!token || typeof token !== "string" || !token.trim()) {
+    return { valid: false, reason: "MISSING_TOKEN" };
+  }
+  const record = getResetRecordByToken(token);
+  if (!record) {
+    return { valid: false, reason: "INVALID_TOKEN" };
+  }
+  if (record.used === 1) {
+    return { valid: false, reason: "ALREADY_USED" };
+  }
+  if (Date.now() > record.expires_at) {
+    return { valid: false, reason: "EXPIRED" };
+  }
+  return { valid: true, email: record.email };
+}
+
+export function resetPasswordWithToken(token: string, newPasswordHash: string): { success: boolean; error?: string } {
+  const verification = verifyResetToken(token);
+  if (!verification.valid || !verification.email) {
+    return { success: false, error: verification.reason || "INVALID_OR_EXPIRED_TOKEN" };
+  }
+
+  db.exec("BEGIN TRANSACTION;");
+  try {
+    const markStmt = db.prepare("UPDATE password_resets SET used = 1 WHERE token = ?");
+    markStmt.run(token.trim());
+
+    const invalidateOthers = db.prepare(
+      "UPDATE password_resets SET used = 1 WHERE email = ? COLLATE NOCASE AND used = 0"
+    );
+    invalidateOthers.run(verification.email);
+
+    const updateUser = db.prepare("UPDATE users SET password_hash = ? WHERE email = ? COLLATE NOCASE");
+    updateUser.run(newPasswordHash, verification.email);
+
+    db.exec("COMMIT;");
+    return { success: true };
+  } catch (err) {
+    db.exec("ROLLBACK;");
+    throw err;
+  }
+}
+
+// Ensure demo user is seeded for testing
+const demoEmail = "user@soren.cafe";
+const existingDemo = db.prepare("SELECT id FROM users WHERE email = ? COLLATE NOCASE").get(demoEmail);
+if (!existingDemo) {
+  const initialHash = await Bun.password.hash("SorenCafe2026!");
+  db.prepare(`
+    INSERT OR IGNORE INTO users (id, name, email, password_hash, role)
+    VALUES (?, ?, ?, ?, ?)
+  `).run("usr_demo", "کاربر کافه سورن", demoEmail, initialHash, "customer");
 }

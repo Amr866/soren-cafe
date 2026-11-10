@@ -1,0 +1,431 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+    <meta name="theme-color" content="#F6F3EE" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+    <meta name="apple-mobile-web-app-title" content="کافه سورن" />
+    <title>شرایط و قوانین استفاده | کافه سورن</title>
+    <link rel="manifest" href="../manifest.json" />
+    <link rel="icon" type="image/svg+xml" href="../images/brand/favicon.svg" />
+    <link rel="apple-touch-icon" href="../images/brand/favicon.svg" />
+
+    <!-- Typography: Peyda & Plus Jakarta Sans -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Vazirmatn:wght@300;400;500;600;700;800;900&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="preload" href="../fonts/Peyda-Regular.woff2" as="font" type="font/woff2" crossorigin />
+    <link rel="preload" href="../fonts/Peyda-Bold.woff2" as="font" type="font/woff2" crossorigin />
+    <link rel="stylesheet" href="../css/style.css?v=2.5-legal" />
+  </head>
+
+  <body class="legal-page-body">
+    <!-- Site Header -->
+    <header class="site-header">
+      <div class="header-inner">
+        <a class="brand" href="../index.html" aria-label="صفحه اصلی کافه سورن">
+          <img
+            src="../images/brand/soren-logo.svg"
+            alt="لوگوی کافه سورن"
+            class="brand-logo"
+            width="58"
+            height="58"
+          />
+          <span class="brand-copy">
+            <span class="brand-name">کافه سورن</span>
+            <span class="brand-en">SOREN CAFÉ</span>
+          </span>
+        </a>
+
+        <nav class="desktop-nav" aria-label="منوی اصلی">
+          <a class="nav-link" href="../index.html">خانه</a>
+          <a class="nav-link" href="./products.html">محصولات</a>
+          <a class="nav-link" href="./about.html">درباره ما</a>
+          <a class="nav-link" href="./cart.html">سفارش / سبد خرید</a>
+        </nav>
+      </div>
+    </header>
+
+    <!-- Legal Header Banner -->
+    <section class="legal-hero-banner">
+      <div class="legal-hero-inner">
+        <div class="legal-badge-row">
+          <span class="legal-badge">سند حقوقی و پذیرش خدمات</span>
+          <span class="legal-badge badge-updated">آخرین به‌روزرسانی: ۱۹ آبان ۱۴۰۵ (Nov 9, 2026)</span>
+        </div>
+        <h1 class="legal-title">شرایط و قوانین عمومی استفاده</h1>
+        <p class="legal-subtitle">
+          شفافیت، اصالت و احترام به حقوق مراجعین؛ پیش‌نیاز تجربه یک فنجان قهوه آرامش‌بخش در فضای تخصصی سورن.
+        </p>
+
+        <div class="legal-toolbar-row">
+          <button type="button" class="legal-btn legal-btn-primary" onclick="window.print()">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <polyline points="6 9 6 2 18 2 18 9"></polyline>
+              <path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"></path>
+              <rect x="6" y="14" width="12" height="8"></rect>
+            </svg>
+            چاپ / ذخیره PDF
+          </button>
+          <a href="./cookies.html" class="legal-btn legal-btn-outline">
+            سیاست و تنظیمات کوکی‌ها
+          </a>
+        </div>
+
+        <!-- Quick Search Component -->
+        <div class="legal-search-container">
+          <div class="legal-search-box">
+            <svg class="legal-search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <circle cx="11" cy="11" r="8"></circle>
+              <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+            </svg>
+            <input
+              type="search"
+              id="legal-search-input"
+              class="legal-search-input"
+              placeholder="جستجو در بندهای توافق‌نامه (مثال: بازپرداخت، رزرو، مسئولیت)..."
+              aria-label="جستجوی متن قوانین"
+            />
+            <div class="legal-search-controls">
+              <span id="legal-search-count" class="legal-search-count" aria-live="polite">۰ نتیجه</span>
+              <button type="button" id="legal-search-prev" class="legal-search-nav-btn" aria-label="مورد قبلی" disabled>↑</button>
+              <button type="button" id="legal-search-next" class="legal-search-nav-btn" aria-label="مورد بعدی" disabled>↓</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Main Content Area with Sticky Sidebar ToC -->
+    <div class="legal-main-wrapper">
+      <!-- Sticky Sidebar Table of Contents -->
+      <aside class="legal-toc-sidebar" aria-label="فهرست عناوین">
+        <h2 class="legal-toc-title">
+          <span>فهرست بندها</span>
+          <span style="font-size: 12px; font-weight: normal; color: var(--text-muted);">ToC</span>
+        </h2>
+        <nav>
+          <ul class="legal-toc-list" id="legal-toc-list">
+            <li class="legal-toc-item"><a href="#section-general" class="legal-toc-link">۱. کلیات و تعاریف اولیه</a></li>
+            <li class="legal-toc-item"><a href="#section-ordering" class="legal-toc-link">۲. فرآیند سفارش‌گذاری و قیمت‌گذاری</a></li>
+            <li class="legal-toc-item"><a href="#section-tables" class="legal-toc-link">۳. رزرو میز و حضور در سالن</a></li>
+            <li class="legal-toc-item"><a href="#section-refunds" class="legal-toc-link">۴. شرایط لغو، عودت و بازپرداخت</a></li>
+            <li class="legal-toc-item"><a href="#section-allergies" class="legal-toc-link">۵. حساسیت‌های غذایی و آلرژن‌ها</a></li>
+            <li class="legal-toc-item"><a href="#section-ip" class="legal-toc-link">۶. مالکیت معنوی و نام تجاری</a></li>
+            <li class="legal-toc-item"><a href="#section-dispute" class="legal-toc-link">۷. قانون حاکم و حل اختلاف</a></li>
+          </ul>
+        </nav>
+      </aside>
+
+      <!-- Editorial Legal Prose Column -->
+      <main class="legal-content-prose" id="legal-prose-content">
+        <!-- Section 1 -->
+        <section id="section-general" class="legal-section">
+          <div class="legal-section-header">
+            <span class="legal-section-tag">SECTION 01</span>
+            <h2 class="legal-section-title">۱. کلیات و تعاریف اولیه</h2>
+          </div>
+          <p>
+            به وب‌سایت و پلتفرم دیجیتال کافه سورن خوش آمدید. استفاده شما از وب‌سایت، منوی آنلاین، سیستم سفارش سر میز (QR) و دریافت خدمات از مجموعه کافه سورن، به منزله مطالعه دقیق، آگاهی کامل و پذیرش بی‌قیدوشرط شرایط و قوانین این سند است.
+          </p>
+          <p>
+            در این توافق‌نامه، اصطلاحات زیر در معانی مشخص‌شده به کار می‌روند:
+          </p>
+          <ul>
+            <li><strong>کافه سورن (مجموعه):</strong> کافه تخصصی و بیکری دست‌ساز سورن با برند رسمی SOREN CAFÉ.</li>
+            <li><strong>مشتری / کاربر:</strong> هر شخص حقیقی که از طریق درگاه‌های دیجیتال یا به صورت حضوری در فضای کافه اقدام به مشاهده منو، ثبت سفارش یا رزرو میز می‌نماید.</li>
+            <li><strong>پلتفرم دیجیتال:</strong> سامانه تحت وب حاضر که شامل منوی بلادرنگ، سامانه تعاملی باریستا (KDS) و سبد سفارش آنلاین است.</li>
+          </ul>
+
+          <div class="legal-en-mirror">
+            <div class="legal-en-header">
+              <h3 class="legal-en-title">1. General Scope & Definitions</h3>
+              <span class="legal-en-badge">Summary</span>
+            </div>
+            <p class="legal-en-body">
+              By accessing Soren Café's digital ordering system, menus, or seated table service, you unconditionally agree to these Terms & Conditions. References to "Soren Café" denote the artisan specialty bakehouse entity; "Customer" refers to any patron placing orders or using web facilities.
+            </p>
+          </div>
+        </section>
+
+        <!-- Section 2 -->
+        <section id="section-ordering" class="legal-section">
+          <div class="legal-section-header">
+            <span class="legal-section-tag">SECTION 02</span>
+            <h2 class="legal-section-title">۲. فرآیند سفارش‌گذاری و قیمت‌گذاری</h2>
+          </div>
+          <p>
+            کافه سورن متعهد به ارائه شفاف‌ترین تجربه سفارش است. بر اساس منشور فنی و اخلاقی مجموعه:
+          </p>
+          <ul>
+            <li>کلیه قیمت‌های درج‌شده در منوی آنلاین به واحد <strong>تومان</strong> بوده و نهایی هستند. هیچ‌گونه هزینه مازاد تحت عنوان حق سرویس یا مالیات مخفی به سفارش‌های داخل سالن اضافه نمی‌شود.</li>
+            <li>ثبت سفارش نیازی به ایجاد حساب کاربری اجباری یا رمز عبور ندارد (اصل دسترسی بدون مانع). سفارش‌ها مستقیماً با شماره میز یا تحویل حضوری شناسایی و به ایستگاه باریستا ارسال می‌گردند.</li>
+            <li>به محض ارسال سفارش و دریافت تاییده بارکد/شماره فیش، تراکنش اتمیک بوده و آماده‌سازی عصاره قهوه یا اقلام بیکری در همان لحظه در صف باریستا آغاز می‌شود.</li>
+          </ul>
+
+          <div class="legal-en-mirror">
+            <div class="legal-en-header">
+              <h3 class="legal-en-title">2. Ordering & Transparent Pricing</h3>
+              <span class="legal-en-badge">Summary</span>
+            </div>
+            <p class="legal-en-body">
+              All prices are listed in Iranian Tomans with no hidden service surcharges. Patrons can order instantly without mandatory account or password hurdles. Orders transmit in real-time directly to the Barista Kitchen Display System upon submission.
+            </p>
+          </div>
+        </section>
+
+        <!-- Section 3 -->
+        <section id="section-tables" class="legal-section">
+          <div class="legal-section-header">
+            <span class="legal-section-tag">SECTION 03</span>
+            <h2 class="legal-section-title">۳. رزرو میز و حضور در سالن</h2>
+          </div>
+          <p>
+            فضای کافه سورن برای ایجاد حس آرامش و تمرکز در کنار عطر قهوه تخصصی طراحی شده است. ضوابط حضور در سالن عبارتند از:
+          </p>
+          <ul>
+            <li>رزرو میز از طریق اسکن بارکد QR یا سامانه آنلاین به مدت ۱۵ دقیقه پس از زمان رزرو شده معتبر بوده و در صورت عدم حضور، میز به صف انتظار واگذار می‌شود.</li>
+            <li>استفاده از رایانه شخصی (لپ‌تاپ) در میزهای کار اشتراکی مجاز است. در ساعات اوج شلوغی (پیک عصرگاهی)، مدیریت کافه ممکن است حداکثر زمان استفاده از میزهای انفرادی را به ۹۰ دقیقه محدود کند تا سایر مراجعین نیز امکان حضور داشته باشند.</li>
+            <li>مجموعه کافه سورن محیطی عاری از دخانیات در بخش سالن سرپوشیده است؛ مصرف دخانیات صرفاً در تراس باز مجاز می‌باشد.</li>
+          </ul>
+
+          <div class="legal-en-mirror">
+            <div class="legal-en-header">
+              <h3 class="legal-en-title">3. Seating, Table Reservation & Etiquette</h3>
+              <span class="legal-en-badge">Summary</span>
+            </div>
+            <p class="legal-en-body">
+              QR table reservations are held for 15 minutes past the scheduled time. During peak terrace hours, laptop work sessions at shared bars may be respectfully capped at 90 minutes. Indoor seating is strictly non-smoking.
+            </p>
+          </div>
+        </section>
+
+        <!-- Section 4 -->
+        <section id="section-refunds" class="legal-section">
+          <div class="legal-section-header">
+            <span class="legal-section-tag">SECTION 04</span>
+            <h2 class="legal-section-title">۴. شرایط لغو، عودت و بازپرداخت</h2>
+          </div>
+          <p>
+            به دلیل ماهیت مواد خوراکی تازه و نوشیدنی‌های فاسدشدنی، ضوابط لغو و عودت به شرح زیر اعمال می‌گردد:
+          </p>
+          <ul>
+            <li><strong>لغو پیش از آماده‌سازی:</strong> چنانچه سفارش در وضعیت «در صف انتظار» باشد و فرآیند عصاره‌گیری یا برش کیک شروع نشده باشد، امکان لغو با بازگشت ۱۰۰٪ وجه وجود دارد.</li>
+            <li><strong>عدم انطباق کیفی:</strong> چنانچه سفارش تحویل داده شده با مشخصات سفارش (نظیر نوع شیر گیاهی، دمای سرو، یا سفارش بدون شکر) مطابقت نداشته باشد، نوشیدنی یا شیرینی بلافاصله بدون هیچ‌گونه هزینه اضافه تجدید سرو خواهد شد.</li>
+            <li><strong>مدت زمان استرداد وجه:</strong> در صورت تایید لغو سفارش، مبلغ پرداختی حداکثر ظرف مدت ۲۴ ساعت کاری به حساب بانکی مشتری مسترد می‌گردد.</li>
+          </ul>
+
+          <div class="legal-en-mirror">
+            <div class="legal-en-header">
+              <h3 class="legal-en-title">4. Cancellation, Returns & Refund Policy</h3>
+              <span class="legal-en-badge">Summary</span>
+            </div>
+            <p class="legal-en-body">
+              Orders canceled prior to barista extraction are fully refunded. Any preparation discrepancies (e.g. oat milk substitutions, temperature mismatch) will be remade immediately at no charge. Approved refunds process within 24 business hours.
+            </p>
+          </div>
+        </section>
+
+        <!-- Section 5 -->
+        <section id="section-allergies" class="legal-section">
+          <div class="legal-section-header">
+            <span class="legal-section-tag">SECTION 05</span>
+            <h2 class="legal-section-title">۵. حساسیت‌های غذایی و آلرژن‌ها</h2>
+          </div>
+          <p>
+            تعهد ما به سلامتی مراجعین قطعی است. در کلیه کارت‌های منو و جدول ترکیبات، مواد تشکیل‌دهنده به دقت ذکر گردیده است:
+          </p>
+          <ul>
+            <li>اقلام دارای آجیل و مغزیجات (پسته دامغان، فندق، گردو، بادام) و گلوتن به صورت واضح با برچسب هشدار مشخص شده‌اند.</li>
+            <li>مشتریان گرامی موظفند در هنگام ثبت سفارش، در بخش یادداشت باریستا یا به صورت شفاهی هرگونه حساسیت حاد به لاکتوز، گلوتن یا آجیل را اعلام فرمایند.</li>
+            <li>با وجود رعایت کامل پروتکل‌های بهداشتی، به دلیل استفاده مشترک از دستگاه‌های اسپرسو و محیط بیکری، احتمال تماس بسیار ناچیز ذرات (Cross-contamination) وجود دارد.</li>
+          </ul>
+
+          <div class="legal-en-mirror">
+            <div class="legal-en-header">
+              <h3 class="legal-en-title">5. Food Allergies & Dietary Disclosures</h3>
+              <span class="legal-en-badge">Summary</span>
+            </div>
+            <p class="legal-en-body">
+              All menu items disclose common allergens (dairy, nuts, gluten). Patrons are requested to notify baristas of severe dietary sensitivities upon order placement. While strict hygiene is enforced, traces of airborne nut dust may exist in the bakery.
+            </p>
+          </div>
+        </section>
+
+        <!-- Section 6 -->
+        <section id="section-ip" class="legal-section">
+          <div class="legal-section-header">
+            <span class="legal-section-tag">SECTION 06</span>
+            <h2 class="legal-section-title">۶. مالکیت معنوی و نام تجاری</h2>
+          </div>
+          <p>
+            کلیه حقوق مادی و معنوی نام و نشان «کافه سورن» (SOREN CAFÉ)، هویت بصری، نشان پرنده و نیلوفر، تصاویر اصیل عکاسی شده از محصولات، متون اختصاصی و کدهای منبع سامانه تحت وب، متعلق به این مجموعه بوده و هرگونه کپی‌برداری غیرمجاز یا استفاده تجاری پیگرد قانونی خواهد داشت.
+          </p>
+
+          <div class="legal-en-mirror">
+            <div class="legal-en-header">
+              <h3 class="legal-en-title">6. Intellectual Property & Brand Rights</h3>
+              <span class="legal-en-badge">Summary</span>
+            </div>
+            <p class="legal-en-body">
+              The Soren Café logo, typography, proprietary photography, and web architecture are protected intellectual property. Commercial reproduction or scraping without explicit consent is strictly prohibited.
+            </p>
+          </div>
+        </section>
+
+        <!-- Section 7 -->
+        <section id="section-dispute" class="legal-section">
+          <div class="legal-section-header">
+            <span class="legal-section-tag">SECTION 07</span>
+            <h2 class="legal-section-title">۷. قانون حاکم و حل اختلاف</h2>
+          </div>
+          <p>
+            این سند تابع قوانین تجارت الکترونیکی و مقررات عمومی جمهوری اسلامی ایران است. در صورت بروز هرگونه ابهام یا نارضایتی، اولویت کافه سورن حل‌وفصل صلح‌آمیز و جلب رضایت حداکثری مشتری از طریق گفتگو با مدیریت مجموعه است.
+          </p>
+          <p>
+            برای ارتباط مستقیم با پشتیبانی حقوقی و صدای مشتریان:
+            <br />
+            <strong>ایمیل ارتباطی:</strong> <a href="mailto:legal@soren.cafe">legal@soren.cafe</a>
+            <br />
+            <strong>تلفن مستقیم مدیریت:</strong> ۰۲۱-۸۸۲۲۴۴۰۰
+          </p>
+
+          <div class="legal-en-mirror">
+            <div class="legal-en-header">
+              <h3 class="legal-en-title">7. Governing Law & Dispute Resolution</h3>
+              <span class="legal-en-badge">Summary</span>
+            </div>
+            <p class="legal-en-body">
+              These terms are governed by applicable commercial laws. Inquiries or feedback may be addressed directly to management at legal@soren.cafe or +98-21-88224400.
+            </p>
+          </div>
+        </section>
+      </main>
+    </div>
+
+    <!-- Site Footer -->
+    <footer class="site-footer" id="site-footer">
+      <div class="footer-container">
+        <div class="footer-main">
+          <div class="footer-brand">
+            <a href="../index.html" class="footer-logo" aria-label="کافه سورن، صفحه اصلی">
+              <img
+                src="../images/brand/soren-logo.svg"
+                alt="لوگوی کافه سورن"
+                class="footer-logo-image"
+                width="43"
+                height="43"
+              />
+              <span>کافه سورن</span>
+            </a>
+
+            <p class="footer-description">
+              لحظه‌ای آرامش، عطر قهوه و طعمی که در خاطرت می‌ماند. در کافه سورن،
+              هر فنجان شروع یک تجربه دل‌نشین است.
+            </p>
+          </div>
+
+          <!-- Quick navigation links -->
+          <nav class="footer-links" aria-label="لینک‌های سریع">
+            <h3 class="footer-title">دسترسی سریع</h3>
+            <ul>
+              <li><a href="../index.html">خانه</a></li>
+              <li><a href="./about.html">درباره ما</a></li>
+              <li><a href="./terms.html" style="color: #e4c5af;">شرایط و قوانین</a></li>
+              <li><a href="./cookies.html">سیاست کوکی‌ها</a></li>
+            </ul>
+          </nav>
+
+          <!-- Menu links -->
+          <nav class="footer-links" aria-label="دسته‌بندی محصولات">
+            <h3 class="footer-title">منوی کافه</h3>
+            <ul>
+              <li><a href="./products.html">همه محصولات</a></li>
+              <li><a href="./coffee.html">قهوه‌ها</a></li>
+              <li><a href="./shakes.html">شیک‌ها</a></li>
+              <li><a href="./cake.html">کیک و دسر</a></li>
+            </ul>
+          </nav>
+
+          <!-- Social media links -->
+          <div class="footer-social">
+            <h3 class="footer-title">همراه سورن باشید</h3>
+
+            <p>
+              برای دیدن لحظه‌های کافه و آشنایی با طعم‌های تازه، ما را در
+              شبکه‌های اجتماعی دنبال کنید.
+            </p>
+
+            <div class="footer-social-links">
+              <!-- Instagram -->
+              <a
+                href="https://instagram.com"
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label="اینستاگرام کافه سورن"
+              >
+                <svg
+                  viewBox="0 0 24 24"
+                  width="21"
+                  height="21"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="1.7"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  aria-hidden="true"
+                >
+                  <rect x="3" y="3" width="18" height="18" rx="5" />
+                  <circle cx="12" cy="12" r="4" />
+                  <circle cx="17.5" cy="6.5" r="0.8" fill="currentColor" />
+                </svg>
+              </a>
+
+              <!-- Telegram -->
+              <a
+                href="https://t.me"
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label="تلگرام کافه سورن"
+              >
+                <svg
+                  viewBox="0 0 24 24"
+                  width="21"
+                  height="21"
+                  fill="currentColor"
+                  aria-hidden="true"
+                >
+                  <path
+                    d="M21.8 4.2 18.6 20c-.2 1.1-.8 1.4-1.7.9l-4.7-3.5-2.3 2.2c-.3.3-.5.5-1 .5l.3-4.8 8.8-8c.4-.4-.1-.6-.6-.2L6.5 14 1.9 12.6c-1-.3-1-1 .2-1.5L20 4.1c.8-.3 1.9.2 1.8.1Z"
+                  />
+                </svg>
+              </a>
+            </div>
+          </div>
+        </div>
+
+        <div class="footer-divider">
+          <span></span>
+          <span class="footer-divider-icon" aria-hidden="true">✦</span>
+          <span></span>
+        </div>
+
+        <div class="footer-bottom">
+          <p>© ۱۴۰۵ کافه سورن؛ تمام حقوق محفوظ است.</p>
+
+          <p class="footer-bottom-note">
+            با عشق، عطر قهوه و کمی آرامش
+            <span aria-hidden="true">♥</span>
+          </p>
+        </div>
+      </div>
+    </footer>
+
+    <script src="../main.js" defer></script>
+  </body>
+</html>

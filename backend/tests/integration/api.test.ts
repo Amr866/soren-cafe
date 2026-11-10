@@ -33,6 +33,42 @@ describe("HTTP REST API Endpoints & Zero-Trust Security", () => {
     }
   });
 
+  it("GET /api/v1/products filters by search query 'q' and handles edge cases", async () => {
+    // 1. English substring search in name/description
+    const doppioRes = await server.fetch(new Request(`${baseUrl}/api/v1/products?q=doppio`));
+    expect(doppioRes.status).toBe(200);
+    const doppioProducts = await doppioRes.json() as any[];
+    expect(doppioProducts.length).toBeGreaterThan(0);
+    expect(doppioProducts.every((p: any) => 
+      p.name.toLowerCase().includes("doppio") || (p.description && p.description.toLowerCase().includes("doppio"))
+    )).toBe(true);
+
+    // 2. Persian search query
+    const espressoRes = await server.fetch(new Request(`${baseUrl}/api/v1/products?q=${encodeURIComponent("اسپرسو")}`));
+    expect(espressoRes.status).toBe(200);
+    const espressoProducts = await espressoRes.json() as any[];
+    expect(espressoProducts.length).toBeGreaterThan(0);
+
+    // 3. Persian / Arabic character normalization (e.g. Arabic Yeh 'ي' vs Persian 'ی', Kaf 'ك' vs 'ک')
+    const arabicRes = await server.fetch(new Request(`${baseUrl}/api/v1/products?q=${encodeURIComponent("دوپيو")}`));
+    expect(arabicRes.status).toBe(200);
+    const arabicProducts = await arabicRes.json() as any[];
+    expect(arabicProducts.length).toBeGreaterThan(0);
+
+    // 4. Trimming and special characters (must not crash with regex or SQL errors)
+    const specialRes = await server.fetch(new Request(`${baseUrl}/api/v1/products?q=${encodeURIComponent("  (Soren)  ")}`));
+    expect(specialRes.status).toBe(200);
+    const specialProducts = await specialRes.json() as any[];
+    expect(specialProducts.length).toBeGreaterThan(0);
+
+    // 5. Non-matching query returns empty list
+    const noneRes = await server.fetch(new Request(`${baseUrl}/api/v1/products?q=nonexistent_product_xyz`));
+    expect(noneRes.status).toBe(200);
+    const noneProducts = await noneRes.json() as any[];
+    expect(Array.isArray(noneProducts)).toBe(true);
+    expect(noneProducts.length).toBe(0);
+  });
+
   it("GET /api/v1/openapi.json and GET /docs provide interactive OpenAPI specs", async () => {
     const openapiRes = await server.fetch(new Request(`${baseUrl}/api/v1/openapi.json`));
     expect(openapiRes.status).toBe(200);

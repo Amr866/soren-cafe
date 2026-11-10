@@ -120,7 +120,123 @@
           </div>
 
           <a class="nav-link" href="./about.html">درباره ما</a>
-          <a class="nav-link" href="#site-footer">تماس با ما</a>
+
+          <!-- Quick-Action Contact Popover Dropdown -->
+          <div class="dropdown contact-dropdown">
+            <button
+              class="contact-trigger"
+              type="button"
+              id="contact-popover-trigger"
+              aria-haspopup="true"
+              aria-expanded="false"
+              aria-label="اطلاعات تماس و دسترسی سریع به کافه سورن"
+            >
+              <span>تماس با ما</span>
+              <svg
+                class="chevron"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="1.8"
+                aria-hidden="true"
+              >
+                <path
+                  d="m6 9 6 6 6-6"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                />
+              </svg>
+            </button>
+
+            <div
+              class="dropdown-menu contact-popover"
+              id="contact-popover-menu"
+              role="region"
+              aria-label="اطلاعات تماس سریع کافه سورن"
+            >
+              <!-- Live Hospitality Status Header -->
+              <div class="contact-popover-header">
+                <div class="popover-status-badge">
+                  <span class="status-pulse-dot" aria-hidden="true"></span>
+                  <span class="status-badge-text">هم‌اکنون باز است</span>
+                </div>
+                <span class="popover-hours">سرویس‌دهی: ۸:۰۰ الی ۲۳:۳۰</span>
+              </div>
+
+              <!-- Quick Action Cards -->
+              <div class="contact-popover-body">
+                <!-- Direct Phone Call Action -->
+                <a
+                  href="tel:03136224422"
+                  class="contact-quick-item call-action"
+                  aria-label="تماس تلفنی با کافه سورن ۰۳۱۳۶۲۲۴۴۲۲"
+                >
+                  <div class="quick-item-icon">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                      <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/>
+                    </svg>
+                  </div>
+                  <div class="quick-item-content">
+                    <span class="quick-item-title">تماس و سفارش تلفنی</span>
+                    <span class="quick-item-sub" dir="ltr">۰۳۱-۳۶۲۲۴۴۲۲</span>
+                  </div>
+                  <span class="quick-item-action-badge">تماس</span>
+                </a>
+
+                <!-- Location & GPS Navigation Action -->
+                <a
+                  href="https://maps.google.com/?q=Isfahan+Soren+Cafe"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  class="contact-quick-item map-action"
+                  aria-label="مسیریابی آدرس کافه سورن روی نقشه"
+                >
+                  <div class="quick-item-icon">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                      <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/>
+                      <circle cx="12" cy="10" r="3"/>
+                    </svg>
+                  </div>
+                  <div class="quick-item-content">
+                    <span class="quick-item-title">مسیریابی حضوری</span>
+                    <span class="quick-item-sub">اصفهان، خیابان چهارباغ عباسی</span>
+                  </div>
+                  <span class="quick-item-action-badge">نقشه</span>
+                </a>
+              </div>
+
+              <!-- Social & Direct Channels -->
+              <div class="contact-popover-footer">
+                <a
+                  href="https://instagram.com"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  class="popover-social-btn"
+                  aria-label="اینستاگرام کافه سورن"
+                >
+                  <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                    <rect x="3" y="3" width="18" height="18" rx="5" />
+                    <circle cx="12" cy="12" r="4" />
+                    <circle cx="17.5" cy="6.5" r="0.8" fill="currentColor" />
+                  </svg>
+                  <span>اینستاگرام</span>
+                </a>
+
+                <a
+                  href="https://t.me"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  class="popover-social-btn"
+                  aria-label="کانال و پشتیبانی تلگرام کافه سورن"
+                >
+                  <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor" aria-hidden="true">
+                    <path d="M21.8 4.2 18.6 20c-.2 1.1-.8 1.4-1.7.9l-4.7-3.5-2.3 2.2c-.3.3-.5.5-1 .5l.3-4.8 8.8-8c.4-.4-.1-.6-.6-.2L6.5 14 1.9 12.6c-1-.3-1-1 .2-1.5L20 4.1c.8-.3 1.9.2 1.8.1Z"/>
+                  </svg>
+                  <span>تلگرام</span>
+                </a>
+              </div>
+            </div>
+          </div>
         </nav>
 
         <div class="header-actions">
@@ -209,60 +325,199 @@
           <button
             class="icon-button mobile-menu-button"
             type="button"
-            aria-label="باز و بسته کردن منو"
+            aria-label="باز و بسته کردن منوی ناوبری کافه"
             aria-expanded="false"
-            aria-controls="mobile-panel"
+            aria-controls="soren-offcanvas-drawer"
           >
             <svg
+              class="hamburger-icon"
               viewBox="0 0 24 24"
               fill="none"
               stroke="currentColor"
-              stroke-width="1.8"
+              stroke-width="2"
+              stroke-linecap="round"
               aria-hidden="true"
             >
-              <path d="M4 7h16M4 12h16M4 17h16" stroke-linecap="round" />
+              <line class="line line-top" x1="4" y1="7" x2="20" y2="7" />
+              <line class="line line-mid" x1="4" y1="12" x2="20" y2="12" />
+              <line class="line line-bot" x1="4" y1="17" x2="20" y2="17" />
             </svg>
           </button>
         </div>
       </div>
+    </header>
 
-      <div class="mobile-panel" id="mobile-panel">
-        <div class="mobile-panel-inner">
-          <form class="mobile-search-form" role="search">
-            <svg
-              class="search-icon"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              stroke-width="1.8"
-              aria-hidden="true"
-            >
-              <circle cx="10.8" cy="10.8" r="6.8" />
-              <path d="m16 16 4.5 4.5" stroke-linecap="round" />
-            </svg>
-            <input
-              id="mobile-search-input"
-              type="search"
-              aria-label="جست‌وجو در منوی کافه"
-              placeholder="جست‌وجو در منوی کافه..."
-            />
-          </form>
+    <!-- ========================================================
+         منوی کشویی موبایل (Artisan Off-Canvas Drawer)
+         ======================================================== -->
+    <div class="soren-drawer-backdrop" id="soren-drawer-backdrop" aria-hidden="true"></div>
+    <aside
+      class="soren-offcanvas-drawer"
+      id="soren-offcanvas-drawer"
+      role="dialog"
+      aria-modal="true"
+      aria-label="منوی اصلی و دسترسی کافه سورن"
+      aria-hidden="true"
+    >
+      <div class="drawer-header">
+        <a href="../index.html" class="drawer-brand" aria-label="صفحه اصلی کافه سورن">
+          <img
+            src="../images/brand/soren-logo.svg"
+            alt=""
+            class="drawer-brand-logo"
+            width="36"
+            height="36"
+            aria-hidden="true"
+          />
+          <div class="drawer-brand-text">
+            <span class="drawer-title">کافه سورن</span>
+            <span class="drawer-subtitle">برشته‌کاری تخصصی و بیکری</span>
+          </div>
+        </a>
+        <button
+          type="button"
+          class="drawer-close-btn"
+          id="drawer-close-btn"
+          aria-label="بستن منو"
+        >
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M18 6L6 18M6 6l12 12" />
+          </svg>
+        </button>
+      </div>
 
-          <nav class="mobile-links" aria-label="منوی موبایل">
-            <a href="../index.html">خانه</a>
-            <span class="mobile-links-label">محصولات</span>
-            <div class="mobile-products">
-              <a href="./products.html">همه محصولات</a>
-              <a href="./coffee.html">قهوه‌ها</a>
-              <a href="./shakes.html">شیک‌ها</a>
-              <a href="./cake.html">کیک و دسر</a>
+      <div class="drawer-body">
+        <div class="drawer-barista-status">
+          <div class="drawer-status-top">
+            <span class="status-pulse-dot" aria-hidden="true"></span>
+            <span class="status-text" id="drawer-barista-text">باریستا: آماده پذیرش سفارش حضوری و بیرون‌بر</span>
+          </div>
+          <span class="drawer-status-hours">ساعات سرویس‌دهی: ۸:۰۰ الی ۲۳:۳۰</span>
+        </div>
+
+        <nav class="drawer-nav" aria-label="پیوندهای اصلی سایت">
+          <div class="drawer-nav-group-title">بخش‌های کافه</div>
+
+          <a href="../index.html" class="drawer-nav-item">
+            <span class="nav-item-icon">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <path d="M3 10.5 12 3l9 7.5V20a1 1 0 0 1-1 1h-5v-6h-6v6H4a1 1 0 0 1-1-1v-9.5Z" />
+              </svg>
+            </span>
+            <span class="nav-item-label">صفحه اصلی</span>
+          </a>
+
+          <div class="drawer-menu-category-block">
+            <a href="./products.html" class="drawer-nav-item drawer-menu-parent">
+              <span class="nav-item-icon">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                  <path d="M18 8h1a4 4 0 0 1 0 8h-1M2 8h16v9a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4V8ZM6 2v3M10 2v3M14 2v3"/>
+                </svg>
+              </span>
+              <span class="nav-item-label">منوی محصولات</span>
+              <span class="drawer-nav-tag">کاتالوگ</span>
+            </a>
+
+            <div class="drawer-category-quicklinks" aria-label="دسته‌بندی‌های منو">
+              <a href="./coffee.html" class="category-quicklink">
+                <span class="quicklink-dot" aria-hidden="true"></span>
+                <span>قهوه‌ها</span>
+              </a>
+              <a href="./shakes.html" class="category-quicklink">
+                <span class="quicklink-dot" aria-hidden="true"></span>
+                <span>شیک‌ها</span>
+              </a>
+              <a href="./cake.html" class="category-quicklink">
+                <span class="quicklink-dot" aria-hidden="true"></span>
+                <span>کیک و دسر</span>
+              </a>
             </div>
-            <a href="./about.html">درباره ما</a>
-            <a href="#site-footer">تماس با ما</a>
-          </nav>
+          </div>
+
+          <a href="./about.html" class="drawer-nav-item">
+            <span class="nav-item-icon">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <circle cx="12" cy="12" r="10" />
+                <path d="M12 16v-4M12 8h.01" />
+              </svg>
+            </span>
+            <span class="nav-item-label">درباره ما و داستان سورن</span>
+          </a>
+
+          <a href="./cart.html" class="drawer-nav-item drawer-cart-link active" aria-current="page">
+            <span class="nav-item-icon">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <path d="M5 8h14l1 12H4L5 8Z" />
+                <path d="M9 9V6a3 3 0 0 1 6 0v3" />
+              </svg>
+            </span>
+            <span class="nav-item-label">سبد خرید سفارش</span>
+            <span class="drawer-cart-badge" id="drawer-cart-badge" aria-live="polite">۰</span>
+          </a>
+
+          <a href="./login.html" class="drawer-nav-item">
+            <span class="nav-item-icon">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <circle cx="12" cy="8" r="3.5" />
+                <path d="M4.5 20c.6-4 3.2-6 7.5-6s6.9 2 7.5 6" />
+              </svg>
+            </span>
+            <span class="nav-item-label">ورود / حساب کاربری</span>
+          </a>
+        </nav>
+
+        <div class="drawer-contact-card">
+          <div class="drawer-nav-group-title">اطلاعات و تماس سریع</div>
+
+          <a href="tel:03136224422" class="drawer-action-row call-row" aria-label="تماس با کافه سورن ۰۳۱۳۶۲۲۴۴۲۲">
+            <div class="action-icon">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/>
+              </svg>
+            </div>
+            <div class="action-texts">
+              <span class="action-title">سفارش و هماهنگی تلفنی</span>
+              <span class="action-sub" dir="ltr">۰۳۱-۳۶۲۲۴۴۲۲</span>
+            </div>
+          </a>
+
+          <a href="https://maps.google.com/?q=Isfahan+Soren+Cafe" target="_blank" rel="noopener noreferrer" class="drawer-action-row map-row" aria-label="مسیریابی به کافه سورن در اصفهان">
+            <div class="action-icon">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/>
+                <circle cx="12" cy="10" r="3"/>
+              </svg>
+            </div>
+            <div class="action-texts">
+              <span class="action-title">مراجعه حضوری</span>
+              <span class="action-sub">اصفهان، خیابان چهارباغ عباسی</span>
+            </div>
+          </a>
+
+          <div class="drawer-socials">
+            <a href="https://instagram.com" target="_blank" rel="noopener noreferrer" class="drawer-social-link" aria-label="اینستاگرام کافه سورن">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <rect x="2" y="2" width="20" height="20" rx="5" ry="5"/>
+                <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"/>
+                <line x1="17.5" y1="6.5" x2="17.51" y2="6.5"/>
+              </svg>
+              <span>اینستاگرام</span>
+            </a>
+            <a href="https://t.me" target="_blank" rel="noopener noreferrer" class="drawer-social-link" aria-label="تلگرام کافه سورن">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                <path d="M21.8 4.2 18.6 20c-.2 1.1-.8 1.4-1.7.9l-4.7-3.5-2.3 2.2c-.3.3-.5.5-1 .5l.3-4.8 8.8-8c.4-.4-.1-.6-.6-.2L6.5 14 1.9 12.6c-1-.3-1-1 .2-1.5L20 4.1c.8-.3 1.9.2 1.8.1Z"/>
+              </svg>
+              <span>تلگرام</span>
+            </a>
+          </div>
+        </div>
+
+        <div class="drawer-footer">
+          <p class="drawer-colophon">برشته‌کاری تخصصی و بیکری دست‌ساز سورن</p>
+          <span class="drawer-motto">عصاره اصیل، آرامش و کیفیت</span>
         </div>
       </div>
-    </header>
+    </aside>
 
     <!-- ==================== Cart ==================== -->
     <main class="cart-page">
@@ -277,54 +532,56 @@
             <div>
               <div class="title-row">
                 <h1 id="cart-title">سبد خرید من</h1>
-                <span class="status-badge" id="header-status-badge"
-                  >۰ مورد</span
-                >
+                <span class="status-badge" id="header-status-badge">۰ مورد</span>
               </div>
               <p>برشته‌کاری تخصصی و بار نوشیدنی‌های تازه سُورن</p>
             </div>
           </div>
 
-          </div>
+          <div class="cart-header-actions"></div>
         </header>
 
-        <!-- Empty cart state -->
+        <!-- Empty cart state (Non-dead-end) -->
         <div class="empty-cart" id="cart-state-empty">
           <div class="empty-illustration">
             <svg class="icon" aria-hidden="true"><use href="#i-coffee" /></svg>
           </div>
 
-          <h2>سبد خریدت خالیه!</h2>
+          <h2>سبد خریدت در حال حاضر خالی است</h2>
 
           <p>
-            هنوز چیزی به سبد خریدت اضافه نکردی. وقتشه یه قهوه خوش‌عطر از
-            برشته‌کاری‌های تازه انتخاب کنی.
+            هنوز محصولی به سبد خریدت اضافه نکرده‌ای. وقتشه یه فنجان قهوه تازه از برشته‌کاری‌های تخصصی یا شیک و دسر دست‌ساز انتخاب کنی.
           </p>
 
-          <a class="primary-btn" href="./coffee.html">
-            مشاهده محصولات
-            <svg class="icon" aria-hidden="true">
-              <use href="#i-arrow-left" />
-            </svg>
-          </a>
+          <div class="empty-cart-actions">
+            <a class="primary-btn" href="./products.html">
+              مشاهده منوی کامل محصولات
+              <svg class="icon" aria-hidden="true">
+                <use href="#i-arrow-left" />
+              </svg>
+            </a>
+            <button type="button" class="secondary-btn" id="empty-cart-restore-sample">
+              افزودن نمونه‌های پیشنهادی باریستا
+            </button>
+          </div>
 
           <div class="popular-categories">
-            <span class="category-title">دسته‌بندی‌های محبوب</span>
+            <span class="category-title">دسته‌بندی‌های محبوب کافه سورن</span>
 
             <div class="category-links">
               <a href="./coffee.html">
                 <span class="category-dot coffee-dot"></span>
-                قهوه
+                قهوه‌های تخصصی
               </a>
 
               <a href="./shakes.html">
                 <span class="category-dot shake-dot"></span>
-                شیک
+                شیک و بارهای خنک
               </a>
 
               <a href="./cake.html">
                 <span class="category-dot dessert-dot"></span>
-                کیک و دسر
+                کیک و شیرینی دست‌ساز
               </a>
             </div>
           </div>
@@ -332,252 +589,145 @@
 
         <!-- Populated cart view -->
         <div class="cart-content" id="cart-state-populated" hidden>
-          <div class="cart-items">
-            <div class="shipping-notice">
-              <svg class="icon" aria-hidden="true"><use href="#i-truck" /></svg>
-              <span>سفارش شما شامل <strong>ارسال رایگان</strong> شد!</span>
+          <div class="cart-items-wrapper">
+            <!-- Free Shipping Tier Progress Card -->
+            <div class="shipping-tier-card" id="shipping-tier-card">
+              <div class="shipping-tier-header">
+                <div class="shipping-tier-info">
+                  <div class="shipping-tier-icon">
+                    <svg class="icon" aria-hidden="true"><use href="#i-truck" /></svg>
+                  </div>
+                  <div>
+                    <strong class="shipping-tier-title" id="shipping-tier-text">در حال محاسبه ارسال رایگان...</strong>
+                    <p class="shipping-tier-sub">سفیران اختصاصی کافه سورن با بسته‌بندی عایق حرارتی</p>
+                  </div>
+                </div>
+                <span class="shipping-tier-badge" id="shipping-tier-badge">ارسال اکسپرس</span>
+              </div>
+              <div class="shipping-progress-track" aria-hidden="true">
+                <div class="shipping-progress-bar" id="shipping-progress-bar" style="width: 0%;"></div>
+              </div>
             </div>
 
-            <article class="cart-item" data-price="420000" data-qty="1">
-              <div class="product-image">
-                <img
-                  src="../images/products/coffee/latte.png"
-                  alt="دانه‌های قهوه اتیوپی"
-                  width="128"
-                  height="128"
-                  loading="lazy"
-                />
-              </div>
-
-              <div class="product-details">
-                <div class="product-top">
-                  <div>
-                    <span class="product-tag">قهوه تخصصی · ۲۵۰ میلی‌لیتر</span>
-                    <h3>لاته</h3>
-                    <p>یادداشت‌های طعمی: ملایم، خامه‌ای، شیرین</p>
-                  </div>
-
-                  <button
-                    class="delete-btn"
-                    type="button"
-                    aria-label="حذف دانه‌های قهوه تخصصی اتیوپی یرگاچف از سبد"
-                  >
-                    <svg class="icon" aria-hidden="true">
-                      <use href="#i-trash" />
-                    </svg>
-                  </button>
-                </div>
-
-                <div class="product-bottom">
-                  <div class="price">
-                    <strong>۴۲۰٬۰۰۰</strong>
-                    <span>تومان</span>
-                  </div>
-
-                  <div class="quantity">
-                    <button
-                      type="button"
-                      data-qty-step="1"
-                      aria-label="افزایش تعداد"
-                    >
-                      +
-                    </button>
-                    <span class="quantity-value" aria-live="polite">۱</span>
-                    <button
-                      type="button"
-                      data-qty-step="-1"
-                      aria-label="کاهش تعداد"
-                    >
-                      −
-                    </button>
-                  </div>
-                </div>
-              </div>
-            </article>
-
-            <article class="cart-item" data-price="145000" data-qty="1">
-              <div class="product-image">
-                <img
-                  src="../images/products/coffee/cappuccino.png"
-                  alt="کاپوچینو کاراملی"
-                  width="128"
-                  height="128"
-                  loading="lazy"
-                />
-              </div>
-
-              <div class="product-details">
-                <div class="product-top">
-                  <div>
-                    <span class="product-tag product-tag--terracotta"
-                      >نوشیدنی گرم · ۳۰۰ میلی‌لیتر</span
-                    >
-                    <h3>کاپوچینو</h3>
-                    <p>یادداشت های طعمی: تلخ، ابری، فندقی</p>
-                  </div>
-
-                  <button
-                    class="delete-btn"
-                    type="button"
-                    aria-label="حذف کاپوچینو کاراملی دبل‌شات از سبد"
-                  >
-                    <svg class="icon" aria-hidden="true">
-                      <use href="#i-trash" />
-                    </svg>
-                  </button>
-                </div>
-
-                <div class="product-bottom">
-                  <div class="price">
-                    <strong>۱۴۵٬۰۰۰</strong>
-                    <span>تومان</span>
-                  </div>
-
-                  <div class="quantity">
-                    <button
-                      type="button"
-                      data-qty-step="1"
-                      aria-label="افزایش تعداد"
-                    >
-                      +
-                    </button>
-                    <span class="quantity-value" aria-live="polite">۱</span>
-                    <button
-                      type="button"
-                      data-qty-step="-1"
-                      aria-label="کاهش تعداد"
-                    >
-                      −
-                    </button>
-                  </div>
-                </div>
-              </div>
-            </article>
-
-            <article class="cart-item" data-price="360000" data-qty="1">
-              <div class="product-image">
-                <img
-                  src="../images/products/shakes/chocolate-shake.png"
-                  alt="قهوه کلمبیا"
-                  width="128"
-                  height="128"
-                  loading="lazy"
-                />
-              </div>
-
-              <div class="product-details">
-                <div class="product-top">
-                  <div>
-                    <span class="product-tag product-tag--sage">شیک تخصصی</span>
-                    <h3>شیک شکلات</h3>
-                    <p>یادداشت‌های طعمی: غلیظ، خنک، شکلاتی</p>
-                  </div>
-
-                  <button
-                    class="delete-btn"
-                    type="button"
-                    aria-label="حذف اسپرسو تک‌خاستگاه کلمبیا هویلا از سبد"
-                  >
-                    <svg class="icon" aria-hidden="true">
-                      <use href="#i-trash" />
-                    </svg>
-                  </button>
-                </div>
-
-                <div class="product-bottom">
-                  <div class="price">
-                    <strong>۳۶۰٬۰۰۰</strong>
-                    <span>تومان</span>
-                  </div>
-
-                  <div class="quantity">
-                    <button
-                      type="button"
-                      data-qty-step="1"
-                      aria-label="افزایش تعداد"
-                    >
-                      +
-                    </button>
-                    <span class="quantity-value" aria-live="polite">۱</span>
-                    <button
-                      type="button"
-                      data-qty-step="-1"
-                      aria-label="کاهش تعداد"
-                    >
-                      −
-                    </button>
-                  </div>
-                </div>
-              </div>
-            </article>
+            <!-- Granular Animated Cart Items List -->
+            <div class="cart-items" id="cart-items-list" aria-label="لیست اقلام سبد خرید">
+              <!-- Item rows injected & memoized dynamically by SorenCartPageController -->
+            </div>
           </div>
 
-          <!-- Order summary -->
+          <!-- Order summary (Sticky High-Trust Card) -->
           <aside class="order-summary" aria-label="خلاصه سفارش">
             <div class="summary-heading">
               <h2>خلاصه سفارش</h2>
-              <span>
+              <span class="secure-badge">
                 <svg class="icon" aria-hidden="true">
                   <use href="#i-shield" />
                 </svg>
-                پرداخت امن
+                پرداخت امن بانکی
               </span>
             </div>
 
             <div class="summary-row">
               <span>مجموع اقلام</span>
-              <strong><span id="summary-subtotal">۰</span> تومان</strong>
+              <strong><span id="summary-subtotal" class="summary-value">۰</span> تومان</strong>
             </div>
 
             <div class="summary-row">
               <span>هزینه ارسال</span>
-              <strong class="free-shipping">رایگان</strong>
+              <strong id="summary-shipping" class="free-shipping">رایگان</strong>
             </div>
 
             <div class="summary-row discount-row">
-              <span>تخفیف باشگاه مشتریان</span>
-              <strong>−<span id="summary-discount">۰</span> تومان</strong>
+              <span>تخفیف باشگاه مشتریان (۵٪)</span>
+              <strong>−<span id="summary-discount" class="summary-value">۰</span> تومان</strong>
             </div>
 
-            <div
-              class="summary-row discount-row"
-              id="summary-coupon-row"
-              hidden
-            >
-              <span>کد تخفیف</span>
-              <strong>−<span id="summary-coupon">۰</span> تومان</strong>
+            <div class="summary-row discount-row" id="summary-coupon-row" hidden>
+              <span id="summary-coupon-label">کد تخفیف</span>
+              <strong>−<span id="summary-coupon" class="summary-value">۰</span> تومان</strong>
             </div>
 
             <div class="summary-total">
               <div>
                 <strong>مبلغ قابل پرداخت</strong>
-                <p>پس از کسر تخفیف</p>
+                <p>با احتساب تخفیف‌های اعمال‌شده</p>
               </div>
-              <strong><span id="summary-total">۰</span> تومان</strong>
+              <div class="total-price-box">
+                <strong class="total-amount"><span id="summary-total" class="summary-value">۰</span></strong>
+                <span class="total-unit">تومان</span>
+              </div>
             </div>
 
-            <div class="coupon">
-              <label for="coupon-input">کد تخفیف یا کارت هدیه داری؟</label>
+            <!-- Promo Code Accordion Disclosure -->
+            <div class="coupon-accordion" id="coupon-accordion">
+              <button
+                type="button"
+                class="coupon-accordion-trigger"
+                id="coupon-accordion-btn"
+                aria-expanded="false"
+                aria-controls="coupon-panel"
+              >
+                <span class="coupon-trigger-text">
+                  <svg class="icon" aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"/>
+                    <line x1="7" y1="7" x2="7.01" y2="7"/>
+                  </svg>
+                  کد تخفیف یا کارت هدیه داری؟
+                </span>
+                <svg class="chevron-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                  <path d="m6 9 6 6 6-6" stroke-linecap="round" stroke-linejoin="round" />
+                </svg>
+              </button>
 
-              <div class="coupon-row">
-                <input
-                  id="coupon-input"
-                  type="text"
-                  placeholder="کد تخفیف"
-                  autocomplete="off"
-                />
-                <button id="coupon-apply" type="button">اعمال کد</button>
+              <div class="coupon-panel" id="coupon-panel" hidden>
+                <!-- Coupon Input Form -->
+                <div class="coupon-row" id="coupon-input-group">
+                  <input
+                    id="coupon-input"
+                    type="text"
+                    placeholder="مثال: SOREN10 یا WELCOME"
+                    autocomplete="off"
+                    aria-label="کد تخفیف"
+                  />
+                  <button id="coupon-apply" type="button" aria-label="اعمال کد تخفیف">
+                    <span class="btn-text">اعمال کد</span>
+                    <span class="btn-spinner" aria-hidden="true"></span>
+                  </button>
+                </div>
+
+                <!-- Applied Coupon Chip State -->
+                <div class="coupon-applied-chip" id="coupon-applied-chip" hidden>
+                  <div class="chip-content">
+                    <svg class="chip-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true">
+                      <path d="M20 6 9 17l-5-5" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                    <span class="chip-code" id="applied-coupon-code">SOREN10</span>
+                    <span class="chip-discount" id="applied-coupon-percent">۱۰٪ تخفیف اعمال شد</span>
+                  </div>
+                  <button type="button" class="chip-remove-btn" id="coupon-remove-btn" aria-label="حذف کد تخفیف">
+                    ✕
+                  </button>
+                </div>
+
+                <p
+                  id="coupon-message"
+                  class="coupon-message"
+                  role="status"
+                  hidden
+                ></p>
               </div>
-
-              <p
-                id="coupon-message"
-                class="coupon-message"
-                role="status"
-                hidden
-              ></p>
             </div>
 
-            <button class="primary-btn checkout-btn" type="button">
+            <!-- Security Invariant Disclaimer -->
+            <div class="security-invariant-box" role="note" aria-label="اعتبارسنجی امنیتی مبالغ">
+              <svg class="icon" aria-hidden="true"><use href="#i-shield" /></svg>
+              <p>
+                قیمت‌های نمایش‌داده‌شده پیش‌نمایش مشتری بوده و قیمت نهایی و اعمال کد تخفیف در مرحله پرداخت توسط سرور کافه سورن اعتبارسنجی می‌شود.
+              </p>
+            </div>
+
+            <!-- Primary Checkout CTA Button -->
+            <button class="primary-btn checkout-btn" id="checkout-btn" type="button">
               ادامه فرایند خرید
               <svg class="icon" aria-hidden="true">
                 <use href="#i-arrow-left" />
@@ -593,24 +743,99 @@
                 <svg class="icon" aria-hidden="true">
                   <use href="#i-award" />
                 </svg>
-                تضمین تازگی برشته‌کاری
+                تضمین تازگی برشته‌کاری تخصصی
               </p>
               <p>
                 <svg class="icon" aria-hidden="true">
                   <use href="#i-package" />
                 </svg>
-                بسته‌بندی مناسب دانه‌های قهوه
+                بسته‌بندی ویژه و عایق دانه‌ها
               </p>
               <p>
                 <svg class="icon" aria-hidden="true">
                   <use href="#i-truck" />
                 </svg>
-                ارسال سفارش در سریع‌ترین زمان
+                ارسال اکسپرس در سریع‌ترین زمان
               </p>
             </div>
           </aside>
         </div>
       </section>
+
+      <!-- Mobile Sticky Checkout Bar (Apple-Style Ergonomics & Safe Area) -->
+      <div class="cart-mobile-bar" id="cart-mobile-bar" aria-label="ثبت سفارش در موبایل">
+        <div class="mobile-bar-summary">
+          <span class="mobile-bar-label">مبلغ نهایی:</span>
+          <div class="mobile-bar-price-wrap">
+            <strong class="mobile-bar-total" id="mobile-bar-total">۰</strong>
+            <span class="mobile-bar-unit">تومان</span>
+          </div>
+          <span class="mobile-bar-count-badge" id="mobile-bar-count">۰ مورد</span>
+        </div>
+        <button type="button" class="mobile-bar-checkout-btn" id="mobile-checkout-btn" aria-label="ادامه فرایند خرید">
+          <span>ثبت و ادامه</span>
+          <svg class="icon" aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M10 19l-7-7m0 0l7-7m-7 7h18" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </button>
+      </div>
+
+      <!-- Native Fluid Slide-Over Drawer -->
+      <div class="cart-drawer-backdrop" id="cart-slideover-backdrop" aria-hidden="true"></div>
+      <aside
+        class="cart-slideover-drawer"
+        id="cart-slideover-drawer"
+        role="dialog"
+        aria-modal="true"
+        aria-label="کشوی پیش‌نمایش سبد خرید"
+        aria-hidden="true"
+      >
+        <div class="drawer-header">
+          <div class="drawer-title-group">
+            <div class="drawer-icon">
+              <svg class="icon" aria-hidden="true"><use href="#i-bag" /></svg>
+            </div>
+            <div>
+              <h2 class="drawer-heading">سبد خرید سریع</h2>
+              <span class="drawer-subtitle">برشته‌کاری و بار تازه کافه سورن</span>
+            </div>
+          </div>
+          <div class="drawer-header-actions">
+            <span class="drawer-badge" id="drawer-items-count">۰</span>
+            <button type="button" class="drawer-close-btn" id="drawer-close-btn" aria-label="بستن کشوی سبد">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M18 6 6 18M6 6l12 12" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+            </button>
+          </div>
+        </div>
+
+        <div class="drawer-body" id="drawer-items-list" tabindex="0" aria-label="اقلام داخل کشوی سبد">
+          <!-- Populated dynamically and synced with main cart -->
+        </div>
+
+        <div class="drawer-footer">
+          <div class="drawer-summary-row">
+            <span>مجموع اقلام:</span>
+            <strong id="drawer-subtotal">۰ تومان</strong>
+          </div>
+          <div class="drawer-summary-row discount-row" id="drawer-discount-row" hidden>
+            <span>تخفیف:</span>
+            <strong id="drawer-discount">۰ تومان</strong>
+          </div>
+          <div class="drawer-summary-total">
+            <span>مبلغ قابل پرداخت:</span>
+            <strong id="drawer-total">۰ تومان</strong>
+          </div>
+          <button type="button" class="primary-btn drawer-checkout-btn" id="drawer-checkout-btn">
+            تکمیل خرید و پرداخت
+            <svg class="icon" aria-hidden="true"><use href="#i-arrow-left" /></svg>
+          </button>
+        </div>
+      </aside>
+
+      <!-- Ask-Sonner Style Toast Container for Undo Notifications -->
+      <div class="soren-sonner-toaster" id="soren-toast-container" aria-live="polite" aria-atomic="true"></div>
     </main>
 
     <!-- ==================== Footer ==================== -->

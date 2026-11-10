@@ -20,17 +20,18 @@
       rel="stylesheet"
     />
 
-        <!-- Preload critical local font weights -->
+    <!-- Preload critical local font weights -->
     <link rel="preload" href="../fonts/Peyda-Regular.woff2" as="font" type="font/woff2" crossorigin />
     <link rel="preload" href="../fonts/Peyda-Bold.woff2" as="font" type="font/woff2" crossorigin />
     <link rel="stylesheet" href="../css/style.css?v=2.1-peyda-fix" />
+    <link rel="stylesheet" href="../css/about.css?v=3.0-editorial" />
   </head>
 
   <body>
     <!-- ==================== Header ==================== -->
     <header class="site-header">
       <div class="header-inner">
-        <a class="brand" href="#home" aria-label="صفحه اصلی کافه سورن">
+        <a class="brand" href="../index.html" aria-label="صفحه اصلی کافه سورن">
           <img
             src="../images/brand/soren-logo.svg"
             alt="لوگوی کافه سورن"
@@ -46,9 +47,7 @@
 
         <!-- Main navigation bar -->
         <nav class="desktop-nav" aria-label="منوی اصلی">
-          <a class="nav-link active" href="../index.html" aria-current="page"
-            >خانه</a
-          >
+          <a class="nav-link" href="../index.html">خانه</a>
 
           <div class="dropdown">
             <a class="products-trigger" href="./products.html" aria-haspopup="true">
@@ -77,8 +76,8 @@
             </div>
           </div>
 
-          <a class="nav-link" href="#">درباره ما</a>
-          <a class="nav-link" href="#">تماس با ما</a>
+          <a class="nav-link active" href="./about.html" aria-current="page">درباره ما</a>
+          <a class="nav-link" href="#site-footer">تماس با ما</a>
         </nav>
 
         <div class="header-actions">
@@ -105,7 +104,7 @@
             <input
               type="search"
               aria-label="جست‌وجو در منوی کافه"
-              placeholder="جست‌وجو در منوی کافه"
+              placeholder="جست‌وجو در منوی کافه..."
             />
           </form>
 
@@ -218,9 +217,7 @@
               <a href="./cake.html">کیک و دسر</a>
             </div>
 
-            <a class="active" href="./about.html" aria-current="page"
-              >درباره ما</a
-            >
+            <a class="active" href="./about.html" aria-current="page">درباره ما</a>
 
             <a href="#site-footer">تماس با ما</a>
           </nav>
@@ -228,22 +225,23 @@
       </div>
     </header>
 
-    <main>
-      <!-- ==================== 1. Hero ==================== -->
-      <section class="page-hero" aria-labelledby="about-title">
-        <div class="page-hero-grid">
-          <div class="page-hero-text">
-            <span class="pill pill--coffee">
-              <span class="pill-dot"></span>
-              درباره کافه سورن
-            </span>
+    <!-- ==================== Main Content ==================== -->
+    <main class="about-page-main" id="about-main">
+      <!-- ==================== 1. HeroEditorial ==================== -->
+      <section class="hero-editorial" aria-labelledby="about-title">
+        <div class="hero-editorial-inner">
+          <div class="hero-editorial-content">
+            <div class="kicker-pill kicker-pill--bronze">
+              <span class="kicker-pill-dot" aria-hidden="true"></span>
+              <span>روایت و هویت سورن · اصالت باریستایی</span>
+            </div>
 
-            <h1 class="page-hero-title" id="about-title">
-              سورن؛ جایی برای لذت بردن از
-              <span class="accent-text">
-                لحظه‌های ساده
+            <h1 class="hero-editorial-title" id="about-title">
+              سورن؛ تجلی آرامش، هنر دست و
+              <span class="accent-editorial">
+                طعم ماندگار
                 <svg
-                  class="accent-underline"
+                  class="editorial-underline"
                   viewBox="0 0 240 16"
                   preserveAspectRatio="none"
                   fill="none"
@@ -252,43 +250,49 @@
                   <path
                     d="M3 13C60 4 180 3 237 11"
                     stroke="currentColor"
-                    stroke-width="3.5"
+                    stroke-width="3"
                     stroke-linecap="round"
                   />
                 </svg>
               </span>
             </h1>
 
-            <p class="page-hero-lead">
-              در شلوغی روزمره، کافه سورن گوشه‌ای دنج برای توقف و نفس کشیدن است؛
-              جایی که کیفیت بی‌واسطه قهوه تازه، گرمای میزبانی اصیل و عطر دلپذیر
-              نان و شیرینی دست‌پخت، ساده‌ترین لحظات روز شما را به تجربه‌ای
-              ماندگار و لذت‌بخش تبدیل می‌کند.
+            <p class="hero-editorial-lead">
+              در شلوغی شتاب‌زده شهر، کافه سورن پناهگاهی دنج برای مکث و نفس کشیدن است؛
+              جایی که کیفیت ناب دانه‌های برشته‌شده تخصصی، گرمای میزبانی اصیل و عطر دلپذیر
+              شیرینی‌های دست‌پخت، ساده‌ترین لحظات روز شما را به تجربه‌ای عمیق و ماندگار تبدیل می‌کند.
             </p>
 
-            <div class="page-hero-actions">
-              <div class="hero-note">
-                <span class="hero-note-dot"></span>
-                <span>عطر اصیل دانه تخصصی</span>
+            <div class="hero-editorial-badges">
+              <div class="hero-badge-item">
+                <span class="badge-dot" aria-hidden="true"></span>
+                <span>۱۰۰٪ دانه تخصصی تازه برشته‌شده</span>
+              </div>
+              <div class="hero-badge-item">
+                <span class="badge-dot badge-dot--sage" aria-hidden="true"></span>
+                <span>عصاره‌گیری و دم‌آوری مهندسی‌شده</span>
               </div>
             </div>
           </div>
 
-          <div class="page-hero-media">
-            <div class="photo-frame photo-frame--hero">
-              <div class="photo-backdrop" aria-hidden="true"></div>
+          <div class="hero-editorial-media">
+            <div class="hero-media-frame">
+              <div class="media-backdrop" aria-hidden="true"></div>
 
-              <div class="photo-box">
+              <div class="media-box">
                 <img
                   src="../images/ui/1-about.png"
-                  alt="فضای دلنشین و آفتاب‌گیر کافه سورن"
+                  alt="فضای دلنشین، آرام و آفتاب‌گیر کافه سورن"
+                  width="1200"
+                  height="896"
                   fetchpriority="high"
+                  decoding="async"
                 />
-                <div class="photo-shade"></div>
+                <div class="media-vignette" aria-hidden="true"></div>
 
-                <div class="photo-badge">
-                  <span class="photo-badge-dot"></span>
-                  <span>فضای آرام و مینیمال سورن</span>
+                <div class="media-caption-badge">
+                  <span class="caption-dot" aria-hidden="true"></span>
+                  <span>فضای آرامش‌بخش و معماری مینیمال سورن</span>
                 </div>
               </div>
             </div>
@@ -296,83 +300,121 @@
         </div>
       </section>
 
-      <!-- 2. The Soren Story -->
-      <section class="story" aria-labelledby="story-title">
-        <div class="story-grid">
-          <div class="story-media">
-            <div class="photo-frame photo-frame--story">
-              <div class="photo-backdrop" aria-hidden="true"></div>
+      <!-- ==================== 2. TimelineStory ==================== -->
+      <section class="timeline-story" aria-labelledby="timeline-title">
+        <header class="section-editorial-header">
+          <div class="kicker-pill kicker-pill--sage">
+            <span class="kicker-pill-dot" aria-hidden="true"></span>
+            <span>گاه‌شمار اصالت</span>
+          </div>
+          <h2 class="section-editorial-title" id="timeline-title">
+            داستان سورن؛ از رؤیا تا فنجان
+          </h2>
+          <p class="section-editorial-desc">
+            مسیر شکل‌گیری و تکامل کافه سورن بر مبنای اشتیاق به طعم ناب و بازتعریف تجربه کافه‌نشینی.
+          </p>
+        </header>
 
-              <div class="photo-box">
-                <img
-                  src="../images/ui/2-about.png"
-                  alt="دم‌آوری تخصصی قهوه در کافه سورن"
-                  loading="lazy"
-                />
-                <div class="photo-shade"></div>
-
-                <div class="photo-caption">دم‌آوری پور-اوور تخصصی</div>
+        <div class="timeline-story-grid">
+          <div class="timeline-track">
+            <!-- Milestone 1: 1398 -->
+            <article class="timeline-milestone">
+              <div class="milestone-marker" aria-hidden="true">
+                <span class="milestone-node"></span>
               </div>
-            </div>
+              <div class="milestone-card">
+                <div class="milestone-meta">
+                  <span class="milestone-year font-latin">1398</span>
+                  <span class="milestone-tag">نقطه آغاز · Genesis</span>
+                </div>
+                <h3 class="milestone-title">تولد ایده و اولین فنجان اسپرسو</h3>
+                <p class="milestone-body">
+                  کافه سورن با یک میز چوبی دست‌ساز، یک دستگاه اسپرسوی تک‌گروپ و یک باور عمیق آغاز به کار کرد: خلق خلوتی دنج و آرام که کیفیت طعم در آن قربانی شتاب روزمرگی نشود.
+                </p>
+              </div>
+            </article>
+
+            <!-- Milestone 2: 1401 -->
+            <article class="timeline-milestone">
+              <div class="milestone-marker" aria-hidden="true">
+                <span class="milestone-node"></span>
+              </div>
+              <div class="milestone-card">
+                <div class="milestone-meta">
+                  <span class="milestone-year font-latin">1401</span>
+                  <span class="milestone-tag">برشته‌کاری مستقل · Roastery</span>
+                </div>
+                <h3 class="milestone-title">راه‌اندازی کارگاه رُست تخصصی</h3>
+                <p class="milestone-body">
+                  با گسترش جامعه همراهان سورن، کارگاه برشته‌کاری اختصاصی کافه تأسیس شد. تمرکز بی‌واسطه بر پروفایل‌های دم‌آوری سبک و جلسات روزانه کاپینگ برای کشف نوت‌های عطری ناب میوه‌ای و آجیلی.
+                </p>
+              </div>
+            </article>
+
+            <!-- Milestone 3: 1405 -->
+            <article class="timeline-milestone">
+              <div class="milestone-marker" aria-hidden="true">
+                <span class="milestone-node milestone-node--active"></span>
+              </div>
+              <div class="milestone-card milestone-card--active">
+                <div class="milestone-meta">
+                  <span class="milestone-year font-latin">1405</span>
+                  <span class="milestone-tag milestone-tag--accent">پناهگاه امروز · Sanctuary</span>
+                </div>
+                <h3 class="milestone-title">تلاقی معماری مینیمال، طعم و پلتفرم دیجیتال</h3>
+                <p class="milestone-body">
+                  امروز کافه سورن فضایی پویا برای علاقه‌مندان به قهوه تخصصی، شیرینی‌های تازه و گفت‌وگوهای آرام است؛ تجهیزشده به پلتفرم سفارش آنلاین سریع و وفادار به سنت میزبانی اصیل.
+                </p>
+              </div>
+            </article>
           </div>
 
-          <div class="story-text">
-            <div class="story-kicker">
-              <span class="story-kicker-line"></span>
-              <span>اصالت و روایت</span>
+          <div class="timeline-media-col">
+            <div class="timeline-media-frame">
+              <div class="media-backdrop media-backdrop--sage" aria-hidden="true"></div>
+
+              <div class="media-box">
+                <img
+                  src="../images/ui/2-about.png"
+                  alt="دم‌آوری پور-اوور و فرآیند باریستایی تخصصی در کافه سورن"
+                  width="1200"
+                  height="896"
+                  loading="lazy"
+                  decoding="async"
+                />
+                <div class="media-vignette" aria-hidden="true"></div>
+
+                <div class="media-caption-badge">
+                  <span class="caption-dot caption-dot--sage" aria-hidden="true"></span>
+                  <span>عصاره‌گیری تخصصی V60 و کمکس</span>
+                </div>
+              </div>
             </div>
-
-            <h2 class="story-title" id="story-title">داستان سورن</h2>
-
-            <div class="story-body">
-              <p>
-                کافه سورن از یک باور ساده و عمیق سرچشمه گرفت: اینکه یک فنجان
-                قهوه تنها یک نوشیدنی نیست، بلکه بهانه‌ای برای خلق خلوتی آرام یا
-                گفت‌وگویی دلنشین با کسانی است که دوستشان داریم.
-              </p>
-              <p>
-                ما در سورن به جزئیات عشق می‌ورزیم؛ از انتخاب باوسواس دانه‌های
-                قهوه با خاستگاه‌های مشخص و برشته‌کاری دقیق، تا تنظیم دمای شیر و
-                طراحی فنجان‌های سرامیکی دست‌ساز. فضایی خلق کرده‌ایم که صمیمیت،
-                بوی خوش اسپرسوی تازه و نور طبیعی دست در دست هم دهند تا احساس
-                راحتی خانه را برای شما تداعی کنند.
-              </p>
-            </div>
-
-            <blockquote class="story-quote">
-              «برای ما، کیفیت نه یک هدف تجاری، بلکه شیوه رفتار روزمره‌مان در
-              مهمان‌نوازی و پذیرایی است.»
-            </blockquote>
           </div>
         </div>
       </section>
 
-      <!-- 3. Core Values -->
-      <section class="values" aria-labelledby="values-title">
-        <header class="values-header">
-          <span class="pill pill--sage">ارزش‌های بنیادین</span>
-          <h2 class="values-title" id="values-title">
+      <!-- ==================== 3. CraftGrid ==================== -->
+      <section class="craft-grid" aria-labelledby="craft-title">
+        <header class="section-editorial-header">
+          <div class="kicker-pill kicker-pill--bronze">
+            <span class="kicker-pill-dot" aria-hidden="true"></span>
+            <span>اصول بنیادین</span>
+          </div>
+          <h2 class="section-editorial-title" id="craft-title">
             چیزی فراتر از یک فنجان قهوه
           </h2>
-          <p>
-            سه ستون اصلی که هویت، طعم و تجربه حضور در کافه سورن بر پایه آن‌ها
-            شکل گرفته است.
+          <p class="section-editorial-desc">
+            سه باور ساده که هویت، طعم و تجربه حضور در سورن را میسازند.
           </p>
         </header>
 
-        <div class="values-grid">
-          <article class="value-card value-card--coffee">
-            <div class="value-body">
-              <div class="value-icon">
-                <svg
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  stroke-width="2"
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                  aria-hidden="true"
-                >
+        <div class="craft-bento-grid">
+          <!-- 1. Quality -->
+          <article class="craft-card craft-card--coffee">
+            <div class="craft-card-top">
+              <div class="craft-icon-box" aria-hidden="true">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
                   <path d="M18 8h1a4 4 0 0 1 0 8h-1"></path>
                   <path d="M2 8h16v9a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4V8z"></path>
                   <line x1="6" y1="1" x2="6" y2="4"></line>
@@ -380,175 +422,170 @@
                   <line x1="14" y1="1" x2="14" y2="4"></line>
                 </svg>
               </div>
-              <h3 class="value-title">کیفیت و تازگی</h3>
-              <p class="value-text">
-                استفاده انحصاری از دانه‌های تخصصی تازه برشته‌شده و مواد اولیه
-                ممتاز؛ طعمی خالص، اصیل و سرشار از طراوت در هر جرعه و هر لقمه.
+              <h3 class="craft-card-title">کیفیت و تازگی</h3>
+              <p class="craft-card-text">
+                دانههای تازه برشتهشده؛ طعمی ناب در هر جرعه.
               </p>
             </div>
-            <div class="value-foot">
-              <span class="value-foot-dot"></span>
-              <span>انتخاب بی‌واسطه مزارع برتر</span>
+            <div class="craft-card-footer">
+              <span class="craft-footer-dot"></span>
+              <span>دانه تخصصی و رُست تازه</span>
             </div>
           </article>
 
-          <article class="value-card value-card--sage">
-            <div class="value-body">
-              <div class="value-icon">
-                <svg
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  stroke-width="2"
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                  aria-hidden="true"
-                >
+          <!-- 2. Precision -->
+          <article class="craft-card craft-card--sage">
+            <div class="craft-card-top">
+              <div class="craft-icon-box" aria-hidden="true">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
                   <circle cx="12" cy="12" r="10"></circle>
-                  <polygon
-                    points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76"
-                  ></polygon>
+                  <polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76"></polygon>
                 </svg>
               </div>
-              <h3 class="value-title">توجه به جزئیات</h3>
-              <p class="value-text">
-                از ثانیه‌های دقیق عصاره‌گیری تا دمای ایده‌آل فوم شیر و چیدمان
-                صمیمانه میزها؛ هر جزئیاتی با ظرافت و دقت برای رضایت شما طراحی
-                شده است.
+              <h3 class="craft-card-title">دقت در جزئیات</h3>
+              <p class="craft-card-text">
+                وسواس در عصارهگیری؛ تعادل بینقص طعم و عطر.
               </p>
             </div>
-            <div class="value-foot">
-              <span class="value-foot-dot"></span>
-              <span>استاندارد باریستای حرفه‌ای</span>
+            <div class="craft-card-footer">
+              <span class="craft-footer-dot craft-footer-dot--sage"></span>
+              <span>استاندارد باریستای حرفهای</span>
             </div>
           </article>
 
-          <article class="value-card value-card--terracotta">
-            <div class="value-body">
-              <div class="value-icon">
-                <svg
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  stroke-width="2"
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                  aria-hidden="true"
-                >
-                  <path
-                    d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"
-                  ></path>
+          <!-- 3. Hospitality -->
+          <article class="craft-card craft-card--terracotta">
+            <div class="craft-card-top">
+              <div class="craft-icon-box" aria-hidden="true">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path>
                 </svg>
               </div>
-              <h3 class="value-title">تجربه‌ای دلنشین</h3>
-              <p class="value-text">
-                خلق اتمسفری آرامش‌بخش، موسیقی ملایم و لبخندی دوستانه؛ می‌خواهیم
-                هر بار که از درِ سورن وارد می‌شوید، حال و روزتان بهتر شود.
+              <h3 class="craft-card-title">میزبانی صمیمانه</h3>
+              <p class="craft-card-text">
+                اتمسفری آرام؛ خلوتی دنج به دور از هیاهو.
               </p>
             </div>
-            <div class="value-foot">
-              <span class="value-foot-dot"></span>
-              <span>میزبانی با مهربانی و احترام</span>
+            <div class="craft-card-footer">
+              <span class="craft-footer-dot craft-footer-dot--terracotta"></span>
+              <span>مهماننوازی از دل و جان</span>
             </div>
           </article>
         </div>
       </section>
 
-      <!-- 4. Closing Call to Action -->
-      <section class="cta-banner" aria-labelledby="cta-title">
-        <div class="cta-glow cta-glow--top" aria-hidden="true"></div>
-        <div class="cta-glow cta-glow--bottom" aria-hidden="true"></div>
-
-        <div class="cta-inner">
-          <div class="cta-text">
-            <h2 class="cta-title" id="cta-title">
-              لحظه‌ی بعدیِ خوبت رو با سورن بساز
-            </h2>
-            <p class="cta-desc">
-              از اسپرسوی ناب روزانه تا شیرینی‌های خوش‌طعم، همه چیز مهیاست تا یک
-              روز خاطره‌انگیز را تجربه کنید.
-            </p>
+      <!-- ==================== 4. EngineeringAndFounders ==================== -->
+      <section class="engineering-founders" aria-labelledby="founders-title">
+        <header class="section-editorial-header">
+          <div class="kicker-pill kicker-pill--bronze">
+            <span class="kicker-pill-dot" aria-hidden="true"></span>
+            <span>تیم آفرینش محصول</span>
           </div>
-
-          <a class="cta-button" href="../pages/coffee.html">
-            <span>مشاهده منو</span>
-            <svg
-              class="btn-arrow"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              stroke-width="2"
-              stroke-linecap="round"
-              stroke-linejoin="round"
-              aria-hidden="true"
-            >
-              <path d="M10 19l-7-7m0 0l7-7m-7 7h18" />
-            </svg>
-          </a>
-        </div>
-      </section>
-
-      <!-- 5. Engineering Team -->
-      <section class="team" aria-labelledby="team-title">
-        <header class="team-header">
-          <h2 class="team-title" id="team-title">تیم توسعه</h2>
-          <p>این پروژه با همکاری دو توسعه‌دهنده طراحی و پیاده‌سازی شده است.</p>
+          <h2 class="section-editorial-title" id="founders-title">
+            مهندسی و طراحی تجربه سورن
+          </h2>
+          <p class="section-editorial-desc">
+            این پروژه حاصل هم‌افزایی طراحی مدرن رابط کاربری و معماری فنی جهت ارائه بی‌نقص‌ترین تجربه است.
+          </p>
         </header>
 
-        <div class="team-grid">
-          <article class="dev-card dev-card--coffee">
-            <div class="dev-top">
-              <div class="dev-avatar">
-                <svg
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  stroke-width="2"
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                  aria-hidden="true"
-                >
-                  <polyline points="16 18 22 12 16 6"></polyline>
-                  <polyline points="8 6 2 12 8 18"></polyline>
-                </svg>
+        <div class="founders-grid">
+          <article class="founder-card founder-card--frontend">
+            <div>
+              <div class="founder-header">
+                <div class="founder-avatar" aria-hidden="true">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                    <polyline points="16 18 22 12 16 6"></polyline>
+                    <polyline points="8 6 2 12 8 18"></polyline>
+                  </svg>
+                </div>
+                <div class="founder-headline">
+                  <h3 class="founder-name">محمد حسین یزدی</h3>
+                  <span class="founder-role-badge font-latin">Front-End Developer & UI/UX</span>
+                </div>
               </div>
-
-              <div class="dev-info">
-                <h3 class="dev-name">محمد حسین یزدی</h3>
-                <p class="dev-role">Front-End Developer</p>
-                <p class="dev-desc">طراحی رابط کاربری و تجربه تعاملی</p>
-              </div>
+              <p class="founder-desc">
+                طراحی سیستم دیزاین اختصاصی، تایپوگرافی دوگانه، معماری اجزای تعاملی فرانت‌اند و پیاده‌سازی موشن‌های طبیعی و فیزیکی رابط کاربری کافه سورن.
+              </p>
             </div>
-
-            <div class="dev-bottom">
-              <span class="dev-handle">@mhyazdi86-ai</span>
+            <div class="founder-action-bar">
+              <span class="founder-handle font-latin" dir="ltr">@mhyazdi86-ai</span>
               <a
-                class="dev-link"
+                class="founder-github-pill"
                 href="https://github.com/mhyazdi86-ai"
                 target="_blank"
                 rel="noopener noreferrer"
+                aria-label="پروفایل گیت‌هاب محمد حسین یزدی"
               >
-                <svg
-                  class="dev-link-icon"
-                  viewBox="0 0 24 24"
-                  fill="currentColor"
-                  aria-hidden="true"
-                >
-                  <path
-                    fill-rule="evenodd"
-                    clip-rule="evenodd"
-                    d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.53 1.032 1.53 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0022 12.017C22 6.484 17.522 2 12 2z"
-                  />
+                <svg class="github-icon" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                  <path fill-rule="evenodd" clip-rule="evenodd" d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.53 1.032 1.53 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0022 12.017C22 6.484 17.522 2 12 2z"/>
                 </svg>
                 <span>پروفایل گیت‌هاب</span>
               </a>
             </div>
           </article>
 
-          <article class="dev-card dev-card--sage">
-            <div class="dev-top">
-              <div class="dev-avatar">
+          <article class="founder-card founder-card--backend">
+            <div>
+              <div class="founder-header">
+                <div class="founder-avatar" aria-hidden="true">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                    <rect x="2" y="2" width="20" height="8" rx="2" ry="2"></rect>
+                    <rect x="2" y="14" width="20" height="8" rx="2" ry="2"></rect>
+                    <line x1="6" y1="6" x2="6.01" y2="6"></line>
+                    <line x1="6" y1="18" x2="6.01" y2="18"></line>
+                  </svg>
+                </div>
+                <div class="founder-headline">
+                  <h3 class="founder-name">امیر حسین محمدی</h3>
+                  <span class="founder-role-badge font-latin">Back-End Developer & Systems</span>
+                </div>
+              </div>
+              <p class="founder-desc">
+                توسعه معماری سرویس‌ها، ارتباطات بلادرنگ وب‌سوکت، طراحی ساختار داده‌های منو و سبد خرید و پیاده‌سازی بهینه APIهای بک‌اند.
+              </p>
+            </div>
+            <div class="founder-action-bar">
+              <span class="founder-handle font-latin" dir="ltr">@Amr866</span>
+              <a
+                class="founder-github-pill"
+                href="https://github.com/Amr866"
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label="پروفایل گیت‌هاب امیر حسین محمدی"
+              >
+                <svg class="github-icon" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                  <path fill-rule="evenodd" clip-rule="evenodd" d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.53 1.032 1.53 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0022 12.017C22 6.484 17.522 2 12 2z"/>
+                </svg>
+                <span>پروفایل گیت‌هاب</span>
+              </a>
+            </div>
+          </article>
+        </div>
+      </section>
+
+      <!-- ==================== 5. AtmosphericCTA ==================== -->
+      <section class="atmospheric-cta" aria-labelledby="cta-title">
+        <div class="atmospheric-cta-container">
+          <div class="cta-glow cta-glow--top" aria-hidden="true"></div>
+          <div class="cta-glow cta-glow--bottom" aria-hidden="true"></div>
+
+          <div class="cta-inner-layout">
+            <div class="cta-editorial-copy">
+              <span class="cta-kicker">دعوت به طعم اصیل</span>
+              <h2 class="cta-heading" id="cta-title">
+                لحظه‌ی بعدیت رو در کافه سورن بساز
+              </h2>
+              <p class="cta-subtext">
+                از اسپرسوی ناب روزانه تا شیرینی‌های خوش‌طعم و گرم، همه چیز مهیاست تا یک روز به‌یادماندنی و آرام را در کنار هم تجربه کنیم.
+              </p>
+            </div>
+
+            <div class="cta-action-group">
+              <a class="cta-primary-btn" href="./coffee.html">
+                <span>مشاهده منوی تخصصی</span>
                 <svg
+                  class="cta-btn-arrow"
                   viewBox="0 0 24 24"
                   fill="none"
                   stroke="currentColor"
@@ -557,44 +594,14 @@
                   stroke-linejoin="round"
                   aria-hidden="true"
                 >
-                  <rect x="2" y="2" width="20" height="8" rx="2" ry="2"></rect>
-                  <rect x="2" y="14" width="20" height="8" rx="2" ry="2"></rect>
-                  <line x1="6" y1="6" x2="6.01" y2="6"></line>
-                  <line x1="6" y1="18" x2="6.01" y2="18"></line>
+                  <path d="M10 19l-7-7m0 0l7-7m-7 7h18" />
                 </svg>
-              </div>
-
-              <div class="dev-info">
-                <h3 class="dev-name">امیر حسین محمدی</h3>
-                <p class="dev-role">Back-End Developer</p>
-                <p class="dev-desc">توسعه منطق بک‌اند و ساختار داده‌ها</p>
-              </div>
-            </div>
-
-            <div class="dev-bottom">
-              <span class="dev-handle">@Amr866</span>
-              <a
-                class="dev-link"
-                href="https://github.com/Amr866"
-                target="_blank"
-                rel="noopener noreferrer"
-              >
-                <svg
-                  class="dev-link-icon"
-                  viewBox="0 0 24 24"
-                  fill="currentColor"
-                  aria-hidden="true"
-                >
-                  <path
-                    fill-rule="evenodd"
-                    clip-rule="evenodd"
-                    d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.53 1.032 1.53 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0022 12.017C22 6.484 17.522 2 12 2z"
-                  />
-                </svg>
-                <span>پروفایل گیت‌هاب</span>
+              </a>
+              <a class="cta-secondary-btn" href="./products.html">
+                <span>سفارش و بررسی همه محصولات</span>
               </a>
             </div>
-          </article>
+          </div>
         </div>
       </section>
     </main>
@@ -604,7 +611,7 @@
       <div class="footer-container">
         <div class="footer-main">
           <div class="footer-brand">
-            <a href="#" class="footer-logo" aria-label="کافه سورن، صفحه اصلی">
+            <a href="../index.html" class="footer-logo" aria-label="کافه سورن، صفحه اصلی">
               <img
                 src="../images/brand/soren-logo.svg"
                 alt="لوگوی کافه سورن"
@@ -627,7 +634,9 @@
             <ul>
               <li><a href="../index.html">خانه</a></li>
               <li><a href="./about.html">درباره ما</a></li>
-              <li><a href="#">تماس با ما</a></li>
+              <li><a href="#site-footer">تماس با ما</a></li>
+              <li><a href="./terms.html">شرایط و قوانین</a></li>
+              <li><a href="./cookies.html">سیاست کوکی‌ها</a></li>
             </ul>
           </nav>
 
@@ -719,4 +728,3 @@
     <script src="../main.js" defer></script>
   </body>
 </html>
-
