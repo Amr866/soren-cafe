@@ -61,6 +61,27 @@ export async function handleStaticRoutes(url: URL): Promise<Response | null> {
     }
   }
 
+  // 5.1 Clean Auth Routes (/forgot-password, /reset-password, /login, /register)
+  const cleanRouteMap: Record<string, string> = {
+    "/forgot-password": "pages/forgot-password.html",
+    "/forgot-password.html": "pages/forgot-password.html",
+    "/reset-password": "pages/reset-password.html",
+    "/reset-password.html": "pages/reset-password.html",
+    "/login": "pages/login.html",
+    "/login.html": "pages/login.html",
+    "/register": "pages/register.html",
+    "/register.html": "pages/register.html",
+  };
+
+  if (cleanRouteMap[pathname]) {
+    const pageFile = Bun.file(join(FRONTEND_DIR, cleanRouteMap[pathname]));
+    if (await pageFile.exists()) {
+      return new Response(pageFile, {
+        headers: { "Content-Type": "text/html; charset=utf-8" },
+      });
+    }
+  }
+
 
   // 6. Generic Frontend File Resolver (pages, css, js, fonts, images)
   const decodedPath = decodeURIComponent(pathname.slice(1));

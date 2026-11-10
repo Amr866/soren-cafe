@@ -13,6 +13,10 @@ import {
   settleTableOrders,
   getAnalyticsStats,
   getTableRowCounts,
+  getUserByEmail,
+  createPasswordReset,
+  verifyResetToken,
+  resetPasswordWithToken,
 } from "../db.ts";
 import { telemetry, type TraceStep } from "../telemetry.ts";
 import { jsonResponse, errorResponse, BARISTA_PIN, normalizeSearchText } from "./helpers.ts";
@@ -30,6 +34,41 @@ export interface ApiClientContext {
   activeWsClients: number;
   localIp: string;
   port: number;
+}
+
+const authRateLimits = new Map<string, { count: number; expiresAt: number }>();
+
+export function checkAuthRateLimit(
+  key: string,
+  maxCount = 3,
+  windowMs = 60_000
+): { limited: boolean; retryAfter: number } {
+  const now = Date.now();
+  const entry = authRateLimits.get(key);
+  if (!entry || now > entry.expiresAt) {
+    authRateLimits.set(key, { count: 1, expiresAt: now + windowMs });
+    return { limited: false, retryAfter: 0 };
+  }
+  entry.count++;
+  if (entry.count > maxCount) {
+    const retryAfter = Math.max(1, Math.ceil((entry.expiresAt - now) / 1000));
+    return { limited: true, retryAfter };
+  }
+  return { limited: false, retryAfter: 0 };
+}
+
+export function isValidEmail(email: any): boolean {
+  if (typeof email !== "string") return false;
+  const trimmed = email.trim();
+  if (trimmed.length < 5 || trimmed.length > 254) return false;
+  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(trimmed);
+}
+
+export function maskEmail(email: string): string {
+  const [local, domain] = email.split("@");
+  if (!domain) return email;
+  if (local.length <= 2) return `${local[0]}*@${domain}`;
+  return `${local.slice(0, 2)}***@${domain}`;
 }
 
 export async function handleApiRoutes(
@@ -563,6 +602,143 @@ export async function handleApiRoutes(
       memoryRssMb: Math.round((memory.rss / 1024 / 1024) * 100) / 100,
       heapUsedMb: Math.round((memory.heapUsed / 1024 / 1024) * 100) / 100,
       rowCounts: getTableRowCounts(),
+    });
+  }
+
+  // ---------------- ROUTE 10: POST /api/v1/auth/forgot-password ----------------
+  if (path === "/auth/forgot-password" && method === "POST") {
+    let body: any = {};
+    try {
+      body = await req.json();
+    } catch {
+      return errorResponse("بدنه درخواست نامعتبر است.", 400);
+    }
+
+    const email = typeof body.email === "string" ? body.email.trim().toLowerCase() : "";
+    if (!isValidEmail(email)) {
+      return errorResponse("لطفاً یک نشانی ایمیل معتبر وارد کنید.", 400);
+    }
+
+    // Rate Limiting (Anti-abuse & DDoS prevention)
+    const rateKey = `pwd_reset_${clientIp}_${email}`;
+    const rateCheck = checkAuthRateLimit(rateKey, 3, 60_000);
+    if (rateCheck.limited) {
+      return jsonResponse(
+        {
+          error: true,
+          message: `تعداد درخواست‌های شما بیش از حد مجاز است. لطفاً پس از ${rateCheck.retryAfter} ثانیه مجدداً تلاش کنید.`,
+          retryAfter: rateCheck.retryAfter,
+        },
+        429
+      );
+    }
+
+    // Anti-Enumeration Principle:
+    // Generate reset token only if user exists, else simulate equivalent execution time
+    const user = getUserByEmail(email);
+    let resetToken = "";
+    if (user) {
+      const reset = createPasswordReset(email);
+      resetToken = reset.token;
+    } else {
+      // Timing equalizer computation
+      await Bun.password.hash("constant-time-dummy-salt-soren");
+    }
+
+    // Identical response for both existing and non-existing email addresses
+    const payload: Record<string, any> = {
+      success: true,
+      message: "اگر حسابی با این ایمیل در سامانه وجود داشته باشد، پیوند بازیابی ارسال گردید.",
+      cooldownSeconds: 60,
+    };
+
+    if (resetToken && (process.env.NODE_ENV === "test" || !process.env.NODE_ENV)) {
+      payload._devToken = resetToken;
+    }
+
+    return jsonResponse(payload);
+  }
+
+  // ---------------- ROUTE 11: GET /api/v1/auth/verify-reset-token ----------------
+  if (path === "/auth/verify-reset-token" && method === "GET") {
+    const token = url.searchParams.get("token") || "";
+    if (!token) {
+      return jsonResponse(
+        {
+          error: true,
+          code: "MISSING_TOKEN",
+          message: "توکن بازیابی رمز عبور ارسال نشده است.",
+        },
+        400
+      );
+    }
+
+    const verification = verifyResetToken(token);
+    if (!verification.valid || !verification.email) {
+      return jsonResponse(
+        {
+          error: true,
+          code: verification.reason || "INVALID_OR_EXPIRED_TOKEN",
+          message: "پیوند بازیابی رمز عبور منقضی شده، استفاده شده یا نامعتبر است.",
+        },
+        400
+      );
+    }
+
+    return jsonResponse({
+      valid: true,
+      email: maskEmail(verification.email),
+    });
+  }
+
+  // ---------------- ROUTE 12: POST /api/v1/auth/reset-password ----------------
+  if (path === "/auth/reset-password" && method === "POST") {
+    let body: any = {};
+    try {
+      body = await req.json();
+    } catch {
+      return errorResponse("بدنه درخواست نامعتبر است.", 400);
+    }
+
+    const token = typeof body.token === "string" ? body.token.trim() : "";
+    const password = typeof body.password === "string" ? body.password : "";
+
+    if (!token) {
+      return errorResponse("توکن بازیابی الزامی است.", 400);
+    }
+
+    if (!password || password.length < 8) {
+      return errorResponse("رمز عبور باید حداقل ۸ کاراکتر باشد.", 400);
+    }
+
+    const verification = verifyResetToken(token);
+    if (!verification.valid || !verification.email) {
+      return jsonResponse(
+        {
+          error: true,
+          code: verification.reason || "INVALID_OR_EXPIRED_TOKEN",
+          message: "پیوند بازیابی رمز عبور منقضی شده، استفاده شده یا نامعتبر است.",
+        },
+        400
+      );
+    }
+
+    const newHash = await Bun.password.hash(password);
+    const result = resetPasswordWithToken(token, newHash);
+    if (!result.success) {
+      return jsonResponse(
+        {
+          error: true,
+          code: result.error || "RESET_FAILED",
+          message: "عملیات تغییر رمز عبور با خطا مواجه شد. لطفاً دوباره تلاش کنید.",
+        },
+        400
+      );
+    }
+
+    return jsonResponse({
+      success: true,
+      message: "رمز عبور جدید شما با موفقیت ذخیره شد. اکنون می‌توانید وارد حساب شوید.",
     });
   }
 
