@@ -35,6 +35,9 @@ jobs:
         with:
           node-version: 22
 
+      - name: Setup Google Chrome
+        uses: browser-actions/setup-chrome@latest
+
       - name: Install Dependencies
         run: bun install
 
@@ -49,6 +52,9 @@ jobs:
 
       - name: Zero-Trust Security & Penetration Audit
         run: bun run test:security
+
+      - name: Observability Dashboard & Threat Simulator Verification
+        run: node scripts/verify-dashboard-security.mjs
 
       - name: PWA & Static HTML Asset Link Audit
         run: bun run test:static

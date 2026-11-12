@@ -702,14 +702,11 @@ export function getScalarHtml(): string {
       </div>
     </header>
 
-    <!-- Embedded OpenAPI Spec for Offline & GitHub Pages Reliability -->
-    <script id="openapi-spec-data" type="application/json">
-${specJson}
-    </script>
-
-    <!-- Scalar Interactive API Reference -->
+    <!-- Scalar OpenAPI Specification & Embedded Runtime Config -->
     <script
       id="api-reference"
+      type="application/json"
+      data-url="/api/v1/openapi.json"
       data-configuration='{
         "theme": "kepler",
         "darkMode": true,
@@ -717,27 +714,16 @@ ${specJson}
         "searchHotKey": "k",
         "hideModels": false,
         "hideDownloadButton": false
-      }'
-      src="https://cdn.jsdelivr.net/npm/@scalar/api-reference"
-    ></script>
+      }'>
+${specJson}
+    </script>
+
+    <!-- Scalar Interactive API Reference Standalone Bundle -->
+    <script src="https://cdn.jsdelivr.net/npm/@scalar/api-reference"></script>
 
     <script>
       // Adaptive path resolution for relative links depending on path depth
       (function() {
-        const specEl = document.getElementById('openapi-spec-data');
-        const apiRefEl = document.getElementById('api-reference');
-        
-        // If loaded via file: or github.io or local bun server, bind spec directly
-        if (specEl && apiRefEl) {
-          try {
-            const rawSpec = specEl.textContent;
-            apiRefEl.setAttribute('data-content', rawSpec.trim());
-          } catch(e) {
-            apiRefEl.setAttribute('data-url', '/api/v1/openapi.json');
-          }
-        }
-
-        // Adjust HUD links if served under /pages/ or /docs
         const isPagesDir = window.location.pathname.includes('/pages/');
         const dashLink = document.getElementById('hud-link-dashboard');
         const storeLink = document.getElementById('hud-link-storefront');
